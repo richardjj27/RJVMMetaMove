@@ -28,4 +28,3 @@ Todo:
 *   4. Check and give update
 
 * Maybe split tag/attributes and the rest into separate functions.
-* Progress bar
