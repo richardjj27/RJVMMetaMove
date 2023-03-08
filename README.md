@@ -20,11 +20,12 @@ Right now, the script will export the following data for all VMs on multiple vCe
 * Notes
 
 Todo:
-*   Create a 'Set-VMMetadata' function
-*   Create a 'Migrate' function
-*     Export (Get-VMMetadata) tags/attributes
-*     Move
-*     Import (Set-VMMetadata) tags/attributes
-*     
-*   Maybe split tag/attributes and the rest into separate functions.
-*   Progress bar
+* Create a 'Set-VMMetadata' function
+* Create a 'Migrate' function
+*   1. Export (Get-VMMetadata) tags/attributes
+*   2. Move
+*   3. Import (Set-VMMetadata) tags/attributes
+*   4. Check and give update
+
+* Maybe split tag/attributes and the rest into separate functions.
+* Progress bar
