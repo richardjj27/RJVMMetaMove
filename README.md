@@ -26,5 +26,5 @@ Todo:
 *   2. Move
 *   3. Import (Set-VMMetadata) tags/attributes
 *   4. Check and give update
-
+* Encryption/disk policy
 * Maybe split tag/attributes and the rest into separate functions.
