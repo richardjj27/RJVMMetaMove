@@ -19,16 +19,12 @@ Right now, the script will export the following data for all VMs on multiple vCe
 * Hosting Cluster
 * Notes
 
-# Todo:
-#   Add:
-#       disks - done
-#       datastores (single or multiple) - done
-#       networks - done
-#   Make the authentication to a vcenter an object - done
-#   Make the loop through each VM not $xxx - done
-#   Create a 'Set-VMMetadata' function
-#   Maybe split tag/attributes and the rest into separate functions. - no
-#   Make output file a variable. - done
-#   Progress bar
-#   Move to Git.
-#   Use a more secure credentials object.
+Todo:
+*   Create a 'Set-VMMetadata' function
+*   Create a 'Migrate' function
+*     Export (Get-VMMetadata) tags/attributes
+*     Move
+*     Import (Set-VMMetadata) tags/attributes
+*     
+*   Maybe split tag/attributes and the rest into separate functions.
+*   Progress bar
