@@ -6,7 +6,6 @@
 #   3. Import (Set-VMMetadata) tags/attributes
 #   4. Check and give update
 # Encryption/disk policy (basically, if datastore is encrypted OR the specific VM is encrypted, its 'yes')
-# Split tag/attributes and the rest into separate functions.
 
 function Get-VMMetaData {
     [CmdletBinding()]
@@ -156,14 +155,11 @@ $VC1 = Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credenti
 $VC2 = Connect-VIServer -Server "su-gbcp-vvcsa03.emea.wdpr.disney.com" -Credential $credential
 $VC3 = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
 
-$VirtualMachines = get-VM -server $VC1 | where-object NumCpu -ge 18
-#$VirtualMachines += get-VM -server $VC2
-#$VirtualMachines += get-VM -server $VC3
+$VirtualMachines = get-VM -server $VC1 # | where-object NumCpu -ge 18
+$VirtualMachines += get-VM -server $VC2
+$VirtualMachines += get-VM -server $VC3
 
-$count = 0
-
-# create an empty XLSX doc with all the headings - not particularly happy with the way I've done this.  I'm sure there is a better way.
-# maybe we don't need to create the NULLs in the function?
+# create an empty XLSX doc with all the headings
 $CustomObject = New-Object -TypeName PSObject
 $CustomObject | Add-Member -Name "Server" -MemberType NoteProperty -value $null
 $CustomObject | Add-Member -Name "AttributeKey" -MemberType NoteProperty -value $null
@@ -171,6 +167,7 @@ $CustomObject | Add-Member -Name "AttributeName" -MemberType NoteProperty -value
 $CustomObject | Add-Member -Name "AttributeValue" -MemberType NoteProperty -value $null
 $CustomObject | Add-Member -Name "Tag" -MemberType NoteProperty -value $null
 $CustomObject | Add-Member -Name "DiskName" -MemberType NoteProperty -value $null
+#$CustomObject | Add-Member -Name "DiskEncryptionStatus" -MemberType NoteProperty -value $null
 $CustomObject | Add-Member -Name "DiskLayout" -MemberType NoteProperty -value $null
 $CustomObject | Add-Member -Name "DiskDatastore" -MemberType NoteProperty -value $null
 #$CustomObject | Add-Member -Name "DiskDatastoreEncryptionStatus" -MemberType NoteProperty -value $null
@@ -192,15 +189,13 @@ $CustomObject | Add-Member -Name "GuestOS" -MemberType NoteProperty -value $null
 $CustomObject | Add-Member -Name "Snapshot" -MemberType NoteProperty -value $null
 $CustomObject | export-excel $output -append -freezetoprow -autofilter -autosize
 
+$count = 0
 foreach ($VirtualMachine in $VirtualMachines){
     $completed = [math]::Round((($count/$VirtualMachines.count) * 100), 2)
-
     get-VMMetaData -VMName $VirtualMachine.Name | export-excel $output -append -freezetoprow -autofilter -autosize
     get-VMCoreData -VMName $VirtualMachine.Name | export-excel $output -append -freezetoprow -autofilter -autosize
-
-    
     Write-Progress -Activity "Scan Progress" -Status "$completed% completed." -PercentComplete $completed
-    $count += 1
+    $count++
 }
 
 Disconnect-VIServer -Server $VC1 -Confirm:$false
