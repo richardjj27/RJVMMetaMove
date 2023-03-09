@@ -1,4 +1,12 @@
-# Initial
+# Todo:
+# Create a 'Set-VMMetadata' function
+# Create a 'Migrate' function
+#   1. Export (Get-VMMetadata) tags/attributes
+#   2. Move
+#   3. Import (Set-VMMetadata) tags/attributes
+#   4. Check and give update
+# Encryption/disk policy
+# Split tag/attributes and the rest into separate functions.
 
 function Get-VMMetadata {
     [CmdletBinding()]
@@ -117,7 +125,6 @@ $credential = Get-Credential
 $VC1 = Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $credential
 $VC2 = Connect-VIServer -Server "su-gbcp-vvcsa03.emea.wdpr.disney.com" -Credential $credential
 $VC3 = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
-
 
 $VirtualMachines = get-VM -server $VC1
 $VirtualMachines += get-VM -server $VC2
