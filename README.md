@@ -19,12 +19,4 @@ Right now, the script will export the following data for all VMs on multiple vCe
 * Hosting Cluster
 * Notes
 
-Todo:
-* Create a 'Set-VMMetadata' function
-* Create a 'Migrate' function
-*   1. Export (Get-VMMetadata) tags/attributes
-*   2. Move
-*   3. Import (Set-VMMetadata) tags/attributes
-*   4. Check and give update
-* Encryption/disk policy
-* Maybe split tag/attributes and the rest into separate functions.
+
