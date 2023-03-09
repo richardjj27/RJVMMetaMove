@@ -150,7 +150,6 @@ remove-item $output -force -ErrorAction SilentlyContinue
 
 # Connect to the vCenter Server
 $credential = Get-Credential
-
 $VC1 = Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $credential
 $VC2 = Connect-VIServer -Server "su-gbcp-vvcsa03.emea.wdpr.disney.com" -Credential $credential
 $VC3 = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
@@ -159,7 +158,7 @@ $VirtualMachines = get-VM -server $VC1 # | where-object NumCpu -ge 18
 $VirtualMachines += get-VM -server $VC2
 $VirtualMachines += get-VM -server $VC3
 
-# create an empty XLSX doc with all the headings
+# create an empty XLSX document with all the headings
 $CustomObject = New-Object -TypeName PSObject
 $CustomObject | Add-Member -Name "Server" -MemberType NoteProperty -value $null
 $CustomObject | Add-Member -Name "AttributeKey" -MemberType NoteProperty -value $null
@@ -194,7 +193,7 @@ foreach ($VirtualMachine in $VirtualMachines){
     $completed = [math]::Round((($count/$VirtualMachines.count) * 100), 2)
     get-VMMetaData -VMName $VirtualMachine.Name | export-excel $output -append -freezetoprow -autofilter -autosize
     get-VMCoreData -VMName $VirtualMachine.Name | export-excel $output -append -freezetoprow -autofilter -autosize
-    Write-Progress -Activity "Scan Progress" -Status "$completed% completed." -PercentComplete $completed
+    Write-Progress -Activity "Scan Progress:" -Status "$completed% completed." -PercentComplete $completed
     $count++
 }
 
