@@ -115,11 +115,11 @@ function Get-VMCoreData {
             $CustomObject = New-Object -TypeName PSObject
             $CustomObject | Add-Member -Name "Server" -MemberType NoteProperty -value $VM.name
             $CustomObject | Add-Member -Name "DiskName" -MemberType NoteProperty -value $HardDisk.Name
+            #$CustomObject | Add-Member -Name "DiskEncryptionStatus" -MemberType NoteProperty -value $null
             $CustomObject | Add-Member -Name "DiskLayout" -MemberType NoteProperty -value "S:$($HardDisk.StorageFormat) / P:$($HardDisk.Persistence) / T:$($HardDisk.DiskType)"
-            $CustomObject | Add-Member -Name "DiskDatastore" -MemberType NoteProperty -value $Datastore
-            #$CustomObject | Add-Member -Name "DiskDatastore" -MemberType NoteProperty -value $HardDisk.Filename
-            #$CustomObject | Add-Member -Name "DiskDatastoreEncryptionStatus" -MemberType NoteProperty -value $null
             $CustomObject | Add-Member -Name "DiskSizeGB" -MemberType NoteProperty -value $HardDisk.CapacityGB
+            $CustomObject | Add-Member -Name "Datastore" -MemberType NoteProperty -value $Datastore
+            #$CustomObject | Add-Member -Name "DatastoreEncryptionStatus" -MemberType NoteProperty -value $null
             $output += $CustomObject
         }
 
@@ -143,7 +143,7 @@ import-module -Name vmware.powercli
 import-Module -Name ImportExcel
 Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
 
-$output = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\export.xlsx"
+$output = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\vCenterExport.xlsx"
 
 # delete old file
 remove-item $output -force -ErrorAction SilentlyContinue
@@ -169,9 +169,9 @@ $CustomObject | Add-Member -Name "Tag" -MemberType NoteProperty -value $null
 $CustomObject | Add-Member -Name "DiskName" -MemberType NoteProperty -value $null
 #$CustomObject | Add-Member -Name "DiskEncryptionStatus" -MemberType NoteProperty -value $null
 $CustomObject | Add-Member -Name "DiskLayout" -MemberType NoteProperty -value $null
+$CustomObject | Add-Member -Name "DiskSizeGB" -MemberType NoteProperty -value $null
 $CustomObject | Add-Member -Name "DiskDatastore" -MemberType NoteProperty -value $null
 #$CustomObject | Add-Member -Name "DiskDatastoreEncryptionStatus" -MemberType NoteProperty -value $null
-$CustomObject | Add-Member -Name "DiskSizeGB" -MemberType NoteProperty -value $null
 $CustomObject | Add-Member -Name "NetworkAdapter" -MemberType NoteProperty -value $null
 $CustomObject | Add-Member -Name "vCenter" -MemberType NoteProperty -value $null
 $CustomObject | Add-Member -Name "Host" -MemberType NoteProperty -value $null
