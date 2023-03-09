@@ -1,4 +1,4 @@
-
+# Initial
 
 function Get-VMMetadata {
     [CmdletBinding()]
