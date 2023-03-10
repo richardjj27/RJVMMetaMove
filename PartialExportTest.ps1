@@ -62,6 +62,4 @@ foreach ($VirtualMachine in $VirtualMachines){
     $count++
 }
 
-Disconnect-VIServer -Server $VC1 -Confirm:$false
-Disconnect-VIServer -Server $VC2 -Confirm:$false
-Disconnect-VIServer -Server $VC3 -Confirm:$false
+Disconnect-VIServer -Server * -Confirm:$false
