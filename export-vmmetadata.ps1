@@ -7,7 +7,6 @@
 #   4. Check and give update
 # Encryption/disk policy (basically, if datastore is encrypted OR the specific VM is encrypted, its 'yes')
 # Make it a module.
-# Add VM Version field
 
 function Get-VMMetaData {
     [CmdletBinding()]

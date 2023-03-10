@@ -2,6 +2,8 @@
 Powershell script to export vCenter metadata to an Excel file.
 
 Right now, the script will export the following data for all VMs on multiple vCenter Servers.
+* VM Creation date
+* VM Hardware Version
 * Attributes (multiple)
 * Tags (multiple)
 * Attached Disks (multiple)
