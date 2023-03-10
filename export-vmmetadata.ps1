@@ -6,6 +6,8 @@
 #   3. Import (Set-VMMetadata) tags/attributes
 #   4. Check and give update
 # Encryption/disk policy (basically, if datastore is encrypted OR the specific VM is encrypted, its 'yes')
+# Make it a module.
+# Add VM Version field
 
 function Get-VMMetaData {
     [CmdletBinding()]
@@ -91,7 +93,8 @@ function Get-VMCoreData {
 
         # --singles
         $CustomObject | Add-Member -Name "VMName" -MemberType NoteProperty -value $VM.name # yes
-        $CustomObject | Add-Member -Name "Created" -MemberType NoteProperty -value $VM.extensiondata.config.createdate # yes
+        $CustomObject | Add-Member -Name "VMCreated" -MemberType NoteProperty -value $VM.extensiondata.config.createdate # yes
+        $CustomObject | Add-Member -Name "VMVersion" -MemberType NoteProperty -value $VM.extensiondata.config.version # yes
         $CustomObject | Add-Member -Name "vCenter" -MemberType NoteProperty -value $vcserver # yes
         $CustomObject | Add-Member -Name "Host" -MemberType NoteProperty -value (get-vmhost -vm $vm).name # yes
         $CustomObject | Add-Member -Name "HostVersion" -MemberType NoteProperty -value (get-vmhost -vm $vm).version # yes
@@ -155,14 +158,15 @@ $VC1 = Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credenti
 $VC2 = Connect-VIServer -Server "su-gbcp-vvcsa03.emea.wdpr.disney.com" -Credential $credential
 $VC3 = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
 
-$VirtualMachines = get-VM -server $VC1 | where-object NumCpu -ge 18
-#$VirtualMachines += get-VM -server $VC2
-#$VirtualMachines += get-VM -server $VC3
+$VirtualMachines = get-VM -server $VC1 #| where-object NumCpu -ge 18
+$VirtualMachines += get-VM -server $VC2
+$VirtualMachines += get-VM -server $VC3
 
 # create an empty XLSX document with all the headings
 $CustomObject = New-Object -TypeName PSObject
 $CustomObject | Add-Member -Name "VMName" -MemberType NoteProperty -value $null
-$CustomObject | Add-Member -Name "Created" -MemberType NoteProperty -value $null
+$CustomObject | Add-Member -Name "VMCreated" -MemberType NoteProperty -value $null
+$CustomObject | Add-Member -Name "VMVersion" -MemberType NoteProperty -value $null
 $CustomObject | Add-Member -Name "AttributeKey" -MemberType NoteProperty -value $null
 $CustomObject | Add-Member -Name "AttributeName" -MemberType NoteProperty -value $null
 $CustomObject | Add-Member -Name "AttributeValue" -MemberType NoteProperty -value $null
