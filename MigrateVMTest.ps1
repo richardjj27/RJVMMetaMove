@@ -9,6 +9,14 @@ Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
 $VMtoMove = "TestVM"
 $credential = Get-Credential
 
+#### Get the metadata
+# may also need disk and network??
+$VMMetaDataItems = get-VMMetaData -VMName $VMtoMove
+
+#### Migrate the VM
+# maybe need to specify folders and other data.
+# may need to create some logic of source and desintation networks/portgroups/datastores
+
 # 2 to 4
 $SourceVC = Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $credential
 $TargetVC = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
@@ -32,7 +40,7 @@ Move-VM -VM $vm -VMotionPriority High -Destination (Get-VMhost -Server $TargetVC
 
 ############
 
-Exit
+#### Write the metadata
 
 $VMMetaDataItems = get-VMMetaData -VMName $VMtoMove
 # This section below will become the 'put-VMMetaData' function.
