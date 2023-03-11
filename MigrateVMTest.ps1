@@ -1,5 +1,5 @@
-# Script to test the migrate-xvc function.
-# initially, do all the hard work here, later, put it all in a function with 3 parameters (VM, sourcevc, destvc)
+# Script to test the move-xvcvm function.  The 'function' side of this will move to the module.
+# initially, do all the hard work here, later, put it all in a function with x parameters (VM, sourcevc object, destvc object, datastore and network attributes)
 
 import-Module -Name vmware.powercli
 import-Module .\export-vmmetadata.psm1
@@ -24,7 +24,6 @@ $Targetdatastore = "VxRail-Virtual-SAN-Datastore-1c4bfaa4-60d6-4ddf-87df-419f47e
 #$TargetPortgroup = "PROD_DataCentre2-386"
 #$TargetVDSwitch = "VMware HCIA Distributed Switch GBEQ Ent Tech VxRail 82d1d4"
 #$Targetdatastore = "VxRail-Virtual-SAN-Datastore-82d1d453-d153-4a50-8ec2-8fa5a819b4a9"
-
 
 $VM = get-vm $VMtoMove
 $networkAdapter = Get-NetworkAdapter -VM $vm -Server $SourceVC
