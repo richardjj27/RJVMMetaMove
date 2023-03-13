@@ -8,6 +8,7 @@
 # Encryption/disk policy (basically, if datastore is encrypted OR the specific VM is encrypted, its 'yes')
 # Make it a module.
 # This needs to be renamed to cover the generic purpose of the 4 modules here..
+# Create module manifest (.psd1)
 
 function Get-VMMetaData {
     [CmdletBinding()]
