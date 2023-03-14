@@ -21,19 +21,10 @@ function Get-VMMetaData {
     $CustomAttrList = Get-CustomAttribute -Server $VM.Uid.Split(":")[0].Split("@")[1]
 
     If ($VM) {
-        # Get all custom attributes for the virtual machine
-
         $output = @()
-        #$vcserver = $VM.Uid.Split(":")[0].Split("@")[1]
 
         # Create an object to hold the custom attributes
         $CustomObject = New-Object -TypeName PSObject
-        #$CustomObject | Add-Member -Name "Server" -MemberType NoteProperty -value $VM.name # yes
-        #$CustomObject | Add-Member -Name "AttributeKey" -MemberType NoteProperty -value $null
-        #$CustomObject | Add-Member -Name "AttributeName" -MemberType NoteProperty -value $null
-        #$CustomObject | Add-Member -Name "AttributeValue" -MemberType NoteProperty -value $null
-        #$CustomObject | Add-Member -Name "Tag" -MemberType NoteProperty -value $null
-        #$output += $CustomObject
 
         # Multiples
         # Loop through each custom attribute and add it to the object
@@ -73,23 +64,15 @@ function Get-VMCoreData {
     
     # Get the virtual machine
     $VM = Get-VM -Name $VMName
-    #$CustomAttrList = Get-CustomAttribute -Server $VM.Uid.Split(":")[0].Split("@")[1]
 
     if ($VM) {
         # Get all custom attributes for the virtual machine
         
         $output = @()
-        $vcserver = $VM.Uid.Split(":")[0].Split("@")[1]
 
         # Create an object to hold the custom attributes
+        $vcserver = $VM.Uid.Split(":")[0].Split("@")[1]
         $CustomObject = New-Object -TypeName PSObject
-
-        #$CustomObject | Add-Member -Name "DiskName" -MemberType NoteProperty -value $null
-        #$CustomObject | Add-Member -Name "DiskLayout" -MemberType NoteProperty -value $null
-        #$CustomObject | Add-Member -Name "DiskDatastore" -MemberType NoteProperty -value $null
-        ##$CustomObject | Add-Member -Name "DiskDatastoreEncryptionStatus" -MemberType NoteProperty -value $null
-        #$CustomObject | Add-Member -Name "DiskSizeGB" -MemberType NoteProperty -value $null
-        #$CustomObject | Add-Member -Name "NetworkAdapter" -MemberType NoteProperty -value $null
 
         # --singles
         $CustomObject | Add-Member -Name "VMName" -MemberType NoteProperty -value $VM.name # yes
@@ -147,26 +130,22 @@ function Set-VMMetaData {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]
-        [object] $VMName,
+        [psobject] $VMName,
         [Parameter(Mandatory = $true)]
-        [object] $TargetVM,
+        [psobject] $TargetVM,
         [Parameter(Mandatory = $true)]
         [object] $TargetVC,
         [Parameter(Mandatory = $true)]
         [object] $VMMetaDataItems
     )
 
-    write-host $VMMetaDataItems
-
     # This section below will become the 'put-VMMetaData' function.
     foreach ($VMMetaDataItem in $VMMetaDataItems){
-        write-host $vmmetadataitem
         if ($VMMetaDataItem.AttributeName){
             $TargetVM | Set-Annotation -CustomAttribute $VMMetaDataItem.AttributeName -Value $VMMetaDataItem.AttributeValue
             }
         
         if ($VMMetaDataItem.Tag){
-            # write-host $VMMetaDataItem.Tag
             New-TagAssignment -Tag $VMMetaDataItem.Tag -Entity $TargetVM -Server $TargetVC # $VMMetaDataItem.Tag
         }
     }
