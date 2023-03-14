@@ -5,7 +5,7 @@ import-Module -Name vmware.powercli
 remove-module VMMetaMoveRJ
 import-Module .\VMMetaMoveRJ.psm1
 
-Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+#Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
 
 $VMtoMove = "TestVM"
 $credential = Get-Credential

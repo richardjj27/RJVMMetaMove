@@ -5,7 +5,7 @@ import-Module -Name ImportExcel
 remove-module VMMetaMoveRJ
 import-Module .\VMMetaMoveRJ.psm1
 
-Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+# Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
 
 $output = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\vCenterExport.xlsx"
 
