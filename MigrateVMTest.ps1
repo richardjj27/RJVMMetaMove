@@ -1,4 +1,4 @@
-# Script to test the move-xvcvm function.  The 'function' side of this will move to the module.
+# Script to test the move-xvcvm function.  The 'function' side of this will eventually move to this module.
 # initially, do all the hard work here, later, put it all in a function with x parameters (VM, sourcevc object, destvc object, datastore and network attributes)
 
 import-Module -Name vmware.powercli
@@ -30,9 +30,8 @@ $Targetdatastore = "VxRail-Virtual-SAN-Datastore-1c4bfaa4-60d6-4ddf-87df-419f47e
 # $TargetVDSwitch = "VMware HCIA Distributed Switch GBEQ Ent Tech VxRail 82d1d4"
 # $Targetdatastore = "VxRail-Virtual-SAN-Datastore-82d1d453-d153-4a50-8ec2-8fa5a819b4a9"
 
-$SourceVM = get-vm -Name $VMtoMove -server $SourceVC
-
 #### Get the metadata
+$SourceVM = get-vm -Name $VMtoMove -server $SourceVC
 $VMMetaDataItems = get-VMMetaData -VMName $VMtoMove
 
 #### Move the VM
@@ -40,10 +39,8 @@ $networkAdapter = Get-NetworkAdapter -VM $SourceVM -Server $SourceVC
 $TargetPortGroup = Get-VDPortgroup -Name $TargetPortGroup -Server $TargetVC -vdswitch $TargetVDSwitch
 Move-VM -VM $SourceVM -VMotionPriority High -Destination (Get-VMhost -Server $TargetVC -Name $TargetVMHost) -Datastore (Get-Datastore -Server $targetVC -Name $TargetDatastore) -NetworkAdapter $networkAdapter -PortGroup $TargetPortGroup
 
-$TargetVM = get-vm -Name $VMtoMove -Server $TargetVC
-
 #### Write the metadata
+$TargetVM = get-vm -Name $VMtoMove -Server $TargetVC
 Set-VMMetaData -VMName $VMtoMove -TargetVM $TargetVM -TargetVC $TargetVC -VMMetaDataItems $VMMetaDataItems
 
 Disconnect-VIServer -Server * -Confirm:$false
-

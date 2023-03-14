@@ -1,14 +1,13 @@
 # Todo:
-# Create a 'Set-VMMetadata' function
 # Create a 'Migrate' function
 #   1. Export (Get-VMMetadata) tags/attributes
 #   2. Move
 #   3. Import (Set-VMMetadata) tags/attributes
 #   4. Check and give update
 # Encryption/disk policy (basically, if datastore is encrypted OR the specific VM is encrypted, its 'yes')
-# Make it a module.
-# This needs to be renamed to cover the generic purpose of the 4 modules here..
+# This needs to be renamed to cover the generic purpose of the 3 modules here (get-vmmetadata, get-vmcoredata, set-vmmetadata).
 # Create module manifest (.psd1)
+# Learn how to keep function parameters private (or not) and whether to pass an object or text is the right thing to do.
 
 function Get-VMMetaData {
     [CmdletBinding()]
