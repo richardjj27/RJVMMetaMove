@@ -55,7 +55,7 @@ function Get-VMMetaData {
         foreach ($Tag in $CustomTags) {
             $CustomObject = New-Object -TypeName PSObject
             $CustomObject | Add-Member -Name "VMName" -MemberType NoteProperty -value $VM.name
-            $CustomObject | Add-Member -Name "Tag" -MemberType NoteProperty -value $Tag.Tag
+            $CustomObject | Add-Member -Name "Tag" -MemberType NoteProperty -value $Tag.Tag.name
             $output += $CustomObject
         }
         return $output
@@ -141,5 +141,34 @@ function Get-VMCoreData {
     }
     else {
         Write-Error "Virtual machine not found."
+    }
+}
+
+function Set-VMMetaData {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [object] $VMName,
+        [Parameter(Mandatory = $true)]
+        [object] $TargetVM,
+        [Parameter(Mandatory = $true)]
+        [object] $TargetVC,
+        [Parameter(Mandatory = $true)]
+        [object] $VMMetaDataItems
+    )
+
+    write-host $VMMetaDataItems
+
+    # This section below will become the 'put-VMMetaData' function.
+    foreach ($VMMetaDataItem in $VMMetaDataItems){
+        write-host $vmmetadataitem
+        if ($VMMetaDataItem.AttributeName){
+            $TargetVM | Set-Annotation -CustomAttribute $VMMetaDataItem.AttributeName -Value $VMMetaDataItem.AttributeValue
+            }
+        
+        if ($VMMetaDataItem.Tag){
+            # write-host $VMMetaDataItem.Tag
+            New-TagAssignment -Tag $VMMetaDataItem.Tag -Entity $TargetVM -Server $TargetVC # $VMMetaDataItem.Tag
+        }
     }
 }

@@ -2,7 +2,8 @@
 
 import-Module -Name vmware.powercli
 import-Module -Name ImportExcel
-import-Module .\VMMetaMoveRJ.psm1.psm1
+remove-module VMMetaMoveRJ
+import-Module .\VMMetaMoveRJ.psm1
 
 Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
 
@@ -14,8 +15,8 @@ remove-item $output -force -ErrorAction SilentlyContinue
 # Connect to the vCenter Server
 $credential = Get-Credential
 $VC1 = Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $credential
-$VC2 = Connect-VIServer -Server "su-gbcp-vvcsa03.emea.wdpr.disney.com" -Credential $credential
-$VC3 = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
+#$VC2 = Connect-VIServer -Server "su-gbcp-vvcsa03.emea.wdpr.disney.com" -Credential $credential
+#$VC3 = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
 
 $VirtualMachines = get-VM -server $VC1 | where-object NumCpu -ge 18
 #$VirtualMachines += get-VM -server $VC2
