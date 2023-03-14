@@ -2,7 +2,7 @@
 
 import-Module -Name vmware.powercli
 import-Module -Name ImportExcel
-import-Module .\export-vmmetadata.psm1
+import-Module .\VMMetaMoveRJ.psm1.psm1
 
 Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
 

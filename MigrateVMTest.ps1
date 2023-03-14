@@ -2,7 +2,7 @@
 # initially, do all the hard work here, later, put it all in a function with x parameters (VM, sourcevc object, destvc object, datastore and network attributes)
 
 import-Module -Name vmware.powercli
-import-Module .\export-vmmetadata.psm1
+import-Module .\VMMetaMoveRJ.psm1
 
 Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
 
