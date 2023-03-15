@@ -2,14 +2,14 @@
 
 import-Module -Name vmware.powercli
 import-Module -Name ImportExcel
-remove-module VMMetaMoveRJ
-import-Module .\VMMetaMoveRJ.psm1
+remove-module RJVMMetaMove
+import-Module .\RJVMMetaMove.psm1
 
 # Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
 
 $output = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\vCenterExport.xlsx"
 
-# delete old file
+# Silently delete old file
 remove-item $output -force -ErrorAction SilentlyContinue
 
 # Connect to the vCenter Server
@@ -57,8 +57,8 @@ $CustomObject | export-excel $output -append -freezetoprow -autofilter -autosize
 $count = 0
 foreach ($VirtualMachine in $VirtualMachines){
     $completed = [math]::Round((($count/$VirtualMachines.count) * 100), 2)
-    get-VMMetaData -VMName $VirtualMachine.Name | export-excel $output -append -freezetoprow -autofilter -autosize
-    get-VMCoreData -VMName $VirtualMachine.Name | export-excel $output -append -freezetoprow -autofilter -autosize
+    get-RJVMMetaData -VMName $VirtualMachine.Name | export-excel $output -append -freezetoprow -autofilter -autosize
+    get-RJVMCoreData -VMName $VirtualMachine.Name | export-excel $output -append -freezetoprow -autofilter -autosize
     Write-Progress -Activity "Scan Progress:" -Status "$completed% completed." -PercentComplete $completed
     $count++
 }

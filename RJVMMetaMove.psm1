@@ -168,7 +168,7 @@ function Get-RJVMHostData {
 
         #get-datastore -vmhost $oVMHost | format-table -autosize -property @{L='Datastore Name';E={$_.Name}},CapacityGB
 
-        $Datastores = get-datastore -vmhost $oVMHost
+        $Datastores = get-datastore -vmhost $oVMHost | Sort-Object CapacityGB -Descending
         foreach ($Datastore in $Datastores) {
             $CustomObject = New-Object -TypeName PSObject
             $CustomObject | Add-Member -Name "Parameter" -MemberType NoteProperty -value "Datastore"
@@ -176,14 +176,14 @@ function Get-RJVMHostData {
             $output += $CustomObject
         }
 
-        #get-virtualportgroup -vmhost $oVMHost | format-table -autosize -property @{L='Virtual Port Group';E={$_.Name}}
-        $VirtualPortGroups = get-virtualportgroup -vmhost $oVMHost
-        foreach ($VirtualPortGroup in $VirtualPortGroups) {
-            $CustomObject = New-Object -TypeName PSObject
-            $CustomObject | Add-Member -Name "Parameter" -MemberType NoteProperty -value "VirtualPortGroup"
-            $CustomObject | Add-Member -Name "Name" -MemberType NoteProperty -value "$($VirtualPortGroup.Name)"
-            $output += $CustomObject
-        }
+        # #get-virtualportgroup -vmhost $oVMHost | format-table -autosize -property @{L='Virtual Port Group';E={$_.Name}}
+        # $VirtualPortGroups = get-virtualportgroup -vmhost $oVMHost
+        # foreach ($VirtualPortGroup in $VirtualPortGroups) {
+        #     $CustomObject = New-Object -TypeName PSObject
+        #     $CustomObject | Add-Member -Name "Parameter" -MemberType NoteProperty -value "VirtualPortGroup"
+        #     $CustomObject | Add-Member -Name "Name" -MemberType NoteProperty -value "$($VirtualPortGroup.Name)"
+        #     $output += $CustomObject
+        # }
 
         #get-vdswitch -VMHost $oVMHost | format-table -autosize -property @{L='vNetwork dSwitch';E={$_.Name}}
         $vdSwitches = get-vdswitch -VMHost $oVMHost
@@ -192,11 +192,17 @@ function Get-RJVMHostData {
             $CustomObject | Add-Member -Name "Parameter" -MemberType NoteProperty -value "vdSwitch"
             $CustomObject | Add-Member -Name "Name" -MemberType NoteProperty -value "$($vdSwitch.Name)"
             $output += $CustomObject
+            $vdPortGroups = Get-VDPortgroup -vdSwitch $vdSwitch | Sort-Object Name
+            foreach ($vdPortGroup in $vdPortGroups) {
+                $CustomObject = New-Object -TypeName PSObject
+                $CustomObject | Add-Member -Name "Parameter" -MemberType NoteProperty -value "vdPortGroup"
+                $CustomObject | Add-Member -Name "Name" -MemberType NoteProperty -value "$($vdPortGroup.Name)"
+                $output += $CustomObject
+            }
         }
-
         return $output
     }
     else {
-         Write-Error "vmHost not found."
+         Write-Error "VmHost not found."
     }
 }
