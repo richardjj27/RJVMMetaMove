@@ -105,8 +105,8 @@ function Get-RJVMCoreData {
             $CustomObject | Add-Member -Name "DiskName" -MemberType NoteProperty -value $HardDisk.Name
             #$CustomObject | Add-Member -Name "DiskEncryptionStatus" -MemberType NoteProperty -value $null
             $CustomObject | Add-Member -Name "DiskLayout" -MemberType NoteProperty -value "S:$($HardDisk.StorageFormat) / P:$($HardDisk.Persistence) / T:$($HardDisk.DiskType)"
-            $CustomObject | Add-Member -Name "DiskSizeGB" -MemberType NoteProperty -value $HardDisk.CapacityGB
-            $CustomObject | Add-Member -Name "Datastore" -MemberType NoteProperty -value $Datastore
+            $CustomObject | Add-Member -Name "DiskSizeGB" -MemberType NoteProperty -value ([math]::Round($HardDisk.CapacityGB,2))
+            $CustomObject | Add-Member -Name "DiskDatastore" -MemberType NoteProperty -value $Datastore
             #$CustomObject | Add-Member -Name "DatastoreEncryptionStatus" -MemberType NoteProperty -value $null
             $output += $CustomObject
         }
