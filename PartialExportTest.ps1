@@ -42,11 +42,12 @@ $CustomObject | Add-Member -Name "vCenter" -MemberType NoteProperty -value $null
 $CustomObject | Add-Member -Name "Host" -MemberType NoteProperty -value $null
 $CustomObject | Add-Member -Name "HostVersion" -MemberType NoteProperty -value $null
 $CustomObject | Add-Member -Name "HostBuild" -MemberType NoteProperty -value $null
+$CustomObject | Add-Member -Name "Folder" -MemberType NoteProperty -value $null
 $CustomObject | Add-Member -Name "Datacenter" -MemberType NoteProperty -value $null
 $CustomObject | Add-Member -Name "Cluster" -MemberType NoteProperty -value $null
 $CustomObject | Add-Member -Name "ResourcePool" -MemberType NoteProperty -value $null
 $CustomObject | Add-Member -Name "MemoryGB" -MemberType NoteProperty -value $null
-$CustomObject | Add-Member -Name "CPU" -MemberType NoteProperty -value $null
+$CustomObject | Add-Member -Name "CPUCores" -MemberType NoteProperty -value $null
 $CustomObject | Add-Member -Name "ToolsVersion" -MemberType NoteProperty -value $null
 $CustomObject | Add-Member -Name "Notes" -MemberType NoteProperty -value $null
 $CustomObject | Add-Member -Name "Powerstate" -MemberType NoteProperty -value $null

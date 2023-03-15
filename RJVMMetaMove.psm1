@@ -87,8 +87,9 @@ function Get-RJVMCoreData {
         $CustomObject | Add-Member -Name "Cluster" -MemberType NoteProperty -value (Get-Cluster -Server $vcserver -vm $vm.name) # yes
         $CustomObject | Add-Member -Name "ResourcePool" -MemberType NoteProperty -value (Get-ResourcePool -Server $vcserver -VM $VM) # yes
         $CustomObject | Add-Member -Name "MemoryGB" -MemberType NoteProperty -value $vm.memorygb # yes
-        $CustomObject | Add-Member -Name "CPU" -MemberType NoteProperty -value $vm.NumCpu # yes
+        $CustomObject | Add-Member -Name "CPUCores" -MemberType NoteProperty -value $vm.NumCpu # yes
         $CustomObject | Add-Member -Name "ToolsVersion" -MemberType NoteProperty -value $vm.extensiondata.guest.toolsversion # yes
+        $CustomObject | Add-Member -Name "Folder" -MemberType NoteProperty -value $VM.folder # yes
         $CustomObject | Add-Member -Name "Notes" -MemberType NoteProperty -value $vm.notes # check
         $CustomObject | Add-Member -Name "Powerstate" -MemberType NoteProperty -value $vm.powerstate # yes
         $CustomObject | Add-Member -Name "GuestOS" -MemberType NoteProperty -value $vm.extensiondata.guest.guestfullname # yes
