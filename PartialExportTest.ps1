@@ -7,10 +7,10 @@ import-Module .\RJVMMetaMove.psm1
 
 # Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
 
-$output = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\vCenterExport.xlsx"
+$output = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\vCenterExport [P] $(get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
 
 # Silently delete old file
-remove-item $output -force -ErrorAction SilentlyContinue
+#remove-item $output -force -ErrorAction SilentlyContinue
 
 # Connect to the vCenter Server
 $credential = Get-Credential
