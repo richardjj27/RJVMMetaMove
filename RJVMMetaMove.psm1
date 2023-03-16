@@ -11,7 +11,18 @@
 # Learn how to keep function parameters private (or not) and whether to pass an object or text is the right thing to do.
 
 function Get-RJVMMetaData {
-    [CmdletBinding()]
+    <#
+    .SYNOPSIS
+        A function to collect metadata from a spefified VM.
+    .DESCRIPTION
+        The function returns an array object containing the VM's Tags and attributes.
+        
+        Get-RJVMMetaData -VMName <VM Name>
+
+    .EXAMPLE
+        $VMData = Get-RJVMMetaData -VMName "TheBigServer"
+    #>
+
     param (
         [Parameter(Mandatory = $true)]
         [string]$VMName
@@ -57,7 +68,42 @@ function Get-RJVMMetaData {
 }
 
 function Get-RJVMCoreData {
-    [CmdletBinding()]
+    #[CmdletBinding()]
+    <#
+    .SYNOPSIS
+        A function to collect core data from a spefified VM.
+        
+    .DESCRIPTION
+        The function returns an array object containing the following VM data.
+            * Data Created
+            * Hardware Version
+            * List of disks
+            * Disk Name
+            * Disk Layout
+            * Disk Size (GB)
+            * Disk Datastore
+            * List of Network Adapters
+            * vCenter
+            * Host
+            * Host Version
+            * Folder
+            * Data Center
+            * Cluster
+            * Resource Pool
+            * Memory (GB)
+            * CPU Cores
+            * Tools Version
+            * Notes
+            * Power State
+            * Guest OS
+            * Snapshot Date    
+    
+        Get-RJVMCoreData -VMName <VM Name>
+
+    .EXAMPLE
+        $VMData = Get-RJVMCoreData -VMName "TheBigServer"
+    #>
+
     param (
         [Parameter(Mandatory = $true)]
         [string]$VMName
@@ -128,8 +174,21 @@ function Get-RJVMCoreData {
     }
 }
 
+# what is the difference between and [object] and a [psobject].
+# should I be passing objects or just the text?
 function Set-RJVMMetaData {
-    [CmdletBinding()]
+    <#
+    .SYNOPSIS
+        A function to import the tags and custom attributes for a specified VM based on the export from a previous Get-RJVMMetaData call.
+    .DESCRIPTION
+        More of what it does.
+        
+        Set-RJVMMetaData -VMName <VMName> -TargetVM <VMHost> -TargetVC <vCenterServer> -VMMetaDataItems <MetadataObject>
+
+    .EXAMPLE
+        Set-RJVMMetaData -VMName $VMtoMove -TargetVM $TargetVM -TargetVC $TargetVC -VMMetaDataItems $VMMetaDataItems
+    #>
+
     param (
         [Parameter(Mandatory = $true)]
         [psobject] $VMName,
@@ -154,7 +213,18 @@ function Set-RJVMMetaData {
 }
 
 function Get-RJVMHostData {
-    [CmdletBinding()]
+    <#
+    .SYNOPSIS
+        A function to return the key network and datastore data necessary for a Cross vCenter VM Migration.
+    .DESCRIPTION
+        Returns an array containing a specific host's available Datastore, Port Groups and Switches.
+        
+        Get-RJVMHostData -VMHost <VM Host Name>
+
+    .EXAMPLE
+        $TheHost = Get-RJVMHostData -VMHost "TheVMHost"
+    #>
+    
     param (
         [Parameter(Mandatory = $true)]
         [psobject] $VMHost
