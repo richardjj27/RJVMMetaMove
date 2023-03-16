@@ -68,10 +68,9 @@ function Get-RJVMMetaData {
 }
 
 function Get-RJVMCoreData {
-    #[CmdletBinding()]
     <#
     .SYNOPSIS
-        A function to collect core data from a spefified VM.
+        A function to collect core data from a specified VM.
         
     .DESCRIPTION
         The function returns an array object containing the following VM data.
