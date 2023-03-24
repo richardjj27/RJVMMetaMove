@@ -9,6 +9,7 @@
 # This needs to be renamed to cover the generic purpose of the 3 modules here (get-vmmetadata, get-vmcoredata, set-vmmetadata).
 # Create module manifest (.psd1)
 # Learn how to keep function parameters private (or not) and whether to pass an object or text is the right thing to do.
+# Make the multivalue function values return an array. 
 
 function Get-RJVMMetaData {
     <#
@@ -228,43 +229,56 @@ function Get-RJVMHostData {
     if($oVMHost){
 
         $CustomObject = New-Object -TypeName PSObject
-        $output = @()
+        #$output = @()
+
+        $CustomObject | Add-Member -Name "Name" -MemberType NoteProperty -value $oVMHost.Name
+
+        $CustomObject | Add-Member -Name "vCenter" -MemberType NoteProperty -value ($oVMHost.Uid.Split(":")[0].Split("@")[1])
+
+        $CustomObject | Add-Member -Name "ParentCluster" -MemberType NoteProperty -value $oVMHost.parent
+        $CustomObject | Add-Member -Name "Vendor" -MemberType NoteProperty -value $oVMHost.extensiondata.hardware.systeminfo.Vendor
+        $CustomObject | Add-Member -Name "Model" -MemberType NoteProperty -value $oVMHost.extensiondata.hardware.systeminfo.Model
+        $CustomObject | Add-Member -Name "SerialNumber" -MemberType NoteProperty -value ($oVMHost|get-esxcli).hardware.platform.get.invoke().enclosureserialnumber
+        $CustomObject | Add-Member -Name "NumCpu" -MemberType NoteProperty -value $oVMHost.NumCpu
+        $CustomObject | Add-Member -Name "CryptoState" -MemberType NoteProperty -value $oVMHost.CryptoState
+        $CustomObject | Add-Member -Name "Version" -MemberType NoteProperty -value $oVMHost.Version
+        $CustomObject | Add-Member -Name "Build" -MemberType NoteProperty -value $oVMHost.Build
+        $CustomObject | Add-Member -Name "MemoryTotalGB" -MemberType NoteProperty -value ([math]::Round($oVMHost.MemoryTotalGB,0))
+        $CustomObject | Add-Member -Name "MaxEVCMode" -MemberType NoteProperty -value $oVMHost.MaxEVCMode
+        $CustomObject | Add-Member -Name "ProcessorType" -MemberType NoteProperty -value $oVMHost.ProcessorType
 
         #get-datastore -vmhost $oVMHost | format-table -autosize -property @{L='Datastore Name';E={$_.Name}},CapacityGB
 
         $Datastores = get-datastore -vmhost $oVMHost | Sort-Object CapacityGB -Descending
+        $outputDatastoreName = @()
+        $outputDatastoreType = @()
+        $outputDatastoreCapacity = @()
+
         foreach ($Datastore in $Datastores) {
-            $CustomObject = New-Object -TypeName PSObject
-            $CustomObject | Add-Member -Name "Parameter" -MemberType NoteProperty -value "Datastore"
-            $CustomObject | Add-Member -Name "Name" -MemberType NoteProperty -value "$($Datastore.Name) / ($([int]$Datastore.CapacityGB)GB)"
-            $output += $CustomObject
+            $outputDatastoreName += $Datastore.Name
+            $outputDatastoreName += $Datastore.Type
+            $outputDatastoreCapacity += ([math]::Round($Datastore.CapacityGB,0))
         }
 
-        # #get-virtualportgroup -vmhost $oVMHost | format-table -autosize -property @{L='Virtual Port Group';E={$_.Name}}
-        # $VirtualPortGroups = get-virtualportgroup -vmhost $oVMHost
-        # foreach ($VirtualPortGroup in $VirtualPortGroups) {
-        #     $CustomObject = New-Object -TypeName PSObject
-        #     $CustomObject | Add-Member -Name "Parameter" -MemberType NoteProperty -value "VirtualPortGroup"
-        #     $CustomObject | Add-Member -Name "Name" -MemberType NoteProperty -value "$($VirtualPortGroup.Name)"
-        #     $output += $CustomObject
-        # }
+        $CustomObject | Add-Member -Name "DatastoreName" -MemberType NoteProperty -value $outputDatastoreName
+        $CustomObject | Add-Member -Name "DatastoreType" -MemberType NoteProperty -value $outputDatastoreType
+        $CustomObject | Add-Member -Name "DatastoreCapacityGB" -MemberType NoteProperty -value $outputDa
+        tastoreCapacity
 
         #get-vdswitch -VMHost $oVMHost | format-table -autosize -property @{L='vNetwork dSwitch';E={$_.Name}}
         $vdSwitches = get-vdswitch -VMHost $oVMHost
+        $outputVDPortGroup = @()
+
         foreach ($vdSwitch in $vdSwitches) {
-            $CustomObject = New-Object -TypeName PSObject
-            $CustomObject | Add-Member -Name "Parameter" -MemberType NoteProperty -value "vdSwitch"
-            $CustomObject | Add-Member -Name "Name" -MemberType NoteProperty -value "$($vdSwitch.Name)"
-            $output += $CustomObject
             $vdPortGroups = Get-VDPortgroup -vdSwitch $vdSwitch | Sort-Object Name
             foreach ($vdPortGroup in $vdPortGroups) {
-                $CustomObject = New-Object -TypeName PSObject
-                $CustomObject | Add-Member -Name "Parameter" -MemberType NoteProperty -value "vdPortGroup"
-                $CustomObject | Add-Member -Name "Name" -MemberType NoteProperty -value "$($vdPortGroup.Name)"
-                $output += $CustomObject
+                $outputVDportGroup += $vdPortGroup.Name
             }
         }
-        return $output
+
+        $CustomObject | Add-Member -Name "vdPortGroup" -MemberType NoteProperty -value $outputVDPortGroup
+
+        return $CustomObject
     }
     else {
          Write-Error "VmHost not found."
