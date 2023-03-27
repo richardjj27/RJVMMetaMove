@@ -5,12 +5,7 @@ import-Module -Name ImportExcel
 remove-module RJVMMetaMove
 import-Module .\RJVMMetaMove.psm1
 
-#Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
-
 $output = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\vmHostExport [F] $(get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
-
-# Silently delete old file
-#remove-item $output -force -ErrorAction SilentlyContinue
 
 # Connect to the vCenter Server
 $credential = Get-Credential
@@ -19,12 +14,8 @@ $VC2 = Connect-VIServer -Server "su-gbcp-vvcsa03.emea.wdpr.disney.com" -Credenti
 $VC3 = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
 
 $allVMHosts = get-VMHost -server $VC1
-#$allVMHosts += get-VMHost -server $VC2
-#$allVMHosts += get-VMHost -server $VC3
-
-# foreach ($allVMHost in $allVMHosts){
-#     Get-RJVMHostData -VMHost $allvmhost.Name | export-excel $output -append -freezetoprow -autofilter -autosize
-# }
+$allVMHosts += get-VMHost -server $VC2
+$allVMHosts += get-VMHost -server $VC3
 
 $count = 0
 foreach ($VMHost in $allVMHosts){
@@ -48,15 +39,14 @@ foreach ($VMHost in $allVMHosts){
         MemoryTotalGB, `
         MaxEVCMode, `
         ProcessorType, `
-        @{N='DatastoreName';E={ if ($_.DatastoreName) { $_.DatastoreName -join("`r`n")}}}, `
-        @{N='DatastoreType';E={ if ($_.DatastoreType) { $_.DatastoreType -join("`r`n")}}}, `
-        @{N='DatastoreCapacityGB';E={ if ($_.DatastoreCapacityGB) { $_.DatastoreCapacityGB -join("`r`n")}}}, `
-        @{N='vdPortGroupName';E={ if ($_.vdPortGroupName) { $_.vdPortGroupName -join("`r`n")}}} `
+        @{N='DatastoreName';E={ if ($_.DatastoreName) { $_.DatastoreName -join("`r")}}}, `
+        @{N='DatastoreType';E={ if ($_.DatastoreType) { $_.DatastoreType -join("`r")}}}, `
+        @{N='DatastoreCapacityGB';E={ if ($_.DatastoreCapacityGB) { $_.DatastoreCapacityGB -join("`r")}}}, `
+        @{N='vdPortGroupName';E={ if ($_.vdPortGroupName) { $_.vdPortGroupName -join("`r")}}} `
         | export-excel -path $output -append -freezetoprow -autofilter -autosize
 
     Write-Progress -Activity "Scan Progress:" -Status "$completed% completed." -PercentComplete $completed
     $count++
 }
-
 
 Disconnect-VIServer -Server * -Confirm:$false

@@ -9,12 +9,7 @@
 # This needs to be renamed to cover the generic purpose of the 3 modules here (get-vmmetadata, get-vmcoredata, set-vmmetadata).
 # Create module manifest (.psd1)
 # Learn how to keep function parameters private (or not) and whether to pass an object or text is the right thing to do.
-# Make the multivalue function values return an array. 
-# Add allocated license key information to hosts
 # Try to find a way of getting some kind of CPU compatibility information.
-# Need to test snapshots output
-# pluralise the multiline output values (where appropriate) - or not?
-# Try to find a way to switch on wordwrap for the appropriate columns
 # Need to tidy up variable names and follow some kind of convention.
 
 function Get-RJVMMetaData {
@@ -91,7 +86,6 @@ function Get-RJVMMetaData {
             }
         }
         
-        $CustomObject | Add-Member -Name "AttributeKey" -MemberType NoteProperty -value $outputCustomAttrKey 
         $CustomObject | Add-Member -Name "AttributeName" -MemberType NoteProperty -value $outputCustomAttrName
         $CustomObject | Add-Member -Name "AttributeValue" -MemberType NoteProperty -value $outputCustomAttrValue
         $CustomObject | Add-Member -Name "AttributeTag" -MemberType NoteProperty -value (Get-TagAssignment -Entity $VM).Tag.Name
@@ -100,7 +94,7 @@ function Get-RJVMMetaData {
     }
 
     else {
-        #Write-Error "Virtual machine not found."
+        Write-Error "Virtual machine not found."
         return $null
     }
 }
@@ -164,7 +158,49 @@ function Get-RJVMHostData {
         return $CustomObject
     }
     else {
-        Write-Error "VmHost not found."
+        Write-Error "VMHost not found."
         return $null
+    }
+}
+
+# what is the difference between and [object] and a [psobject].
+# should I be passing objects or just the text?
+function Set-RJVMCustomAttributes {
+    <#
+    .SYNOPSIS
+        A function to import the tags and custom attributes for a specified VM based on the export from a previous Get-RJVMMetaData call.
+    .DESCRIPTION
+        More of what it does.
+    .EXAMPLE
+        Set-RJVMCustomAttributes -VMName $VMtoMove -TargetVM $TargetVM -TargetVC $TargetVC -VMMetaDataItems $VMMetaDataItems
+    #>
+
+    param (
+        [Parameter(Mandatory = $true)]
+        [psobject] $VMName,
+        [Parameter(Mandatory = $true)]
+        [psobject] $TargetVM,
+        [Parameter(Mandatory = $true)]
+        [object] $TargetVC,
+        [Parameter(Mandatory = $true)]
+        [object] $VMMetaData
+    )
+
+    $AllCustomAttributeName = $VMMetaData.AttributeName
+    $AllCustomAttributeValue = $VMMetaData.AttributeValue
+    $AllCustomAttributeTag = $VMMetaData.AttributeTag
+
+    $attrcount = 0
+
+    if ($AllCustomAttributeName){
+        foreach ($CustomAttributeName in $AllCustomAttributeName){
+            $TargetVM | Set-Annotation -CustomAttribute $CustomAttributeName -Value $AllCustomAttributeValue[$attrcount]
+            $attrcount++
+        }
+
+    if ($AllCustomAttributeTag){}
+        foreach ($CustomAttributeTag in $AllCustomAttributeTag){
+            New-TagAssignment -Tag $CustomAttributeTag -Entity $TargetVM -Server $TargetVC # $VMMetaDataItem.Tag
+        }
     }
 }

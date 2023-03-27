@@ -21,7 +21,7 @@ $credential = Get-Credential
 # get-virtualportgroup -vmhost $myvmhost | ft -autosize -property name
 # get-vdswitch -VMHost $myvmhost | ft -autosize -property name
 
-# 2 to 4
+# # 2 to 4
 # $SourceVC = Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $credential
 # $TargetVC = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
 # $TargetVMHost = "su-gbeq-vxrail01.emea.wdpr.disney.com"
@@ -39,7 +39,7 @@ $Targetdatastore = "VxRail-Virtual-SAN-Datastore-82d1d453-d153-4a50-8ec2-8fa5a81
 
 #### Get the metadata
 $SourceVM = get-vm -Name $VMtoMove -server $SourceVC
-$VMMetaDataItems = get-RJVMMetaData -VMName $VMtoMove
+$VMMetaData = get-RJVMMetaData -VMName $VMtoMove
 
 #### Move the VM
 #### Do a pre-move compatbility check (processor stepping level etc)
@@ -49,6 +49,6 @@ Move-VM -VM $SourceVM -VMotionPriority High -Destination (Get-VMhost -Server $Ta
 
 #### Write the metadata
 $TargetVM = get-vm -Name $VMtoMove -Server $TargetVC
-Set-RJVMMetaData -VMName $VMtoMove -TargetVM $TargetVM -TargetVC $TargetVC -VMMetaDataItems $VMMetaDataItems
+Set-RJVMCustomAttributes -VMName $VMtoMove -TargetVM $TargetVM -TargetVC $TargetVC -VMMetaData $VMMetaData
 
 Disconnect-VIServer -Server * -Confirm:$false
