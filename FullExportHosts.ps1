@@ -2,6 +2,7 @@
 
 import-Module -Name vmware.powercli
 import-Module -Name ImportExcel
+remove-module RJVMMetaMove
 import-Module .\RJVMMetaMove.psm1
 
 #Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
@@ -18,11 +19,44 @@ $VC2 = Connect-VIServer -Server "su-gbcp-vvcsa03.emea.wdpr.disney.com" -Credenti
 $VC3 = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
 
 $allVMHosts = get-VMHost -server $VC1
-$allVMHosts += get-VMHost -server $VC2
-$allVMHosts += get-VMHost -server $VC3
+#$allVMHosts += get-VMHost -server $VC2
+#$allVMHosts += get-VMHost -server $VC3
 
-foreach ($allVMHost in $allVMHosts){
-    Get-RJVMHostData -VMHost $allvmhost.Name | export-excel $output -append -freezetoprow -autofilter -autosize
+# foreach ($allVMHost in $allVMHosts){
+#     Get-RJVMHostData -VMHost $allvmhost.Name | export-excel $output -append -freezetoprow -autofilter -autosize
+# }
+
+$count = 0
+foreach ($VMHost in $allVMHosts){
+    $completed = [math]::Round((($count/$allVMHosts.count) * 100), 2)
+    $a = Get-RJVMHostData -VMHost $VMHost
+    $a | select-object -ExcludeProperty DatastoreName,DatastoreType,DatastoreCapacityGB,vdPortGroupName `
+    -Property `
+        Name, `
+        State, `
+        vCenter, `
+        ParentCluster, `
+        Vendor, `
+        Model, `
+        SerialNumber, `
+        IPMIIP, `
+        LicenseKey, `
+        NumCPU, `
+        CryptoState, `
+        Version, `
+        Build, `
+        MemoryTotalGB, `
+        MaxEVCMode, `
+        ProcessorType, `
+        @{N='DatastoreName';E={ if ($_.DatastoreName) { $_.DatastoreName -join("`r`n")}}}, `
+        @{N='DatastoreType';E={ if ($_.DatastoreType) { $_.DatastoreType -join("`r`n")}}}, `
+        @{N='DatastoreCapacityGB';E={ if ($_.DatastoreCapacityGB) { $_.DatastoreCapacityGB -join("`r`n")}}}, `
+        @{N='vdPortGroupName';E={ if ($_.vdPortGroupName) { $_.vdPortGroupName -join("`r`n")}}} `
+        | export-excel -path $output -append -freezetoprow -autofilter -autosize
+
+    Write-Progress -Activity "Scan Progress:" -Status "$completed% completed." -PercentComplete $completed
+    $count++
 }
+
 
 Disconnect-VIServer -Server * -Confirm:$false
