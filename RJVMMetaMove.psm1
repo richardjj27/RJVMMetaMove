@@ -79,7 +79,7 @@ function Get-RJVMMetaData {
         $HardDisks = get-HardDisk -VM $VM
         
         foreach ($HardDisk in $HardDisks) {
-            $outputDiskDatastore += ($HardDisk.Filename | select-string '(?<=\[)[^]]+(?=\])').matches.value 
+            $outputDiskDatastore += ($HardDisk.Filename | select-string '(?<=\[)[^]]+(?=\])').matches.value
         }
 
         $CustomObject | Add-Member -Name "NetworkAdapter" -MemberType NoteProperty -value (Get-NetworkAdapter -VM $VM).NetworkName
@@ -143,11 +143,21 @@ function Get-RJVMHostData {
         $CustomObject | Add-Member -Name "ProcessorType" -MemberType NoteProperty -value $oVMHost.ProcessorType
 
         $Datastores = get-datastore -vmhost $oVMHost
-        
         if($Datastores){
             $CustomObject | Add-Member -Name "DatastoreName" -MemberType NoteProperty -value $Datastores.Name
             $CustomObject | Add-Member -Name "DatastoreType" -MemberType NoteProperty -value $Datastores.Type
             $CustomObject | Add-Member -Name "DatastoreCapacityGB" -MemberType NoteProperty -value $Datastores.CapacityGB
+        }
+
+        if (($oVMHost.extensiondata.hardware.systeminfo.Model).substring(0,6) -eq 'vxrail'){
+            foreach ($ds in $Datastores){
+                if ($ds.name.substring(0,2) -eq 'DE') {
+                    $CustomObject | Add-Member -Name "PSNT" -MemberType NoteProperty -value $ds.Name.substring(0,14)
+                }
+            }
+        }
+        else {
+            $CustomObject | Add-Member -Name "PSNT" -MemberType NoteProperty -value $null
         }
 
         $vdSwitches = get-vdswitch -VMHost $oVMHost

@@ -9,13 +9,13 @@ $output = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\vmHo
 
 # Connect to the vCenter Server
 $credential = Get-Credential
-$VC1 = Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $credential
-$VC2 = Connect-VIServer -Server "su-gbcp-vvcsa03.emea.wdpr.disney.com" -Credential $credential
+#$VC1 = Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $credential
+#$VC2 = Connect-VIServer -Server "su-gbcp-vvcsa03.emea.wdpr.disney.com" -Credential $credential
 $VC3 = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
 
-$allVMHosts = get-VMHost -server $VC1
-$allVMHosts += get-VMHost -server $VC2
-$allVMHosts += get-VMHost -server $VC3
+#$allVMHosts = get-VMHost -server $VC1
+#$allVMHosts += get-VMHost -server $VC2
+$allVMHosts = get-VMHost -server $VC3
 
 $count = 0
 foreach ($VMHost in $allVMHosts){
@@ -30,6 +30,7 @@ foreach ($VMHost in $allVMHosts){
         Vendor, `
         Model, `
         SerialNumber, `
+        PSNT, `
         IPMIIP, `
         LicenseKey, `
         NumCPU, `
