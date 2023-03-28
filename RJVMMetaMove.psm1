@@ -4,6 +4,7 @@
 # Try to find a way of getting some kind of CPU compatibility information.
 # Need to tidy up variable names and follow some kind of convention.
 # Add some error checking.
+# Add module version/ing.
 
 function Get-RJVMMetaData {
     <#
