@@ -43,10 +43,15 @@ foreach ($VMHost in $allVMHosts){
         @{N='DatastoreType';E={ if ($_.DatastoreType) { $_.DatastoreType -join("`r")}}}, `
         @{N='DatastoreCapacityGB';E={ if ($_.DatastoreCapacityGB) { $_.DatastoreCapacityGB -join("`r")}}}, `
         @{N='vdPortGroupName';E={ if ($_.vdPortGroupName) { $_.vdPortGroupName -join("`r")}}} `
-        | export-excel -path $output -append -freezetoprow -autofilter -autosize
+        | export-excel -path $output -WorksheetName "vmHostExport" -autosize -append
 
     Write-Progress -Activity "Scan Progress:" -Status "$completed% completed." -PercentComplete $completed
     $count++
 }
+
+$exportXL = Export-Excel -Path $output -WorksheetName "vmHostExport" -freezetoprow -autofilter -Titlebold -autosize -PassThru
+$exportWS = $exportXL.vmHostExport
+set-format $exportWS.workbook.worksheets['vmHostExport'].cells -WrapText
+Close-ExcelPackage $exportXL
 
 Disconnect-VIServer -Server * -Confirm:$false

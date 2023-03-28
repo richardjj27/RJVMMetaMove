@@ -40,8 +40,13 @@ function Get-RJVMMetaData {
 
         # --singles
         $CustomObject | Add-Member -Name "VMName" -MemberType NoteProperty -value $VM.name # yes
-        $CustomObject | Add-Member -Name "VMCreated" -MemberType NoteProperty -value $VM.extensiondata.config.createdate # yes
+        $CustomObject | Add-Member -Name "Powerstate" -MemberType NoteProperty -value $vm.powerstate # yes
         $CustomObject | Add-Member -Name "VMVersion" -MemberType NoteProperty -value $VM.extensiondata.config.version # yes
+        $CustomObject | Add-Member -Name "MemoryGB" -MemberType NoteProperty -value $vm.memorygb # yes
+        $CustomObject | Add-Member -Name "CPUCores" -MemberType NoteProperty -value $vm.NumCpu # yes
+        $CustomObject | Add-Member -Name "ToolsVersion" -MemberType NoteProperty -value $vm.extensiondata.guest.toolsversion # yes
+        $CustomObject | Add-Member -Name "GuestOS" -MemberType NoteProperty -value $vm.extensiondata.guest.guestfullname # yes
+        $CustomObject | Add-Member -Name "VMCreated" -MemberType NoteProperty -value $VM.extensiondata.config.createdate # yes
         $CustomObject | Add-Member -Name "vCenter" -MemberType NoteProperty -value $vcserver # yes
         $CustomObject | Add-Member -Name "Host" -MemberType NoteProperty -value (get-vmhost -vm $vm).name # yes
         $CustomObject | Add-Member -Name "HostVersion" -MemberType NoteProperty -value (get-vmhost -vm $vm).version # yes
@@ -49,29 +54,9 @@ function Get-RJVMMetaData {
         $CustomObject | Add-Member -Name "Datacenter" -MemberType NoteProperty -value (Get-Datacenter -Server $vcserver -vm $vm.name) # yes
         $CustomObject | Add-Member -Name "Cluster" -MemberType NoteProperty -value (Get-Cluster -Server $vcserver -vm $vm.name) # yes
         $CustomObject | Add-Member -Name "ResourcePool" -MemberType NoteProperty -value (Get-ResourcePool -Server $vcserver -VM $VM) # yes
-        $CustomObject | Add-Member -Name "MemoryGB" -MemberType NoteProperty -value $vm.memorygb # yes
-        $CustomObject | Add-Member -Name "CPUCores" -MemberType NoteProperty -value $vm.NumCpu # yes
-        $CustomObject | Add-Member -Name "ToolsVersion" -MemberType NoteProperty -value $vm.extensiondata.guest.toolsversion # yes
         $CustomObject | Add-Member -Name "Folder" -MemberType NoteProperty -value $vm.folder # yes
         $CustomObject | Add-Member -Name "Notes" -MemberType NoteProperty -value $vm.notes # check
-        $CustomObject | Add-Member -Name "Powerstate" -MemberType NoteProperty -value $vm.powerstate # yes
-        $CustomObject | Add-Member -Name "GuestOS" -MemberType NoteProperty -value $vm.extensiondata.guest.guestfullname # yes
         $CustomObject | Add-Member -Name "Snapshot" -MemberType NoteProperty -value ($vm | get-snapshot).created # yes
-
-        $outputDiskDatastore = @()
-        $HardDisks = get-HardDisk -VM $VM
-        
-        foreach ($HardDisk in $HardDisks) {
-            $outputDiskDatastore += ($HardDisk.Filename | select-string '(?<=\[)[^]]+(?=\])').matches.value 
-        }
-
-        $CustomObject | Add-Member -Name "DiskLayoutStorageFormat" -MemberType NoteProperty -value (get-HardDisk -VM $VM).StorageFormat
-        $CustomObject | Add-Member -Name "DiskLayoutPersistence" -MemberType NoteProperty -value (get-HardDisk -VM $VM).Persistence
-        $CustomObject | Add-Member -Name "DiskLayoutDiskType" -MemberType NoteProperty -value (get-HardDisk -VM $VM).DiskType
-        $CustomObject | Add-Member -Name "DiskDatastore" -MemberType NoteProperty -value $outputDiskDatastore
-        $CustomObject | Add-Member -Name "DiskName" -MemberType NoteProperty -value (get-HardDisk -VM $VM).Name
-        $CustomObject | Add-Member -Name "DiskSizeGB" -MemberType NoteProperty -value (get-HardDisk -VM $VM).CapacityGB
-        $CustomObject | Add-Member -Name "NetworkAdapter" -MemberType NoteProperty -value (Get-NetworkAdapter -VM $VM).NetworkName
         
         $outputCustomAttrKey = @()
         $outputCustomAttrName = @()
@@ -89,6 +74,21 @@ function Get-RJVMMetaData {
         $CustomObject | Add-Member -Name "AttributeName" -MemberType NoteProperty -value $outputCustomAttrName
         $CustomObject | Add-Member -Name "AttributeValue" -MemberType NoteProperty -value $outputCustomAttrValue
         $CustomObject | Add-Member -Name "AttributeTag" -MemberType NoteProperty -value (Get-TagAssignment -Entity $VM).Tag.Name
+
+        $outputDiskDatastore = @()
+        $HardDisks = get-HardDisk -VM $VM
+        
+        foreach ($HardDisk in $HardDisks) {
+            $outputDiskDatastore += ($HardDisk.Filename | select-string '(?<=\[)[^]]+(?=\])').matches.value 
+        }
+
+        $CustomObject | Add-Member -Name "NetworkAdapter" -MemberType NoteProperty -value (Get-NetworkAdapter -VM $VM).NetworkName
+        $CustomObject | Add-Member -Name "DiskLayoutStorageFormat" -MemberType NoteProperty -value (get-HardDisk -VM $VM).StorageFormat
+        $CustomObject | Add-Member -Name "DiskLayoutPersistence" -MemberType NoteProperty -value (get-HardDisk -VM $VM).Persistence
+        $CustomObject | Add-Member -Name "DiskLayoutDiskType" -MemberType NoteProperty -value (get-HardDisk -VM $VM).DiskType
+        $CustomObject | Add-Member -Name "DiskDatastore" -MemberType NoteProperty -value $outputDiskDatastore
+        $CustomObject | Add-Member -Name "DiskName" -MemberType NoteProperty -value (get-HardDisk -VM $VM).Name
+        $CustomObject | Add-Member -Name "DiskSizeGB" -MemberType NoteProperty -value (get-HardDisk -VM $VM).CapacityGB
 
         return $CustomObject
     }
