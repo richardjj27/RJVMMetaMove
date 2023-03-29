@@ -162,8 +162,6 @@ function Get-RJVMHostData {
 
         $CustomObject | Add-Member -Name "LocationCode" -MemberType NoteProperty -value $LocationCode
 
-        #$CustomObject | Add-Member -Name "LocationCode" -MemberType NoteProperty -value ((Get-Cluster -vmhost $oVMHost.name).ExtensionData.customvalue |where-object {$_.key -eq (($CustomAttrList | where-object {$_.Name -eq 'Location ID'}).key)}).value
-
         $Datastores = get-datastore -vmhost $oVMHost
         if($Datastores){
             $CustomObject | Add-Member -Name "DatastoreName" -MemberType NoteProperty -value $Datastores.Name
