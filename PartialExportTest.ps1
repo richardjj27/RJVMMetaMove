@@ -5,18 +5,23 @@ import-Module -Name ImportExcel
 remove-module RJVMMetaMove
 import-Module .\RJVMMetaMove.psm1
 
-$output = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\vmGuestExport [P] $(get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
+$output = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\vmGuestExport2 [P] $(get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
 
 # Connect to the vCenter Server
 $credential = Get-Credential
 $VC1 = Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $credential
-#$VC2 = Connect-VIServer -Server "su-gbcp-vvcsa03.emea.wdpr.disney.com" -Credential $credential
-#$VC3 = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
+$VC2 = Connect-VIServer -Server "su-gbcp-vvcsa03.emea.wdpr.disney.com" -Credential $credential
+$VC3 = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
+#$VC4 = Connect-VIServer -Server "su-cnts-vcsa01.apac.wdpr.disney.com" -Credential $credential
+#$VC5 = Connect-VIServer -Server "su-cnts-vvcsa02.apac.wdpr.disney.com" -Credential $credential
+#$VC6 = Connect-VIServer -Server "su-arba-vc01.ltam.wdpr.disney.com" -Credential $credential
 
-$VirtualMachines = get-VM -server $VC1 | where-object NumCpu -ge 18
-$virtualMachines += get-vm -server $VC1 | where-object Name -eq "SM-GBCP-VCXA105"  
-#$VirtualMachines += get-VM -server $VC2
-#$VirtualMachines += get-VM -server $VC3
+$VirtualMachines = get-VM -server $VC1
+$VirtualMachines += get-VM -server $VC2
+$VirtualMachines += get-VM -server $VC3
+#$VirtualMachines = get-VM -server $VC4
+#$VirtualMachines += get-VM -server $VC5
+#$VirtualMachines += get-VM -server $VC6
 
 $count = 0
 foreach ($VirtualMachine in $VirtualMachines){
