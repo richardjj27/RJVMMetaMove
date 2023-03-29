@@ -45,7 +45,7 @@ foreach ($VirtualMachine in $VirtualMachines){
         Cluster, `
         ResourcePool, `
         Folder, `
-        ClusterLocation, `
+        LocationCode, `
         Notes, `
         @{N='AttributeName';E={ if ($_.AttributeName) { $_.AttributeName -join("`r")}}}, `
         @{N='AttributeValue';E={ if ($_.AttributeValue) { $_.AttributeValue -join("`r")}}}, `

@@ -67,7 +67,17 @@ function Get-RJVMMetaData {
             }
         }
         
-        $CustomObject | Add-Member -Name "ClusterLocation" -MemberType NoteProperty -value ((Get-Cluster -vm $vm.name).ExtensionData.customvalue |where-object {$_.key -eq (($CustomAttrList | where-object {$_.Name -eq 'Location ID'}).key)}).value
+        $LocationCodeC = ((Get-Cluster -vm $vm.name).ExtensionData.customvalue |where-object {$_.key -eq (($CustomAttrList | where-object {$_.Name -eq 'Location ID' -and $_.TargetType -eq 'Cluster'}).key)}).value
+        $LocationCodeH = ((Get-VMHost -vm $vm.name).ExtensionData.customvalue |where-object {$_.key -eq (($CustomAttrList | where-object {$_.Name -eq 'Location ID' -and $_.TargetType -eq 'VMHost'}).key)}).value
+
+        if ($LocationCodeC){
+            $LocationCode = $LocationCodeC
+        }
+        else {
+            $LocationCode = $LocationCodeH
+        }
+
+        $CustomObject | Add-Member -Name "LocationCode" -MemberType NoteProperty -value $LocationCode
         $CustomObject | Add-Member -Name "AttributeName" -MemberType NoteProperty -value $outputCustomAttrName
         $CustomObject | Add-Member -Name "AttributeValue" -MemberType NoteProperty -value $outputCustomAttrValue
         $CustomObject | Add-Member -Name "AttributeTag" -MemberType NoteProperty -value (Get-TagAssignment -Entity $VM).Tag.Name
@@ -140,7 +150,19 @@ function Get-RJVMHostData {
         $CustomObject | Add-Member -Name "MaxEVCMode" -MemberType NoteProperty -value $oVMHost.MaxEVCMode
         $CustomObject | Add-Member -Name "ProcessorType" -MemberType NoteProperty -value $oVMHost.ProcessorType
 
-        $CustomObject | Add-Member -Name "ClusterLocation" -MemberType NoteProperty -value ((Get-Cluster -vmhost $oVMHost.name).ExtensionData.customvalue |where-object {$_.key -eq (($CustomAttrList | where-object {$_.Name -eq 'Location ID'}).key)}).value
+        $LocationCodeC = ((Get-Cluster -vmhost $ovmhost.name).ExtensionData.customvalue |where-object {$_.key -eq (($CustomAttrList | where-object {$_.Name -eq 'Location ID' -and $_.TargetType -eq 'Cluster'}).key)}).value
+        $LocationCodeH = ((Get-VMHost -name $ovmhost.name).ExtensionData.customvalue |where-object {$_.key -eq (($CustomAttrList | where-object {$_.Name -eq 'Location ID' -and $_.TargetType -eq 'VMHost'}).key)}).value
+
+        if ($LocationCodeC){
+            $LocationCode = $LocationCodeC
+        }
+        else {
+            $LocationCode = $LocationCodeH
+        }
+
+        $CustomObject | Add-Member -Name "LocationCode" -MemberType NoteProperty -value $LocationCode
+
+        #$CustomObject | Add-Member -Name "LocationCode" -MemberType NoteProperty -value ((Get-Cluster -vmhost $oVMHost.name).ExtensionData.customvalue |where-object {$_.key -eq (($CustomAttrList | where-object {$_.Name -eq 'Location ID'}).key)}).value
 
         $Datastores = get-datastore -vmhost $oVMHost
         if($Datastores){

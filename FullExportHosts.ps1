@@ -12,16 +12,16 @@ $credential = Get-Credential
 $VC1 = Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $credential
 $VC2 = Connect-VIServer -Server "su-gbcp-vvcsa03.emea.wdpr.disney.com" -Credential $credential
 $VC3 = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
-$VC4 = Connect-VIServer -Server "su-cnts-vcsa01.apac.wdpr.disney.com" -Credential $credential
-$VC5 = Connect-VIServer -Server "su-cnts-vvcsa02.apac.wdpr.disney.com" -Credential $credential
-$VC6 = Connect-VIServer -Server "su-arba-vc01.ltam.wdpr.disney.com" -Credential $credential
+#$VC4 = Connect-VIServer -Server "su-cnts-vcsa01.apac.wdpr.disney.com" -Credential $credential
+#$VC5 = Connect-VIServer -Server "su-cnts-vvcsa02.apac.wdpr.disney.com" -Credential $credential
+#$VC6 = Connect-VIServer -Server "su-arba-vc01.ltam.wdpr.disney.com" -Credential $credential
 
 $allVMHosts = get-VMHost -server $VC1
 $allVMHosts += get-VMHost -server $VC2
 $allVMHosts += get-VMHost -server $VC3
-$allVMHosts += get-VMHost -server $VC4
-$allVMHosts += get-VMHost -server $VC5
-$allVMHosts += get-VMHost -server $VC6
+#$allVMHosts += get-VMHost -server $VC4
+#$allVMHosts += get-VMHost -server $VC5
+#$allVMHosts += get-VMHost -server $VC6
 
 $count = 0
 foreach ($VMHost in $allVMHosts){
@@ -33,7 +33,7 @@ foreach ($VMHost in $allVMHosts){
         State, `
         vCenter, `
         Cluster, `
-        ClusterLocation, `
+        LocationCode, `
         Vendor, `
         Model, `
         SerialNumber, `
