@@ -60,11 +60,14 @@ function Get-RJVMMetaData {
         foreach ($attribute in $CustomAttributes) {
             if ($attribute.Value) {
                 $outputCustomAttrKey += $attribute.key
+
                 $outputCustomAttrName += ($CustomAttrList | where-object {$_.Key -eq $Attribute.Key}).Name
+                
                 $outputCustomAttrValue += $attribute.value
             }
         }
         
+        $CustomObject | Add-Member -Name "ClusterLocation" -MemberType NoteProperty -value ((Get-Cluster -vm $vm.name).ExtensionData.customvalue |where-object {$_.key -eq (($CustomAttrList | where-object {$_.Name -eq 'Location ID'}).key)}).value
         $CustomObject | Add-Member -Name "AttributeName" -MemberType NoteProperty -value $outputCustomAttrName
         $CustomObject | Add-Member -Name "AttributeValue" -MemberType NoteProperty -value $outputCustomAttrValue
         $CustomObject | Add-Member -Name "AttributeTag" -MemberType NoteProperty -value (Get-TagAssignment -Entity $VM).Tag.Name
@@ -111,6 +114,7 @@ function Get-RJVMHostData {
     )
 
     $oVMHost = get-vmhost -name $VMHost
+    $CustomAttrList = Get-CustomAttribute -Server $oVMHost.Uid.Split(":")[0].Split("@")[1]
 
     if($oVMHost){
         $CustomObject = New-Object -TypeName PSObject
@@ -118,7 +122,7 @@ function Get-RJVMHostData {
         $CustomObject | Add-Member -Name "Name" -MemberType NoteProperty -value $oVMHost.Name
         $CustomObject | Add-Member -Name "State" -MemberType NoteProperty -value $oVMHost.ConnectionState
         $CustomObject | Add-Member -Name "vCenter" -MemberType NoteProperty -value ($oVMHost.Uid.Split(":")[0].Split("@")[1])
-        $CustomObject | Add-Member -Name "ParentCluster" -MemberType NoteProperty -value $oVMHost.parent
+        $CustomObject | Add-Member -Name "Cluster" -MemberType NoteProperty -value $oVMHost.parent
         $CustomObject | Add-Member -Name "Vendor" -MemberType NoteProperty -value $oVMHost.extensiondata.hardware.systeminfo.Vendor
         $CustomObject | Add-Member -Name "Model" -MemberType NoteProperty -value $oVMHost.extensiondata.hardware.systeminfo.Model
         
@@ -135,6 +139,8 @@ function Get-RJVMHostData {
         $CustomObject | Add-Member -Name "MemoryTotalGB" -MemberType NoteProperty -value ([math]::Round($oVMHost.MemoryTotalGB,0))
         $CustomObject | Add-Member -Name "MaxEVCMode" -MemberType NoteProperty -value $oVMHost.MaxEVCMode
         $CustomObject | Add-Member -Name "ProcessorType" -MemberType NoteProperty -value $oVMHost.ProcessorType
+
+        $CustomObject | Add-Member -Name "ClusterLocation" -MemberType NoteProperty -value ((Get-Cluster -vmhost $oVMHost.name).ExtensionData.customvalue |where-object {$_.key -eq (($CustomAttrList | where-object {$_.Name -eq 'Location ID'}).key)}).value
 
         $Datastores = get-datastore -vmhost $oVMHost
         if($Datastores){

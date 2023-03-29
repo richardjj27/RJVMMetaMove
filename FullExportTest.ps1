@@ -45,6 +45,7 @@ foreach ($VirtualMachine in $VirtualMachines){
         Cluster, `
         ResourcePool, `
         Folder, `
+        ClusterLocation, `
         Notes, `
         @{N='AttributeName';E={ if ($_.AttributeName) { $_.AttributeName -join("`r")}}}, `
         @{N='AttributeValue';E={ if ($_.AttributeValue) { $_.AttributeValue -join("`r")}}}, `
@@ -62,7 +63,7 @@ foreach ($VirtualMachine in $VirtualMachines){
 
 }
 
-$exportXL = Export-Excel -Path $output -WorksheetName "vmGuestExport" -freezetoprow -autofilter -Titlebold -autosize -PassThru
+$exportXL = Export-Excel -Path $output -WorksheetName "vmGuestExport" -freezetoprow -autofilter -titlebold -autosize -PassThru
 $exportWS = $exportXL.vmGuestExport
 set-format $exportWS.workbook.worksheets['vmGuestExport'].cells -WrapText
 Close-ExcelPackage $exportXL

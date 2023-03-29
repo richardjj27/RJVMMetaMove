@@ -10,15 +10,15 @@ $output = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\vmGu
 # Connect to the vCenter Server
 $credential = Get-Credential
 $VC1 = Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $credential
-$VC2 = Connect-VIServer -Server "su-gbcp-vvcsa03.emea.wdpr.disney.com" -Credential $credential
-$VC3 = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
+#$VC2 = Connect-VIServer -Server "su-gbcp-vvcsa03.emea.wdpr.disney.com" -Credential $credential
+#$VC3 = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
 #$VC4 = Connect-VIServer -Server "su-cnts-vcsa01.apac.wdpr.disney.com" -Credential $credential
 #$VC5 = Connect-VIServer -Server "su-cnts-vvcsa02.apac.wdpr.disney.com" -Credential $credential
 #$VC6 = Connect-VIServer -Server "su-arba-vc01.ltam.wdpr.disney.com" -Credential $credential
 
 $VirtualMachines = get-VM -server $VC1
-$VirtualMachines += get-VM -server $VC2
-$VirtualMachines += get-VM -server $VC3
+#$VirtualMachines += get-VM -server $VC2
+#$VirtualMachines += get-VM -server $VC3
 #$VirtualMachines = get-VM -server $VC4
 #$VirtualMachines += get-VM -server $VC5
 #$VirtualMachines += get-VM -server $VC6
@@ -45,6 +45,7 @@ foreach ($VirtualMachine in $VirtualMachines){
         Cluster, `
         ResourcePool, `
         Folder, `
+        ClusterLocation, `
         Notes, `
         @{N='AttributeName';E={ if ($_.AttributeName) { $_.AttributeName -join("`r")}}}, `
         @{N='AttributeValue';E={ if ($_.AttributeValue) { $_.AttributeValue -join("`r")}}}, `
@@ -62,7 +63,7 @@ foreach ($VirtualMachine in $VirtualMachines){
 
 }
 
-$exportXL = Export-Excel -Path $output -WorksheetName "vmGuestExport" -freezetoprow -autofilter -Titlebold -autosize -PassThru
+$exportXL = Export-Excel -Path $output -WorksheetName "vmGuestExport" -freezetoprow -autofilter -titlebold -autosize -PassThru
 $exportWS = $exportXL.vmGuestExport
 set-format $exportWS.workbook.worksheets['vmGuestExport'].cells -WrapText
 Close-ExcelPackage $exportXL
