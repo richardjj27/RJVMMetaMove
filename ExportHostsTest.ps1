@@ -8,7 +8,7 @@ import-Module .\RJVMMetaMove.psm1
 # P = Just one vCenter (for testing)
 # E = Just Europe
 # G = Global
-$runtype = "P"
+$runtype = "G"
 
 $output = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\vmHostExport [$runtype] $(get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
 
