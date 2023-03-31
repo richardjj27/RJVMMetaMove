@@ -64,7 +64,7 @@ foreach ($VirtualMachine in $VirtualMachines){
         @{N='AttributeName';E={ if ($_.AttributeName) { $_.AttributeName -join("`r")}}}, `
         @{N='AttributeValue';E={ if ($_.AttributeValue) { $_.AttributeValue -join("`r")}}}, `
         @{N='AttributeTag';E={ if ($_.AttributeTag) { $_.AttributeTag -join("`r")}}}, `
-        @{N='NetworkAdapter';E={ if ($_.NetworkAdapter) { $_.NetworkAdapter -join("`r")}}}, `
+        @{N='Network';E={ if ($_.NetworkAdapter) { $_.NetworkAdapter -join("`r")}}}, `
         @{N='DiskName';E={ if ($_.DiskName) { $_.DiskName -join("`r")}}}, `
         @{N='DiskLayout';E={ if ($_.DiskLayout) { $_.DiskLayout -join("`r")}}}, `
         @{N='DiskSizeGB';E={ if ($_.DiskSizeGB) { $_.DiskSizeGB -join("`r")}}}, `

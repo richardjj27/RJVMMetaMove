@@ -8,7 +8,7 @@ import-Module .\RJVMMetaMove.psm1
 # P = Just one vCenter (for testing)
 # E = Just Europe
 # G = Global
-$runtype = "G"
+$runtype = "E"
 
 $output = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\vmHostExport [$runtype] $(get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
 
@@ -41,7 +41,7 @@ $count = 0
 foreach ($VMHost in $allVMHosts){
     $completed = [math]::Round((($count/$allVMHosts.count) * 100), 2)
     $a = Get-RJVMHostData -VMHost $VMHost
-    $a | select-object -ExcludeProperty DatastoreName,DatastoreType,DatastoreCapacityGB,vdPortGroupName `
+    $a | select-object -ExcludeProperty DatastoreName,DatastoreType,DatastoreCapacityGB,Network,NetworkSwitch `
     -Property `
         Name, `
         State, `
@@ -64,7 +64,8 @@ foreach ($VMHost in $allVMHosts){
         @{N='DatastoreName';E={ if ($_.DatastoreName) { $_.DatastoreName -join("`r")}}}, `
         @{N='DatastoreType';E={ if ($_.DatastoreType) { $_.DatastoreType -join("`r")}}}, `
         @{N='DatastoreCapacityGB';E={ if ($_.DatastoreCapacityGB) { $_.DatastoreCapacityGB -join("`r")}}}, `
-        @{N='vdPortGroupName';E={ if ($_.vdPortGroupName) { $_.vdPortGroupName -join("`r")}}} `
+        @{N='Network';E={ if ($_.Network) { $_.Network -join("`r")}}}, `
+        @{N='NetworkSwitch';E={ if ($_.NetworkSwitch) { $_.NetworkSwitch -join("`r")}}} `
         | export-excel -path $output -WorksheetName "vmHostExport" -autosize -append
 
     Write-Progress -Activity "Scan Progress:" -Status "$completed% completed." -PercentComplete $completed
