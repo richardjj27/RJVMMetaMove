@@ -2,9 +2,13 @@
 # Create module manifest (.psd1)
 # Learn how to keep function parameters private (or not) and whether to pass an object or text is the right thing to do.
 # Try to find a way of getting some kind of CPU compatibility information.
-# Need to tidy up variable names and follow some kind of convention.
-# Add some error checking.
+# Need to tidy up variable names and follow some kind of convention and scoping.
+#   https://stackoverflow.com/questions/27847809/in-powershell-how-to-set-variable-values-within-a-function-and-have-that-value
 # Add module version/ing.
+# Sort out the Portgroup and Switch export data for host and VM
+# Put some logging in place with error checking.
+# Writing of tag/attributes writes to console.
+# Try to freeze first column in export scripts.
 
 function Get-RJVMMetaData {
     <#
