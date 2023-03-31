@@ -5,7 +5,6 @@
 # Need to tidy up variable names and follow some kind of convention and scoping.
 #   https://stackoverflow.com/questions/27847809/in-powershell-how-to-set-variable-values-within-a-function-and-have-that-value
 # Add module version/ing.
-# Sort out the Portgroup and Switch export data for host and VM
 # Put some logging in place with error checking.
 # Writing of tag/attributes writes to console.
 # Try to freeze first column in export scripts.
@@ -93,7 +92,7 @@ function Get-RJVMMetaData {
             $outputDiskDatastore += ($HardDisk.Filename | select-string '(?<=\[)[^]]+(?=\])').matches.value
         }
 
-        $CustomObject | Add-Member -Name "NetworkAdapter" -MemberType NoteProperty -value (Get-NetworkAdapter -VM $VM).NetworkName
+        $CustomObject | Add-Member -Name "Network" -MemberType NoteProperty -value (Get-NetworkAdapter -VM $VM).NetworkName
         $CustomObject | Add-Member -Name "DiskLayoutStorageFormat" -MemberType NoteProperty -value (get-HardDisk -VM $VM).StorageFormat
         $CustomObject | Add-Member -Name "DiskLayoutPersistence" -MemberType NoteProperty -value (get-HardDisk -VM $VM).Persistence
         $CustomObject | Add-Member -Name "DiskLayoutDiskType" -MemberType NoteProperty -value (get-HardDisk -VM $VM).DiskType
@@ -184,10 +183,13 @@ function Get-RJVMHostData {
             $CustomObject | Add-Member -Name "PSNT" -MemberType NoteProperty -value $null
         }
 
-        $vdSwitches = get-vdswitch -VMHost $oVMHost
-        if($vdSwitches) {
-            $CustomObject | Add-Member -Name "vdPortGroupName" -MemberType NoteProperty -value $vdSwitches.Name
-        }
+        # $vdSwitches = get-vdswitch -VMHost $oVMHost
+        # if($vdSwitches) {
+        #     $CustomObject | Add-Member -Name "NetworkSwitch" -MemberType NoteProperty -value $vdSwitches.Name
+        # }
+
+        $CustomObject | Add-Member -Name "Network" -MemberType NoteProperty -value (Get-VirtualPortGroup -vmhost $oVMHost).name
+        $CustomObject | Add-Member -Name "NetworkSwitch" -MemberType NoteProperty -value (Get-Virtualswitch -vmhost $oVMHost).name
 
         return $CustomObject
     }
