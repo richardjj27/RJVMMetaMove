@@ -26,52 +26,52 @@ function Get-RJVMMetaData {
         [string]$VMName
     )
     
-    # Get the virtual machine
-    $VM = Get-VM -Name $VMName
-    $CustomAttrList = Get-CustomAttribute -Server $VM.Uid.Split(":")[0].Split("@")[1]
-    $CustomObject = New-Object -TypeName PSObject
+    $Private:oVMGuest = Get-VM -Name $VMName
+    $Private:VCServer = $oVMGuest.Uid.Split(":")[0].Split("@")[1]
+    $Private:CustomAttrList = Get-CustomAttribute -Server $oVMGuest.Uid.Split(":")[0].Split("@")[1]
+    $Private:outputCustomAttrKey = @()
+    $Private:outputCustomAttrName = @()
+    $Private:outputCustomAttrValue = @()
+    $Private:LocationCodeC = $null
+    $Private:LocationCodeH = $null
+    $Private:LocationCode = $null
+    $Private:CustomAttributes = $oVMGuest.ExtensionData.CustomValue
+    $Private:CustomAttribute = $null
+    $Private:HardDisks = get-HardDisk -VM $oVMGuest
+    $Private:HardDisk = $null
+    $Private:OutputDiskDatastore = @()
+    $Private:OutputObject = New-Object -TypeName PSObject
 
-    If ($VM) {
-        # Create an object to hold the custom attributes
-        $vcserver = $VM.Uid.Split(":")[0].Split("@")[1]
-
-        # --singles
-        $CustomObject | Add-Member -Name "VMName" -MemberType NoteProperty -value $VM.name # yes
-        $CustomObject | Add-Member -Name "Powerstate" -MemberType NoteProperty -value $vm.powerstate # yes
-        $CustomObject | Add-Member -Name "VMVersion" -MemberType NoteProperty -value $VM.extensiondata.config.version # yes
-        $CustomObject | Add-Member -Name "MemoryGB" -MemberType NoteProperty -value $vm.memorygb # yes
-        $CustomObject | Add-Member -Name "CPUCores" -MemberType NoteProperty -value $vm.NumCpu # yes
-        $CustomObject | Add-Member -Name "ToolsVersion" -MemberType NoteProperty -value $vm.extensiondata.guest.toolsversion # yes
-        $CustomObject | Add-Member -Name "GuestOS" -MemberType NoteProperty -value $vm.extensiondata.guest.guestfullname # yes
-        $CustomObject | Add-Member -Name "VMCreated" -MemberType NoteProperty -value $VM.extensiondata.config.createdate # yes
-        $CustomObject | Add-Member -Name "vCenter" -MemberType NoteProperty -value $vcserver # yes
-        $CustomObject | Add-Member -Name "Host" -MemberType NoteProperty -value (get-vmhost -vm $vm).name # yes
-        $CustomObject | Add-Member -Name "HostVersion" -MemberType NoteProperty -value (get-vmhost -vm $vm).version # yes
-        $CustomObject | Add-Member -Name "HostBuild" -MemberType NoteProperty -value (get-vmhost -vm $vm).build # yes
-        $CustomObject | Add-Member -Name "Datacenter" -MemberType NoteProperty -value (Get-Datacenter -Server $vcserver -vm $vm.name) # yes
-        $CustomObject | Add-Member -Name "Cluster" -MemberType NoteProperty -value (Get-Cluster -Server $vcserver -vm $vm.name) # yes
-        $CustomObject | Add-Member -Name "ResourcePool" -MemberType NoteProperty -value (Get-ResourcePool -Server $vcserver -VM $VM) # yes
-        $CustomObject | Add-Member -Name "Folder" -MemberType NoteProperty -value $vm.folder # yes
-        $CustomObject | Add-Member -Name "Notes" -MemberType NoteProperty -value $vm.notes # check
-        $CustomObject | Add-Member -Name "Snapshot" -MemberType NoteProperty -value ($vm | get-snapshot).created # yes
+    If ($oVMGuest) {
+        $OutputObject | Add-Member -Name "VMName" -MemberType NoteProperty -value $oVMGuest.name
+        $OutputObject | Add-Member -Name "Powerstate" -MemberType NoteProperty -value $oVMGuest.powerstate 
+        $OutputObject | Add-Member -Name "VMVersion" -MemberType NoteProperty -value $oVMGuest.extensiondata.config.version 
+        $OutputObject | Add-Member -Name "MemoryGB" -MemberType NoteProperty -value $oVMGuest.memorygb 
+        $OutputObject | Add-Member -Name "CPUCores" -MemberType NoteProperty -value $oVMGuest.NumCpu 
+        $OutputObject | Add-Member -Name "ToolsVersion" -MemberType NoteProperty -value $oVMGuest.extensiondata.guest.toolsversion 
+        $OutputObject | Add-Member -Name "GuestOS" -MemberType NoteProperty -value $oVMGuest.extensiondata.guest.guestfullname 
+        $OutputObject | Add-Member -Name "VMCreated" -MemberType NoteProperty -value $oVMGuest.extensiondata.config.createdate 
+        $OutputObject | Add-Member -Name "vCenter" -MemberType NoteProperty -value $VCServer
+        $OutputObject | Add-Member -Name "Host" -MemberType NoteProperty -value (get-vmhost -vm $oVMGuest).name 
+        $OutputObject | Add-Member -Name "HostVersion" -MemberType NoteProperty -value (get-vmhost -vm $oVMGuest).version 
+        $OutputObject | Add-Member -Name "HostBuild" -MemberType NoteProperty -value (get-vmhost -vm $oVMGuest).build 
+        $OutputObject | Add-Member -Name "Datacenter" -MemberType NoteProperty -value (Get-Datacenter -Server $VCServer -vm $oVMGuest.name) 
+        $OutputObject | Add-Member -Name "Cluster" -MemberType NoteProperty -value (Get-Cluster -Server $VCServer -vm $oVMGuest.name) 
+        $OutputObject | Add-Member -Name "ResourcePool" -MemberType NoteProperty -value (Get-ResourcePool -Server $VCServer -VM $oVMGuest) 
+        $OutputObject | Add-Member -Name "Folder" -MemberType NoteProperty -value $oVMGuest.folder 
+        $OutputObject | Add-Member -Name "Notes" -MemberType NoteProperty -value $oVMGuest.notes
+        $OutputObject | Add-Member -Name "Snapshot" -MemberType NoteProperty -value ($oVMGuest | get-snapshot).created 
         
-        $outputCustomAttrKey = @()
-        $outputCustomAttrName = @()
-        $outputCustomAttrValue = @()
-        $CustomAttributes = $VM.ExtensionData.CustomValue
-
-        foreach ($attribute in $CustomAttributes) {
-            if ($attribute.Value) {
-                $outputCustomAttrKey += $attribute.key
-
-                $outputCustomAttrName += ($CustomAttrList | where-object {$_.Key -eq $Attribute.Key}).Name
-                
-                $outputCustomAttrValue += $attribute.value
+        foreach ($CustomAttribute in $CustomAttributes) {
+            if ($CustomAttribute.Value) {
+                $outputCustomAttrKey += $CustomAttribute.key
+                $outputCustomAttrName += ($CustomAttrList | where-object {$_.Key -eq $CustomAttribute.Key}).Name
+                $outputCustomAttrValue += $CustomAttribute.value
             }
         }
         
-        $LocationCodeC = ((Get-Cluster -vm $vm.name).ExtensionData.customvalue |where-object {$_.key -eq (($CustomAttrList | where-object {$_.Name -eq 'Location ID' -and $_.TargetType -eq 'Cluster'}).key)}).value
-        $LocationCodeH = ((Get-VMHost -vm $vm.name).ExtensionData.customvalue |where-object {$_.key -eq (($CustomAttrList | where-object {$_.Name -eq 'Location ID' -and $_.TargetType -eq 'VMHost'}).key)}).value
+        $LocationCodeC = ((Get-Cluster -vm $oVMGuest.name).ExtensionData.customvalue |where-object {$_.key -eq (($CustomAttrList | where-object {$_.Name -eq 'Location ID' -and $_.TargetType -eq 'Cluster'}).key)}).value
+        $LocationCodeH = ((Get-VMHost -vm $oVMGuest.name).ExtensionData.customvalue |where-object {$_.key -eq (($CustomAttrList | where-object {$_.Name -eq 'Location ID' -and $_.TargetType -eq 'VMHost'}).key)}).value
 
         if ($LocationCodeC){
             $LocationCode = $LocationCodeC
@@ -80,27 +80,24 @@ function Get-RJVMMetaData {
             $LocationCode = $LocationCodeH
         }
 
-        $CustomObject | Add-Member -Name "LocationCode" -MemberType NoteProperty -value $LocationCode
-        $CustomObject | Add-Member -Name "AttributeName" -MemberType NoteProperty -value $outputCustomAttrName
-        $CustomObject | Add-Member -Name "AttributeValue" -MemberType NoteProperty -value $outputCustomAttrValue
-        $CustomObject | Add-Member -Name "AttributeTag" -MemberType NoteProperty -value (Get-TagAssignment -Entity $VM).Tag.Name
+        $OutputObject | Add-Member -Name "LocationCode" -MemberType NoteProperty -value $LocationCode
+        $OutputObject | Add-Member -Name "AttributeName" -MemberType NoteProperty -value $outputCustomAttrName
+        $OutputObject | Add-Member -Name "AttributeValue" -MemberType NoteProperty -value $outputCustomAttrValue
+        $OutputObject | Add-Member -Name "AttributeTag" -MemberType NoteProperty -value (Get-TagAssignment -Entity $oVMGuest).Tag.Name
 
-        $outputDiskDatastore = @()
-        $HardDisks = get-HardDisk -VM $VM
-        
         foreach ($HardDisk in $HardDisks) {
-            $outputDiskDatastore += ($HardDisk.Filename | select-string '(?<=\[)[^]]+(?=\])').matches.value
+            $OutputDiskDatastore += ($HardDisk.Filename | select-string '(?<=\[)[^]]+(?=\])').matches.value
         }
 
-        $CustomObject | Add-Member -Name "Network" -MemberType NoteProperty -value (Get-NetworkAdapter -VM $VM).NetworkName
-        $CustomObject | Add-Member -Name "DiskLayoutStorageFormat" -MemberType NoteProperty -value (get-HardDisk -VM $VM).StorageFormat
-        $CustomObject | Add-Member -Name "DiskLayoutPersistence" -MemberType NoteProperty -value (get-HardDisk -VM $VM).Persistence
-        $CustomObject | Add-Member -Name "DiskLayoutDiskType" -MemberType NoteProperty -value (get-HardDisk -VM $VM).DiskType
-        $CustomObject | Add-Member -Name "DiskDatastore" -MemberType NoteProperty -value $outputDiskDatastore
-        $CustomObject | Add-Member -Name "DiskName" -MemberType NoteProperty -value (get-HardDisk -VM $VM).Name
-        $CustomObject | Add-Member -Name "DiskSizeGB" -MemberType NoteProperty -value (get-HardDisk -VM $VM).CapacityGB
+        $OutputObject | Add-Member -Name "Network" -MemberType NoteProperty -value (Get-NetworkAdapter -VM $oVMGuest).NetworkName
+        $OutputObject | Add-Member -Name "DiskLayoutStorageFormat" -MemberType NoteProperty -value (get-HardDisk -VM $oVMGuest).StorageFormat
+        $OutputObject | Add-Member -Name "DiskLayoutPersistence" -MemberType NoteProperty -value (get-HardDisk -VM $oVMGuest).Persistence
+        $OutputObject | Add-Member -Name "DiskLayoutDiskType" -MemberType NoteProperty -value (get-HardDisk -VM $oVMGuest).DiskType
+        $OutputObject | Add-Member -Name "DiskDatastore" -MemberType NoteProperty -value $outputDiskDatastore
+        $OutputObject | Add-Member -Name "DiskName" -MemberType NoteProperty -value (get-HardDisk -VM $oVMGuest).Name
+        $OutputObject | Add-Member -Name "DiskSizeGB" -MemberType NoteProperty -value (get-HardDisk -VM $oVMGuest).CapacityGB
 
-        return $CustomObject
+        return $OutputObject
     }
 
     else {
@@ -123,35 +120,42 @@ function Get-RJVMHostData {
     
     param (
         [Parameter(Mandatory = $true)]
-        [psobject] $VMHost
+        [string]$VMHost
     )
 
-    $oVMHost = get-vmhost -name $VMHost
-    $CustomAttrList = Get-CustomAttribute -Server $oVMHost.Uid.Split(":")[0].Split("@")[1]
+    $Private:oVMHost = get-vmhost -name $VMHost
+    $Private:VCServer = $oVMHost.Uid.Split(":")[0].Split("@")[1]
+    $Private:CustomAttrList = Get-CustomAttribute -Server $oVMHost.Uid.Split(":")[0].Split("@")[1]
+    $Private:Datastores = get-datastore -vmhost $oVMHost   
+    $Private:Datastore = $null
+    $Private:LocationCodeC = $null
+    $Private:LocationCodeH = $null
+    $Private:LocationCode = $null
+    $Private:OutputObject = New-Object -TypeName PSObject
+
+    write-host $oVMHost
 
     if($oVMHost){
-        $CustomObject = New-Object -TypeName PSObject
-
-        $CustomObject | Add-Member -Name "Name" -MemberType NoteProperty -value $oVMHost.Name
-        $CustomObject | Add-Member -Name "State" -MemberType NoteProperty -value $oVMHost.ConnectionState
-        $CustomObject | Add-Member -Name "vCenter" -MemberType NoteProperty -value ($oVMHost.Uid.Split(":")[0].Split("@")[1])
-        $CustomObject | Add-Member -Name "Cluster" -MemberType NoteProperty -value $oVMHost.parent
-        $CustomObject | Add-Member -Name "Vendor" -MemberType NoteProperty -value $oVMHost.extensiondata.hardware.systeminfo.Vendor
-        $CustomObject | Add-Member -Name "Model" -MemberType NoteProperty -value $oVMHost.extensiondata.hardware.systeminfo.Model
+        $OutputObject | Add-Member -Name "Name" -MemberType NoteProperty -value $oVMHost.Name
+        $OutputObject | Add-Member -Name "State" -MemberType NoteProperty -value $oVMHost.ConnectionState
+        $OutputObject | Add-Member -Name "vCenter" -MemberType NoteProperty -value $VCServer
+        $OutputObject | Add-Member -Name "Cluster" -MemberType NoteProperty -value $oVMHost.parent
+        $OutputObject | Add-Member -Name "Vendor" -MemberType NoteProperty -value $oVMHost.extensiondata.hardware.systeminfo.Vendor
+        $OutputObject | Add-Member -Name "Model" -MemberType NoteProperty -value $oVMHost.extensiondata.hardware.systeminfo.Model
         
         if($oVMHost.ConnectionState -ne "NotResponding"){
-            $CustomObject | Add-Member -Name "SerialNumber" -MemberType NoteProperty -value ($oVMHost|get-esxcli -V2).hardware.platform.get.invoke().enclosureserialnumber
-            $CustomObject | Add-Member -Name "IPMIIP" -MemberType NoteProperty -value ($oVMHost|get-esxcli -V2).hardware.ipmi.bmc.get.invoke().ipv4address
+            $OutputObject | Add-Member -Name "SerialNumber" -MemberType NoteProperty -value ($oVMHost|get-esxcli -V2).hardware.platform.get.invoke().enclosureserialnumber
+            $OutputObject | Add-Member -Name "IPMIIP" -MemberType NoteProperty -value ($oVMHost|get-esxcli -V2).hardware.ipmi.bmc.get.invoke().ipv4address
         }
 
-        $CustomObject | Add-Member -Name "LicenseKey" -MemberType NoteProperty -value $oVMHost.LicenseKey
-        $CustomObject | Add-Member -Name "NumCpu" -MemberType NoteProperty -value $oVMHost.NumCpu
-        $CustomObject | Add-Member -Name "CryptoState" -MemberType NoteProperty -value $oVMHost.CryptoState
-        $CustomObject | Add-Member -Name "Version" -MemberType NoteProperty -value $oVMHost.Version
-        $CustomObject | Add-Member -Name "Build" -MemberType NoteProperty -value $oVMHost.Build
-        $CustomObject | Add-Member -Name "MemoryTotalGB" -MemberType NoteProperty -value ([math]::Round($oVMHost.MemoryTotalGB,0))
-        $CustomObject | Add-Member -Name "MaxEVCMode" -MemberType NoteProperty -value $oVMHost.MaxEVCMode
-        $CustomObject | Add-Member -Name "ProcessorType" -MemberType NoteProperty -value $oVMHost.ProcessorType
+        $OutputObject | Add-Member -Name "LicenseKey" -MemberType NoteProperty -value $oVMHost.LicenseKey
+        $OutputObject | Add-Member -Name "NumCpu" -MemberType NoteProperty -value $oVMHost.NumCpu
+        $OutputObject | Add-Member -Name "CryptoState" -MemberType NoteProperty -value $oVMHost.CryptoState
+        $OutputObject | Add-Member -Name "Version" -MemberType NoteProperty -value $oVMHost.Version
+        $OutputObject | Add-Member -Name "Build" -MemberType NoteProperty -value $oVMHost.Build
+        $OutputObject | Add-Member -Name "MemoryTotalGB" -MemberType NoteProperty -value ([math]::Round($oVMHost.MemoryTotalGB,0))
+        $OutputObject | Add-Member -Name "MaxEVCMode" -MemberType NoteProperty -value $oVMHost.MaxEVCMode
+        $OutputObject | Add-Member -Name "ProcessorType" -MemberType NoteProperty -value $oVMHost.ProcessorType
 
         $LocationCodeC = ((Get-Cluster -vmhost $ovmhost.name).ExtensionData.customvalue |where-object {$_.key -eq (($CustomAttrList | where-object {$_.Name -eq 'Location ID' -and $_.TargetType -eq 'Cluster'}).key)}).value
         $LocationCodeH = ((Get-VMHost -name $ovmhost.name).ExtensionData.customvalue |where-object {$_.key -eq (($CustomAttrList | where-object {$_.Name -eq 'Location ID' -and $_.TargetType -eq 'VMHost'}).key)}).value
@@ -163,35 +167,29 @@ function Get-RJVMHostData {
             $LocationCode = $LocationCodeH
         }
 
-        $CustomObject | Add-Member -Name "LocationCode" -MemberType NoteProperty -value $LocationCode
+        $OutputObject | Add-Member -Name "LocationCode" -MemberType NoteProperty -value $LocationCode
 
-        $Datastores = get-datastore -vmhost $oVMHost
         if($Datastores){
-            $CustomObject | Add-Member -Name "DatastoreName" -MemberType NoteProperty -value $Datastores.Name
-            $CustomObject | Add-Member -Name "DatastoreType" -MemberType NoteProperty -value $Datastores.Type
-            $CustomObject | Add-Member -Name "DatastoreCapacityGB" -MemberType NoteProperty -value $Datastores.CapacityGB
+            $OutputObject | Add-Member -Name "DatastoreName" -MemberType NoteProperty -value $Datastores.Name
+            $OutputObject | Add-Member -Name "DatastoreType" -MemberType NoteProperty -value $Datastores.Type
+            $OutputObject | Add-Member -Name "DatastoreCapacityGB" -MemberType NoteProperty -value $Datastores.CapacityGB
         }
 
         if (($oVMHost.extensiondata.hardware.systeminfo.Model).substring(0,6) -eq 'vxrail'){
-            foreach ($ds in $Datastores){
-                if ($ds.name.substring(0,2) -eq 'DE') {
-                    $CustomObject | Add-Member -Name "PSNT" -MemberType NoteProperty -value $ds.Name.substring(0,14)
+            foreach ($Datastore in $Datastores){
+                if ($Datastore.name.substring(0,2) -eq 'DE') {
+                    $OutputObject | Add-Member -Name "PSNT" -MemberType NoteProperty -value $Datastore.Name.substring(0,14)
                 }
             }
         }
         else {
-            $CustomObject | Add-Member -Name "PSNT" -MemberType NoteProperty -value $null
+            $OutputObject | Add-Member -Name "PSNT" -MemberType NoteProperty -value $null
         }
 
-        # $vdSwitches = get-vdswitch -VMHost $oVMHost
-        # if($vdSwitches) {
-        #     $CustomObject | Add-Member -Name "NetworkSwitch" -MemberType NoteProperty -value $vdSwitches.Name
-        # }
+        $OutputObject | Add-Member -Name "Network" -MemberType NoteProperty -value (Get-VirtualPortGroup -vmhost $oVMHost).name
+        $OutputObject | Add-Member -Name "NetworkSwitch" -MemberType NoteProperty -value (Get-Virtualswitch -vmhost $oVMHost).name
 
-        $CustomObject | Add-Member -Name "Network" -MemberType NoteProperty -value (Get-VirtualPortGroup -vmhost $oVMHost).name
-        $CustomObject | Add-Member -Name "NetworkSwitch" -MemberType NoteProperty -value (Get-Virtualswitch -vmhost $oVMHost).name
-
-        return $CustomObject
+        return $OutputObject
     }
     else {
         Write-Error "VMHost not found."
@@ -222,16 +220,17 @@ function Set-RJVMCustomAttributes {
         [object] $VMMetaData
     )
 
-    $AllCustomAttributeName = $VMMetaData.AttributeName
-    $AllCustomAttributeValue = $VMMetaData.AttributeValue
-    $AllCustomAttributeTag = $VMMetaData.AttributeTag
-
-    $attrcount = 0
+    $Private:AllCustomAttributeName = $VMMetaData.AttributeName
+    $Private:AllCustomAttributeValue = $VMMetaData.AttributeValue
+    $Private:AllCustomAttributeTag = $VMMetaData.AttributeTag
+    $Private:CustomAttributeName 
+    $Private:CustomAttributeTag
+    $Private:AttributeCount = 0
 
     if ($AllCustomAttributeName){
         foreach ($CustomAttributeName in $AllCustomAttributeName){
-            $TargetVM | Set-Annotation -CustomAttribute $CustomAttributeName -Value $AllCustomAttributeValue[$attrcount]
-            $attrcount++
+            $TargetVM | Set-Annotation -CustomAttribute $CustomAttributeName -Value $AllCustomAttributeValue[$AttributeCount]
+            $AttributeCount++
         }
 
     if ($AllCustomAttributeTag){}
