@@ -8,6 +8,7 @@
 # Put some logging in place with error checking.
 # Writing of tag/attributes writes to console.
 # Try to freeze first column in export scripts.
+# Check hosts returns the correct cluster (and null if not in onee)
 
 function Get-RJVMMetaData {
     <#
@@ -133,13 +134,11 @@ function Get-RJVMHostData {
     $Private:LocationCode = $null
     $Private:OutputObject = New-Object -TypeName PSObject
 
-    write-host $oVMHost
-
     if($oVMHost){
         $OutputObject | Add-Member -Name "Name" -MemberType NoteProperty -value $oVMHost.Name
         $OutputObject | Add-Member -Name "State" -MemberType NoteProperty -value $oVMHost.ConnectionState
         $OutputObject | Add-Member -Name "vCenter" -MemberType NoteProperty -value $VCServer
-        $OutputObject | Add-Member -Name "Cluster" -MemberType NoteProperty -value $oVMHost.parent
+        $OutputObject | Add-Member -Name "Cluster" -MemberType NoteProperty -value (Get-Cluster -vmhost $oVMHost) 
         $OutputObject | Add-Member -Name "Vendor" -MemberType NoteProperty -value $oVMHost.extensiondata.hardware.systeminfo.Vendor
         $OutputObject | Add-Member -Name "Model" -MemberType NoteProperty -value $oVMHost.extensiondata.hardware.systeminfo.Model
         
