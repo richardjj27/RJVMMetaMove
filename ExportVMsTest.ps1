@@ -8,7 +8,7 @@ import-Module .\RJVMMetaMove.psm1
 # P = Just one vCenter (for testing)
 # E = Just Europe
 # G = Global
-$runtype = "P"
+$runtype = "G"
 
 $output = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\vmGuestExport [$runtype] $(get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
 
@@ -26,21 +26,24 @@ if($runtype -ne "P"){
     }
 }
 
-$VirtualMachines = get-VM -server $VC1
+$VMGuests = get-VM -server $VC1
+
 if($runtype -ne "P"){
-    $VirtualMachines += get-VM -server $VC2
-    $VirtualMachines += get-VM -server $VC3
+    $VMGuests += get-VM -server $VC2
+    $VMGuests += get-VM -server $VC3
     if($runtype -eq "G"){   
-        $VirtualMachines += get-VM -server $VC4
-        $VirtualMachines += get-VM -server $VC5
-        $VirtualMachines += get-VM -server $VC6
+        $VMGuests += get-VM -server $VC4
+        $VMGuests += get-VM -server $VC5
+        $VMGuests += get-VM -server $VC6
     }
 }
 
+$VMGuests = $VMGuests | sort-object -property VMHost,Name
+
 $count = 0
-foreach ($VirtualMachine in $VirtualMachines){
-    $completed = [math]::Round((($count/$VirtualMachines.count) * 100), 2)
-    $a = get-RJVMMetaData -VMName $VirtualMachine
+foreach ($VMGuest in $VMGuests){
+    $completed = [math]::Round((($count/$VMGuests.count) * 100), 2)
+    $a = get-RJVMMetaData -VMName $VMGuest
     $a | select-object -ExcludeProperty AttributeName,AttributeValue,AttributeTag,NetworkAdaper,DiskName,DiskLayout,DiskSizeGB,DiskDatastore,Snapshot `
     -Property `
         VMName, `

@@ -28,6 +28,7 @@ function Get-RJVMMetaData {
         [Parameter(Mandatory = $true)]
         [string]$VMName
     )
+    
     Begin{}
 
     Process{

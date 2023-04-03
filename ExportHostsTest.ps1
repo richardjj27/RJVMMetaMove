@@ -8,7 +8,7 @@ import-Module .\RJVMMetaMove.psm1
 # P = Just one vCenter (for testing)
 # E = Just Europe
 # G = Global
-$runtype = "P"
+$runtype = "G"
 
 $output = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\vmHostExport [$runtype] $(get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
 
@@ -26,21 +26,25 @@ if($runtype -ne "P"){
     }
 }
 
-$allVMHosts = get-VMHost -server $VC1
+$VMHosts = get-VMHost -server $VC1
+
 if($runtype -ne "P"){
-    $allVMHosts += get-VMHost -server $VC2
-    $allVMHosts += get-VMHost -server $VC3
+    $VMHosts += get-VMHost -server $VC2
+    $VMHosts += get-VMHost -server $VC3
     if($runtype -eq "G"){
-        $allVMHosts += get-VMHost -server $VC4
-        $allVMHosts += get-VMHost -server $VC5
-        $allVMHosts += get-VMHost -server $VC6
+        $VMHosts += get-VMHost -server $VC4
+        $VMHosts += get-VMHost -server $VC5
+        $VMHosts += get-VMHost -server $VC6
     }
 }
 
+$VMHosts = $VMHosts | sort-object -property name
+
 $count = 0
-foreach ($VMHost in $allVMHosts){
-    $completed = [math]::Round((($count/$allVMHosts.count) * 100), 2)
+foreach ($VMHost in $VMHosts){
+    $completed = [math]::Round((($count/$VMHosts.count) * 100), 2)
     $a = Get-RJVMHostData -VMHost $VMHost
+    
     $a | select-object -ExcludeProperty DatastoreName,DatastoreType,DatastoreCapacityGB,Network,NetworkSwitch `
     -Property `
         Name, `
