@@ -77,7 +77,7 @@ foreach ($VirtualMachine in $VirtualMachines){
 
 }
 
-$exportXL = Export-Excel -Path $output -WorksheetName "vmGuestExport" -freezetoprow -autofilter -titlebold -autosize -PassThru
+$exportXL = Export-Excel -Path $output -WorksheetName "vmGuestExport" -FreezeTopRowFirstColumn -autofilter -titlebold -autosize -PassThru
 $exportWS = $exportXL.vmGuestExport
 set-format $exportWS.workbook.worksheets['vmGuestExport'].cells -WrapText
 Close-ExcelPackage $exportXL

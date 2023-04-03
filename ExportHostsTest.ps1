@@ -72,7 +72,7 @@ foreach ($VMHost in $allVMHosts){
     $count++
 }
 
-$exportXL = Export-Excel -Path $output -WorksheetName "vmHostExport" -freezetoprow -autofilter -Titlebold -autosize -PassThru
+$exportXL = Export-Excel -Path $output -WorksheetName "vmHostExport" -FreezeTopRowFirstColumn -autofilter -titlebold -autosize -PassThru
 $exportWS = $exportXL.vmHostExport
 set-format $exportWS.workbook.worksheets['vmHostExport'].cells -WrapText
 Close-ExcelPackage $exportXL
