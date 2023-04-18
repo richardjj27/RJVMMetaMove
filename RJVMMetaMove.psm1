@@ -95,7 +95,7 @@ function Get-RJVMMetaData {
                 $OutputDiskDatastore += ($HardDisk.Filename | select-string '(?<=\[)[^]]+(?=\])').matches.value
             }
 
-            $OutputObject | Add-Member -Name "Network" -MemberType NoteProperty -value (Get-NetworkAdapter -VM $oVMGuest).NetworkName
+            $OutputObject | Add-Member -Name "NetworkAdapter" -MemberType NoteProperty -value (Get-NetworkAdapter -VM $oVMGuest).NetworkName
             $OutputObject | Add-Member -Name "DiskLayoutStorageFormat" -MemberType NoteProperty -value (get-HardDisk -VM $oVMGuest).StorageFormat
             $OutputObject | Add-Member -Name "DiskLayoutPersistence" -MemberType NoteProperty -value (get-HardDisk -VM $oVMGuest).Persistence
             $OutputObject | Add-Member -Name "DiskLayoutDiskType" -MemberType NoteProperty -value (get-HardDisk -VM $oVMGuest).DiskType
