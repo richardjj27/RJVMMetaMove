@@ -102,7 +102,7 @@ function Get-RJVMMetaData {
             $OutputObject | Add-Member -Name "DiskDatastore" -MemberType NoteProperty -value $outputDiskDatastore
             $OutputObject | Add-Member -Name "DiskName" -MemberType NoteProperty -value (get-HardDisk -VM $oVMGuest).Name
             $OutputObject | Add-Member -Name "DiskSizeGB" -MemberType NoteProperty -value (get-HardDisk -VM $oVMGuest).CapacityGB
-            $OutputObject | Add-member -Name "DiskSizeTotalGB" -MemberType NoteProperty -Value (foreach-object {(Get-HardDisk -vm SM-GBCP-VCOR124 | Measure-Object -Property CapacityGB -Sum).sum})
+            $OutputObject | Add-member -Name "DiskSizeTotalGB" -MemberType NoteProperty -Value (foreach-object {(Get-HardDisk -VM $oVMGuest | Measure-Object -Property CapacityGB -Sum).sum})
 
             return $OutputObject
         }
