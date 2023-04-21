@@ -54,7 +54,10 @@ function Get-RJVMMetaData {
             $OutputObject | Add-Member -Name "Powerstate" -MemberType NoteProperty -value $oVMGuest.powerstate 
             $OutputObject | Add-Member -Name "VMVersion" -MemberType NoteProperty -value $oVMGuest.extensiondata.config.version 
             $OutputObject | Add-Member -Name "MemoryGB" -MemberType NoteProperty -value $oVMGuest.memorygb 
-            $OutputObject | Add-Member -Name "CPUCores" -MemberType NoteProperty -value $oVMGuest.NumCpu 
+            $OutputObject | Add-Member -Name "CPUCores" -MemberType NoteProperty -value $oVMGuest.NumCpu
+            $OutputObject | Add-member -Name "TotalDiskSizeGB" -MemberType NoteProperty -Value (foreach-object {(Get-HardDisk -VM $oVMGuest | Measure-Object -Property CapacityGB -Sum).sum})
+            $OutputObject | Add-Member -Name "UsedSpaceGB" -MemberType NoteProperty -value $oVMGuest.UsedSpaceGB
+            $OutputObject | Add-Member -Name "ProvisionedSpaceGB" -MemberType NoteProperty -value $oVMGuest.ProvisionedSpaceGB
             $OutputObject | Add-Member -Name "ToolsVersion" -MemberType NoteProperty -value $oVMGuest.extensiondata.guest.toolsversion 
             $OutputObject | Add-Member -Name "GuestOS" -MemberType NoteProperty -value $oVMGuest.extensiondata.guest.guestfullname 
             $OutputObject | Add-Member -Name "VMCreated" -MemberType NoteProperty -value $oVMGuest.extensiondata.config.createdate 
@@ -92,18 +95,16 @@ function Get-RJVMMetaData {
             $OutputObject | Add-Member -Name "AttributeValue" -MemberType NoteProperty -value $outputCustomAttrValue
             $OutputObject | Add-Member -Name "AttributeTag" -MemberType NoteProperty -value (Get-TagAssignment -Entity $oVMGuest).Tag.Name
 
-            foreach ($HardDisk in $HardDisks) {
-                $OutputDiskDatastore += ($HardDisk.Filename | select-string '(?<=\[)[^]]+(?=\])').matches.value
-            }
-
+            foreach ($HardDisk in $HardDisks) { $OutputDiskDatastore += ($HardDisk.Filename | select-string '(?<=\[)[^]]+(?=\])').matches.value }
+        
             $OutputObject | Add-Member -Name "NetworkAdapter" -MemberType NoteProperty -value (Get-NetworkAdapter -VM $oVMGuest).NetworkName
             $OutputObject | Add-Member -Name "DiskLayoutStorageFormat" -MemberType NoteProperty -value (get-HardDisk -VM $oVMGuest).StorageFormat
             $OutputObject | Add-Member -Name "DiskLayoutPersistence" -MemberType NoteProperty -value (get-HardDisk -VM $oVMGuest).Persistence
             $OutputObject | Add-Member -Name "DiskLayoutDiskType" -MemberType NoteProperty -value (get-HardDisk -VM $oVMGuest).DiskType
             $OutputObject | Add-Member -Name "DiskDatastore" -MemberType NoteProperty -value $outputDiskDatastore
             $OutputObject | Add-Member -Name "DiskName" -MemberType NoteProperty -value (get-HardDisk -VM $oVMGuest).Name
+            $OutputObject | Add-Member -Name "DiskFileName" -MemberType NoteProperty -value (get-HardDisk -VM $oVMGuest).Filename
             $OutputObject | Add-Member -Name "DiskSizeGB" -MemberType NoteProperty -value (get-HardDisk -VM $oVMGuest).CapacityGB
-            $OutputObject | Add-member -Name "DiskSizeTotalGB" -MemberType NoteProperty -Value (foreach-object {(Get-HardDisk -VM $oVMGuest | Measure-Object -Property CapacityGB -Sum).sum})
 
             return $OutputObject
         }
