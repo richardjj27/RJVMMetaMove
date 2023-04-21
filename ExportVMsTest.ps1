@@ -8,7 +8,7 @@ import-Module .\RJVMMetaMove.psm1
 # P = Just one vCenter (for testing)
 # E = Just Europe
 # G = Global
-$runtype = "E"
+$runtype = "G"
 
 $output = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\vmGuestExport [$runtype] $(get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
 
@@ -51,6 +51,7 @@ foreach ($VMGuest in $VMGuests){
         VMVersion, `
         MemoryGB, `
         CPUCores, `
+        DiskSizeTotalGB, `
         ToolsVersion, `
         GuestOS, `
         VMCreated, `
@@ -72,7 +73,6 @@ foreach ($VMGuest in $VMGuests){
         @{N='DiskLayout';E={ if ($_.DiskLayout) { $_.DiskLayout -join("`r")}}}, `
         @{N='DiskSizeGB';E={ if ($_.DiskSizeGB) { $_.DiskSizeGB -join("`r")}}}, `
         @{N='DiskDatastore';E={ if ($_.DiskDatastore) { $_.DiskDatastore -join("`r")}}}, `
-        DiskSizeTotalGB, `
         @{N='Snapshot';E={ if ($_.Snapshot) { $_.Snapshot -join("`r")}}} `
         | export-excel -path $output -WorksheetName "vmGuestExport" -autosize -append
 
