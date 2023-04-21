@@ -10,6 +10,7 @@
 # Try to freeze first column in export scripts. - now using -FreezeTopRowFirstColumn - need to test
 # Rreturns the correct cluster (and null if not in onee) - done but need to test.
 # [CmdletBinding()] - done but need to test.
+# Identify/mark networks which are presented to VMs.
 
 function Get-RJVMMetaData {
     [CmdletBinding()]
