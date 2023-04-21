@@ -41,11 +41,11 @@ $Targetdatastore = "VxRail-Virtual-SAN-Datastore-a86fa29d-0e1d-4b08-9bf1-633d006
 $SourceVM = get-vm -Name $VMtoMove -server $SourceVC
 $VMMetaData = get-RJVMMetaData -VMName $VMtoMove
 
-#### Move the VM
-#### Do a pre-move compatbility check (processor stepping level etc)
+#### Move the VM and convert target to thin (reomove the switch if this is undesired)
+#### Todo: a pre-move compatbility check (processor stepping level etc) or make this a 'try/catch' command.
 $networkAdapter = Get-NetworkAdapter -VM $SourceVM -Server $SourceVC
 $TargetPortGroup = Get-VDPortgroup -Name $TargetPortGroup -Server $TargetVC -vdswitch $TargetVDSwitch
-Move-VM -VM $SourceVM -VMotionPriority High -Destination (Get-VMhost -Server $TargetVC -Name $TargetVMHost) -Datastore (Get-Datastore -Server $targetVC -Name $TargetDatastore) -NetworkAdapter $networkAdapter -PortGroup $TargetPortGroup
+Move-VM -VM $SourceVM -VMotionPriority High -Destination (Get-VMhost -Server $TargetVC -Name $TargetVMHost) -Datastore (Get-Datastore -Server $targetVC -Name $TargetDatastore) -DiskStorageFormat thin -NetworkAdapter $networkAdapter -PortGroup $TargetPortGroup
 
 #### Write the metadata
 $TargetVM = get-vm -Name $VMtoMove -Server $TargetVC
