@@ -7,7 +7,7 @@ import-Module .\RJVMMetaMove.psm1
 
 #Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
 
-$VMtoMove = "SM-TRZE-DTC1411"
+$VMtoMove = "SM-ILTA-VDC67"
 $credential = Get-Credential
 
 #### Migrate the VM
@@ -32,10 +32,10 @@ $credential = Get-Credential
 # 2 to 4
 $SourceVC = Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $credential
 $TargetVC = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
-$TargetVMHost = "su-trze-vxrail01.emea.wdpr.disney.com"
-$TargetPortgroup = "Production_45"
-$TargetVDSwitch = "VMware HCIA Distributed Switch TRZE Ent Tech VxRail a86fa2"
-$Targetdatastore = "VxRail-Virtual-SAN-Datastore-a86fa29d-0e1d-4b08-9bf1-633d0064c41d"
+$TargetVMHost = "su-ilta-vxrail01.emea.wdpr.disney.com"
+$TargetPortgroup = "PROD_ILTA_VLAN5"
+$TargetVDSwitch = "VMware HCIA Distributed Switch ILTA_Ent_Tech_VxRail 3645c3-1"
+$Targetdatastore = "VxRail-Virtual-SAN-Datastore-ILTA"
 
 #### Get the metadata
 $SourceVM = get-vm -Name $VMtoMove -server $SourceVC
@@ -49,6 +49,6 @@ Move-VM -VM $SourceVM -VMotionPriority High -Destination (Get-VMhost -Server $Ta
 
 #### Write the metadata
 $TargetVM = get-vm -Name $VMtoMove -Server $TargetVC
-Set-RJVMCustomAttributes -VMName $VMtoMove -TargetVM $TargetVM -TargetVC $TargetVC -VMMetaData $VMMetaData
+Set-RJVMCustomAttributes -TargetVM $TargetVM -TargetVC $TargetVC -VMMetaData $VMMetaData
 
 Disconnect-VIServer -Server * -Confirm:$false

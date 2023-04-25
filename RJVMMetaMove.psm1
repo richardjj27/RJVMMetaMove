@@ -229,13 +229,11 @@ function Set-RJVMCustomAttributes {
 
     param (
         [Parameter(Mandatory = $true)]
-        [psobject] $VMName,
+        [psobject]$TargetVM,
         [Parameter(Mandatory = $true)]
-        [psobject] $TargetVM,
+        [psobject]$TargetVC,
         [Parameter(Mandatory = $true)]
-        [object] $TargetVC,
-        [Parameter(Mandatory = $true)]
-        [object] $VMMetaData
+        [psobject]$VMMetaData
     )
 
     Begin{}
@@ -251,15 +249,16 @@ function Set-RJVMCustomAttributes {
         if ($AllCustomAttributeName){
             foreach ($CustomAttributeName in $AllCustomAttributeName){
                 $TargetVM | Set-Annotation -CustomAttribute $CustomAttributeName -Value $AllCustomAttributeValue[$AttributeCount]
+                write-host $AllCustomAttributeValue[$AttributeCount]
                 $AttributeCount++
             }
+        }
 
         if ($AllCustomAttributeTag){}
             foreach ($CustomAttributeTag in $AllCustomAttributeTag){
                 New-TagAssignment -Tag $CustomAttributeTag -Entity $TargetVM -Server $TargetVC
             }
         }
-    }
-
+    
     End{}
 }
