@@ -248,15 +248,15 @@ function Set-RJVMCustomAttributes {
 
         if ($AllCustomAttributeName){
             foreach ($CustomAttributeName in $AllCustomAttributeName){
-                $TargetVM | Set-Annotation -CustomAttribute $CustomAttributeName -Value $AllCustomAttributeValue[$AttributeCount]
-                write-host $AllCustomAttributeValue[$AttributeCount]
+                $TargetVM | Set-Annotation -CustomAttribute $CustomAttributeName -Value $AllCustomAttributeValue[$AttributeCount] | Out-Null
+                #write-host $AllCustomAttributeValue[$AttributeCount]
                 $AttributeCount++
             }
         }
 
         if ($AllCustomAttributeTag){
             foreach ($CustomAttributeTag in $AllCustomAttributeTag){
-                New-TagAssignment -Tag $CustomAttributeTag -Entity $TargetVM -Server $TargetVC
+                New-TagAssignment -Tag $CustomAttributeTag -Entity $TargetVM -Server $TargetVC | Out-Null
             }
         }
     }
@@ -281,7 +281,7 @@ function Write-RJLog {
     [ValidateRange(0,3)]
     [int]$Severity=0,
     [Parameter(Position=2)]
-    [string]$LogText="--------------------------------------------------------------"
+    [string]$LogText="--------------------------------------------------------------------------"
     )
 
     Begin{}
@@ -294,6 +294,7 @@ function Write-RJLog {
         if ($Severity -eq 3) {$LogOutput += "CRIT | "}
 
         add-content $LogFile $LogOutput$LogText
+        write-host $LogOutput$LogText
     }
 
     End{}
