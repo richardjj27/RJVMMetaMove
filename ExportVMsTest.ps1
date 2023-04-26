@@ -10,7 +10,7 @@ import-Module .\RJVMMetaMove.psm1
 # G = Global
 $runtype = "E"
 
-$output = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\vmGuestExport [$runtype] $(get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
+$output = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\Exports\vmGuestExport [$runtype] $(get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
 
 # Connect to the vCenter Server
 $credential = Get-Credential
