@@ -32,10 +32,10 @@ $credential = Get-Credential
 # 2 to 4
 $SourceVC = Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $credential
 $TargetVC = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
-$TargetVMHost = "su-ilta-vxrail01.emea.wdpr.disney.com"
-$TargetPortgroup = "PROD_ILTA_VLAN5"
-$TargetVDSwitch = "VMware HCIA Distributed Switch ILTA_Ent_Tech_VxRail 3645c3-1"
-$Targetdatastore = "VxRail-Virtual-SAN-Datastore-ILTA"
+$TargetVMHost = "su-trze-vxrail01.emea.wdpr.disney.com"
+$TargetPortgroup = "Production_45"
+$TargetVDSwitch = "VMware HCIA Distributed Switch TRZE Ent Tech VxRail a86fa2"
+$Targetdatastore = "VxRail-Virtual-SAN-Datastore-a86fa29d-0e1d-4b08-9bf1-633d0064c41d"
 
 #### Get the metadata
 $SourceVM = get-vm -Name $VMtoMove -server $SourceVC
@@ -45,10 +45,10 @@ $VMMetaData = get-RJVMMetaData -VMName $VMtoMove
 #### Todo: a pre-move compatbility check (processor stepping level etc) or make this a 'try/catch' command.
 $networkAdapter = Get-NetworkAdapter -VM $SourceVM -Server $SourceVC
 $TargetPortGroup = Get-VDPortgroup -Name $TargetPortGroup -Server $TargetVC -vdswitch $TargetVDSwitch
-Move-VM -VM $SourceVM -VMotionPriority High -Destination (Get-VMhost -Server $TargetVC -Name $TargetVMHost) -Datastore (Get-Datastore -Server $targetVC -Name $TargetDatastore) -DiskStorageFormat thin -NetworkAdapter $networkAdapter -PortGroup $TargetPortGroup
+Move-VM -VM $SourceVM -VMotionPriority High -Destination (Get-VMhost -Server $TargetVC -Name $TargetVMHost) -Datastore (Get-Datastore -Server $targetVC -Name $TargetDatastore) -DiskStorageFormat T -NetworkAdapter $networkAdapter -PortGroup $TargetPortGroup
 
 #### Write the metadata
 $TargetVM = get-vm -Name $VMtoMove -Server $TargetVC
-Set-RJVMCustomAttributes -TargetVM $TargetVM -TargetVC $TargetVC -VMMetaData $VMMetaData
+Set-RJVMCustomAttributes -VMName $VMtoMove -TargetVM $TargetVM -TargetVC $TargetVC -VMMetaData $VMMetaData
 
 Disconnect-VIServer -Server * -Confirm:$false
