@@ -259,7 +259,7 @@ function Set-RJVMCustomAttributes {
                 New-TagAssignment -Tag $CustomAttributeTag -Entity $TargetVM -Server $TargetVC
             }
         }
-    
+    }
     End{}
 }
 
@@ -267,35 +267,33 @@ function Write-RJLog {
     [CmdletBinding()]
     <#
     .SYNOPSIS
-        A function to write a timestamped log entry to a specified file object.
+        A function to write a timestamped log entry to a specified file.
     .DESCRIPTION
         More of what it does.
     .EXAMPLE
         Write-RJLog -LogFile <Fileobject> -Severity <0..3> -LogText <Log Text>
     #>
 
-    param (
-    [Parameter(Mandatory = $true,Position=0)]
+    param(
+    [Parameter(Mandatory=$true,Position=0)]
     [psobject]$LogFile,
     [Parameter(Position=1)]
     [ValidateRange(0,3)]
     [int]$Severity=0,
-    [Parameter(Position=1)]
-    [text]$LogText
+    [Parameter(Position=2)]
+    [string]$LogText="--------------------------------------------------------------"
     )
 
     Begin{}
 
     Process{
         $Private:LogOutput = (get-date -format "yyyy/MM/dd HH:mm:ss | ")
-        if ($Severity = 0) {$LogOutput += "INFO | "}
-        if ($Severity = 1) {$LogOutput += "WARN | "}
-        if ($Severity = 2) {$LogOutput += "ERR  | "}
-        if ($Severity = 3) {$LogOutput += "CRIT | "}
+        if ($Severity -eq 0) {$LogOutput += "INFO | "}
+        if ($Severity -eq 1) {$LogOutput += "WARN | "}
+        if ($Severity -eq 2) {$LogOutput += "ERR  | "}
+        if ($Severity -eq 3) {$LogOutput += "CRIT | "}
 
-        $LogOuput += $LogText
-        
-        write-host $LogOutput
+        add-content $LogFile $LogOutput$LogText
     }
 
     End{}

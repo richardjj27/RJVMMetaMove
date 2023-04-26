@@ -7,6 +7,8 @@ import-Module .\RJVMMetaMove.psm1
 
 #Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
 
+$logfile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\richard\vCenterExport\logs\log$(get-date -Format "yyyy-MM-dd_HH.mm").txt"
+
 $VMtoMove = "SM-ILTA-VDC67"
 $credential = Get-Credential
 
@@ -39,16 +41,38 @@ $Targetdatastore = "VxRail-Virtual-SAN-Datastore-a86fa29d-0e1d-4b08-9bf1-633d006
 
 #### Get the metadata
 $SourceVM = get-vm -Name $VMtoMove -server $SourceVC
+Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Collect data for $SourceVM"
 $VMMetaData = get-RJVMMetaData -VMName $VMtoMove
 
 #### Move the VM and convert target to thin (reomove the switch if this is undesired)
 #### Todo: a pre-move compatbility check (processor stepping level etc) or make this a 'try/catch' command.
 $networkAdapter = Get-NetworkAdapter -VM $SourceVM -Server $SourceVC
 $TargetPortGroup = Get-VDPortgroup -Name $TargetPortGroup -Server $TargetVC -vdswitch $TargetVDSwitch
+Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Start VM migration for $SourceVM to $TargetVMHost"
 Move-VM -VM $SourceVM -VMotionPriority High -Destination (Get-VMhost -Server $TargetVC -Name $TargetVMHost) -Datastore (Get-Datastore -Server $targetVC -Name $TargetDatastore) -DiskStorageFormat T -NetworkAdapter $networkAdapter -PortGroup $TargetPortGroup
+
 
 #### Write the metadata
 $TargetVM = get-vm -Name $VMtoMove -Server $TargetVC
 Set-RJVMCustomAttributes -VMName $VMtoMove -TargetVM $TargetVM -TargetVC $TargetVC -VMMetaData $VMMetaData
+
+$VMTargetMetaData = get-RJVMMetaData -VMName $VMtoMove
+
+if ($VMMetaData.Host -eq $VMTargetMetaData.Host) {
+    Write-RJLog -LogFile $Logfile -Severity 2 -LogText "Migration of $SourceVM failed."
+}
+else {
+    Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of $SourceVM to succeeded."
+    Set-RJVMCustomAttributes -VMName $VMtoMove -TargetVM $TargetVM -TargetVC $TargetVC -VMMetaData $VMMetaData
+    $VMTargetMetaData = get-RJVMMetaData -VMName $VMtoMove
+    if ($VMMetaData.AttributeName -eq $VMTargetMetaData.AttributeName `
+        -and $VMMetaData.AttributeValue -eq $VMTargetMetaData.AttributeValue `
+        -and $VMMetaData.AttributeTag -eq $VMTargetMetaData.AttributeTab) {
+        Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of tags and attributes for $SourceVM succeeded."
+    }
+    else {
+        Write-RJLog -LogFile $Logfile -Severity 2 -LogText "Migration of tags and attributes for $SourceVM failed."
+    }
+}
 
 Disconnect-VIServer -Server * -Confirm:$false
