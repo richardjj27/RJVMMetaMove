@@ -8,8 +8,6 @@ import-Module .\RJVMMetaMove.psm1
 #Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
 
 $logfile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\richard\vCenterExport\logs\log$(get-date -Format "yyyy-MM-dd_HH.mm").txt"
-
-$VMtoMove = "SM-ILTA-VDC67"
 $credential = Get-Credential
 
 #### Migrate the VM
@@ -23,21 +21,41 @@ $credential = Get-Credential
 # get-virtualportgroup -vmhost $myvmhost | ft -autosize -property name
 # get-vdswitch -VMHost $myvmhost | ft -autosize -property name
 
-# # 2 to 4
-# $SourceVC = Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $credential
-# $TargetVC = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
-# $TargetVMHost = "su-gbeq-vxrail01.emea.wdpr.disney.com"
-# $TargetPortgroup = "PROD_DataCentre2-386"
-# $TargetVDSwitch = "VMware HCIA Distributed Switch GBEQ Ent Tech VxRail v7 1c4bfa"
-# $Targetdatastore = "VxRail-Virtual-SAN-Datastore-1c4bfaa4-60d6-4ddf-87df-419f47e931a6"
-
 # 2 to 4
+$VMtoMove = "TestVMRename"
 $SourceVC = Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $credential
 $TargetVC = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
-$TargetVMHost = "su-trze-vxrail01.emea.wdpr.disney.com"
-$TargetPortgroup = "Production_45"
-$TargetVDSwitch = "VMware HCIA Distributed Switch TRZE Ent Tech VxRail a86fa2"
-$Targetdatastore = "VxRail-Virtual-SAN-Datastore-a86fa29d-0e1d-4b08-9bf1-633d0064c41d"
+$TargetVMHost = "su-gbeq-vxrail01.emea.wdpr.disney.com"
+$TargetPortgroup = "PROD_DataCentre2-386"
+$TargetVDSwitch = "VMware HCIA Distributed Switch GBEQ Ent Tech VxRail v7 1c4bfa"
+$Targetdatastore = "VxRail-Virtual-SAN-Datastore-1c4bfaa4-60d6-4ddf-87df-419f47e931a6"
+
+# # 4 to 2
+# $VMtoMove = "TestVMRename"
+# $SourceVC = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
+# $TargetVC = Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $credential
+# $TargetVMHost = "su-gbeq-vxrail50.emea.wdpr.disney.com"
+# $TargetPortgroup = "PROD_DataCentre2-386"
+# $TargetVDSwitch = "VMware HCIA Distributed Switch GBEQ Ent Tech VxRail 82d1d4"
+# $Targetdatastore = "VxRail-Virtual-SAN-Datastore-82d1d453-d153-4a50-8ec2-8fa5a819b4a9"
+
+# # ILTA Move
+# $VMtoMove = "SM-ILTA-VDC67"
+# $SourceVC = Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $credential
+# $TargetVC = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
+# $TargetVMHost = "su-ilta-vxrail01.emea.wdpr.disney.com"
+# $TargetPortgroup = "PROD_ILTA_VLAN5"
+# $TargetVDSwitch = "VMware HCIA Distributed Switch ILTA_Ent_Tech_VxRail 3645c3-1"
+# $Targetdatastore = "VxRail-Virtual-SAN-Datastore-ILTA"
+
+# # TRZE Move
+# $VMtoMove = "SM-TRZE-DTC1411"
+# $SourceVC = Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $credential
+# $TargetVC = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
+# $TargetVMHost = "su-trze-vxrail01.emea.wdpr.disney.com"
+# $TargetPortgroup = "Production_45"
+# $TargetVDSwitch = "VMware HCIA Distributed Switch TRZE Ent Tech VxRail a86fa2"
+# $Targetdatastore = "VxRail-Virtual-SAN-Datastore-a86fa29d-0e1d-4b08-9bf1-633d0064c41d"
 
 #### Get the metadata
 $SourceVM = get-vm -Name $VMtoMove -server $SourceVC
@@ -49,12 +67,12 @@ $VMMetaData = get-RJVMMetaData -VMName $VMtoMove
 $networkAdapter = Get-NetworkAdapter -VM $SourceVM -Server $SourceVC
 $TargetPortGroup = Get-VDPortgroup -Name $TargetPortGroup -Server $TargetVC -vdswitch $TargetVDSwitch
 Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Start VM migration for $SourceVM to $TargetVMHost"
-Move-VM -VM $SourceVM -VMotionPriority High -Destination (Get-VMhost -Server $TargetVC -Name $TargetVMHost) -Datastore (Get-Datastore -Server $targetVC -Name $TargetDatastore) -DiskStorageFormat T -NetworkAdapter $networkAdapter -PortGroup $TargetPortGroup
+Move-VM -VM $SourceVM -VMotionPriority High -Destination (Get-VMhost -Server $TargetVC -Name $TargetVMHost) -Datastore (Get-Datastore -Server $targetVC -Name $TargetDatastore) -DiskStorageFormat Thin -NetworkAdapter $networkAdapter -PortGroup $TargetPortGroup
 
 
 #### Write the metadata
 $TargetVM = get-vm -Name $VMtoMove -Server $TargetVC
-Set-RJVMCustomAttributes -VMName $VMtoMove -TargetVM $TargetVM -TargetVC $TargetVC -VMMetaData $VMMetaData
+#Set-RJVMCustomAttributes -VMName $VMtoMove -TargetVM $TargetVM -TargetVC $TargetVC -VMMetaData $VMMetaData
 
 $VMTargetMetaData = get-RJVMMetaData -VMName $VMtoMove
 
@@ -62,17 +80,26 @@ if ($VMMetaData.Host -eq $VMTargetMetaData.Host) {
     Write-RJLog -LogFile $Logfile -Severity 2 -LogText "Migration of $SourceVM failed."
 }
 else {
-    Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of $SourceVM to succeeded."
-    Set-RJVMCustomAttributes -VMName $VMtoMove -TargetVM $TargetVM -TargetVC $TargetVC -VMMetaData $VMMetaData
+    Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of $SourceVM succeeded."
+    Set-RJVMCustomAttributes -TargetVM $TargetVM -TargetVC $TargetVC -VMMetaData $VMMetaData
     $VMTargetMetaData = get-RJVMMetaData -VMName $VMtoMove
-    if ($VMMetaData.AttributeName -eq $VMTargetMetaData.AttributeName `
-        -and $VMMetaData.AttributeValue -eq $VMTargetMetaData.AttributeValue `
-        -and $VMMetaData.AttributeTag -eq $VMTargetMetaData.AttributeTab) {
-        Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of tags and attributes for $SourceVM succeeded."
-    }
-    else {
-        Write-RJLog -LogFile $Logfile -Severity 2 -LogText "Migration of tags and attributes for $SourceVM failed."
-    }
+    if ((Compare-Object -ReferenceObject @($VMMetaData.AttributeName | Select-Object) -DifferenceObject @($VMTargetMetaData.AttributeName | Select-Object)).count -eq 0)
+        {Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of attribute names for $SourceVM succeeded."} 
+        else
+        {Write-RJLog -LogFile $Logfile -Severity 2 -LogText "Migration of attribute names for $SourceVM failed."}
+    if ((Compare-Object -ReferenceObject @($VMMetaData.AttributeValue | Select-Object) -DifferenceObject @($VMTargetMetaData.AttributeValue | Select-Object)).count -eq 0)
+        {Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of attribute values for $SourceVM succeeded."}
+        else
+        {Write-RJLog -LogFile $Logfile -Severity 2 -LogText "Migration of attribute values for $SourceVM failed."}
+    if ((Compare-Object -ReferenceObject @($VMMetaData.AttributeTag | Select-Object) -DifferenceObject @($VMTargetMetaData.AttributeTag | Select-Object)).count -eq 0)
+        {Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of tags for $SourceVM succeeded."}
+        else
+        {Write-RJLog -LogFile $Logfile -Severity 2 -LogText "Migration of tags for $SourceVM failed."}
 }
 
+write-rjlog -LogFile $LogFile 
+
 Disconnect-VIServer -Server * -Confirm:$false
+
+
+
