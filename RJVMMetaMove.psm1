@@ -1,16 +1,17 @@
 # Todo:
 # Create module manifest (.psd1)
-# Learn how to keep function parameters private (or not) and whether to pass an object or text is the right thing to do.
 # Try to find a way of getting some kind of CPU compatibility information.
 # Need to tidy up variable names and follow some kind of convention and scoping.
+# Learn how to keep function parameters private (or not) and whether to pass an object or text is the right thing to do.
 #   https://stackoverflow.com/questions/27847809/in-powershell-how-to-set-variable-values-within-a-function-and-have-that-value
 # Add module version/ing.
-# Put some logging in place with error checking.
 # Writing of tag/attributes writes to console.
-# Try to freeze first column in export scripts. - now using -FreezeTopRowFirstColumn - need to test
-# Rreturns the correct cluster (and null if not in onee) - done but need to test.
-# [CmdletBinding()] - done but need to test.
 # Identify/mark networks which are presented to VMs.
+# Loop through list with all appropriate attributes piped.
+# More logging.
+# Give output better column headings making it clear where a value is a raw VM native value or a derived one.
+# Output each VMDK size + this total.  Capacity has many contributing factors so is worth reporting from many different points of view.
+# Export a notes tab in the results explaining each column.
 
 function Get-RJVMMetaData {
     [CmdletBinding()]
@@ -68,7 +69,7 @@ function Get-RJVMMetaData {
             $OutputObject | Add-Member -Name "Datacenter" -MemberType NoteProperty -value (Get-Datacenter -Server $VCServer -vm $oVMGuest.name) 
             $OutputObject | Add-Member -Name "Cluster" -MemberType NoteProperty -value (Get-Cluster -Server $VCServer -vm $oVMGuest.name) 
             $OutputObject | Add-Member -Name "ResourcePool" -MemberType NoteProperty -value (Get-ResourcePool -Server $VCServer -VM $oVMGuest) 
-            $OutputObject | Add-Member -Name "Folder" -MemberType NoteProperty -value $oVMGuest.folder 
+            $OutputObject | Add-Member -Name "Folder" -MemberType NoteProperty -value $oVMGuest.folder
             $OutputObject | Add-Member -Name "Notes" -MemberType NoteProperty -value $oVMGuest.notes
             $OutputObject | Add-Member -Name "Snapshot" -MemberType NoteProperty -value ($oVMGuest | get-snapshot).created 
             
