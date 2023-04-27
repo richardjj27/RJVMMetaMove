@@ -5,8 +5,6 @@ import-Module -Name vmware.powercli
 remove-module RJVMMetaMove
 import-Module .\RJVMMetaMove.psm1
 
-#Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
-
 $logfile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\richard\vCenterExport\Logs\VM Migration Log $(get-date -Format "yyyy-MM-dd_HH.mm").txt"
 $VMListFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\richard\vCenterExport\VMList.txt"
 $credential = Get-Credential
@@ -50,19 +48,18 @@ $MovingVMs = Get-Content ($VMListFile)
 ForEach($MovingVM in $MovingVMs) {
 
     #### Get the metadata
-    $SourceVM = Get-VM -Name $MovingVM #-server $SourceVC
+    $SourceVM = Get-VM -Name $MovingVM
     Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Collect data for $SourceVM."
     $VMMetaData = get-RJVMMetaData -VMName $SourceVM
 
-    #### Move the VM and convert target to thin (remove the switch if this is undesired)
     #### Todo: a pre-move compatbility check (processor stepping level etc) or make this a 'try/catch' command.
     $TargetPortGroup = Get-VirtualPortGroup -VMHost $TargetVMHost -Name $TargetNetwork
     Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Start VM migration for $SourceVM to $TargetVMHost."
     Move-VM -VM $SourceVM -VMotionPriority High -Destination (Get-VMhost -Name $TargetVMHost) -Datastore (Get-Datastore -Name $TargetDatastore) -DiskStorageFormat Thin -PortGroup $TargetPortGroup | Out-Null
 
     #### Write the metadata
-    $TargetVM = get-vm -Name $SourceVM #-Server $TargetVC
-    $TargetVC = (get-vm -name $SourceVM).Uid.Split(":")[0].Split("@")[1]
+    $TargetVM = Get-VM -Name $SourceVM
+    $TargetVC = $TargetVM.Uid.Split(":")[0].Split("@")[1]
 
     $VMTargetMetaData = get-RJVMMetaData -VMName $SourceVM
 

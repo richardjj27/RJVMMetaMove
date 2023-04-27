@@ -1,4 +1,4 @@
-# Script to test the export-vmmmetadata function by exporting all VMs.
+# Script to Export all the VM Hosts in multiple vCenter Servers to a native Excel file.
 
 import-Module -Name vmware.powercli
 import-Module -Name ImportExcel
