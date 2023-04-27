@@ -9,16 +9,6 @@ $logfile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\richard\vCenterExport\Log
 $VMListFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\richard\vCenterExport\VMList.txt"
 $credential = Get-Credential
 
-#### Migrate the VM
-# may need to specify folders and other data.
-# may need to create some logic of source and desintation networks/portgroups/datastores
-# code to find datastore, portgroup and VDSwitch
-# Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" 
-# $myvmhost = get-vmhost -name "su-gbcp-vxrail01.emea.wdpr.disney.com"
-# get-datastore -vmhost $myvmhost | ft -autosize -property name,capacitygb
-# get-virtualportgroup -vmhost $myvmhost | ft -autosize -property name
-# get-vdswitch -VMHost $myvmhost | ft -autosize -property name
-
 Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $credential | Out-Null
 Connect-VIServer -Server "su-gbcp-vvcsa03.emea.wdpr.disney.com" -Credential $credential | Out-Null
 Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential | Out-Null
@@ -87,8 +77,4 @@ ForEach($MovingVM in $MovingVMs) {
     Write-RJLog -LogFile $LogFile 
 }
 
-
 Disconnect-VIServer -Server * -Confirm:$false
-
-
-

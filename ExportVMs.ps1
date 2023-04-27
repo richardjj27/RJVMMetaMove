@@ -12,7 +12,6 @@ $runtype = "E"
 
 $output = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\Exports\vmGuestExport [$runtype] $(get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
 
-# Connect to the vCenter Server
 $credential = Get-Credential
 
 $VC1 = Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $credential
@@ -43,8 +42,7 @@ $VMGuests = $VMGuests | sort-object -property VMHost,Name
 $count = 0
 foreach ($VMGuest in $VMGuests){
     $completed = [math]::Round((($count/$VMGuests.count) * 100), 2)
-    $a = get-RJVMMetaData -VMName $VMGuest
-    $a | select-object -ExcludeProperty AttributeName,AttributeValue,AttributeTag,NetworkAdaper,DiskName,DiskStoragePolicy,DiskID,DiskFileName,DiskLayoutStorageFormat,DiskLayoutPersistence,DiskLayoutDiskType,DiskSizeGB,DiskDatastore,Snapshot `
+    Get-RJVMMetaData -VMName $VMGuest | select-object -ExcludeProperty AttributeName,AttributeValue,AttributeTag,NetworkAdaper,DiskName,DiskStoragePolicy,DiskID,DiskFileName,DiskLayoutStorageFormat,DiskLayoutPersistence,DiskLayoutDiskType,DiskSizeGB,DiskDatastore,Snapshot `
     -Property `
         VMName, `
         VMID, `
@@ -77,7 +75,6 @@ foreach ($VMGuest in $VMGuests){
         @{N='DiskFileName';E={ if ($_.DiskFileName) { $_.DiskFileName -join("`r")}}}, `
         @{N='DiskStoragePolicy';E={ if ($_.DiskStoragePolicy) { $_.DiskStoragePolicy -join("`r")}}}, `
         @{N='DiskLayoutStorageFormat';E={ if ($_.DiskLayoutStorageFormat) { $_.DiskLayoutStorageFormat -join("`r")}}}, `
-        #@{N='DiskLayoutPersistence';E={ if ($_.DiskLayoutPersistence) { $_.DiskLayoutPersistence -join("`r")}}}, `
         @{N='DiskLayoutPersistence';E={ $_.DiskLayoutPersistence -join("`r")}}, `
         @{N='DiskLayoutDiskType';E={ if ($_.DiskLayoutDiskType) { $_.DiskLayoutDiskType -join("`r")}}}, `
         @{N='DiskSizeGB';E={ if ($_.DiskSizeGB) { $_.DiskSizeGB -join("`r")}}}, `
@@ -87,7 +84,6 @@ foreach ($VMGuest in $VMGuests){
 
     Write-Progress -Activity "Scan Progress:" -Status "$completed% completed." -PercentComplete $completed
     $count++
-
 }
 
 $exportXL = Export-Excel -Path $output -WorksheetName "vmGuestExport" -FreezeTopRowFirstColumn -autofilter -titlebold -autosize -PassThru

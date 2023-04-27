@@ -12,7 +12,6 @@ $runtype = "E"
 
 $output = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\Exports\vmHostExport [$runtype] $(get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
 
-# Connect to the vCenter Server
 $credential = Get-Credential
 
 $VC1 = Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $credential
@@ -43,9 +42,7 @@ $VMHosts = $VMHosts | sort-object -property name
 $count = 0
 foreach ($VMHost in $VMHosts){
     $completed = [math]::Round((($count/$VMHosts.count) * 100), 2)
-    $a = Get-RJVMHostData -VMHost $VMHost
-    
-    $a | select-object -ExcludeProperty DatastoreName,DatastoreType,DatastoreCapacityGB,Network,NetworkSwitch `
+    Get-RJVMHostData -VMHost $VMHost | select-object -ExcludeProperty DatastoreName,DatastoreType,DatastoreCapacityGB,Network,NetworkSwitch `
     -Property `
         Name, `
         State, `
