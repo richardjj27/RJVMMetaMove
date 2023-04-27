@@ -105,8 +105,8 @@ function Get-RJVMMetaData {
             $OutputObject | Add-Member -Name "DiskLayoutDiskType" -MemberType NoteProperty -value (get-HardDisk -VM $oVMGuest).DiskType
             $OutputObject | Add-Member -Name "DiskDatastore" -MemberType NoteProperty -value $outputDiskDatastore
             $OutputObject | Add-Member -Name "DiskName" -MemberType NoteProperty -value (get-HardDisk -VM $oVMGuest).Name
-            $OutputObject | Add-Member -Name "DiskID" -MemberType NoteProperty -value (Get-SpbmEntityConfiguration -HardDisk (Get-HardDisk -VM $vm)).id
-            $OutputObject | Add-Member -Name "DiskStoragePolicy" -MemberType NoteProperty -value (Get-SpbmEntityConfiguration -HardDisk (Get-HardDisk -VM $vm)).storagepolicy.name
+            $OutputObject | Add-Member -Name "DiskID" -MemberType NoteProperty -value (Get-SpbmEntityConfiguration -HardDisk (Get-HardDisk -VM $oVMGuest)).id
+            $OutputObject | Add-Member -Name "DiskStoragePolicy" -MemberType NoteProperty -value (Get-SpbmEntityConfiguration -HardDisk (Get-HardDisk -VM $oVMGuest)).storagepolicy.name
             $OutputObject | Add-Member -Name "DiskFileName" -MemberType NoteProperty -value (get-HardDisk -VM $oVMGuest).Filename
             $OutputObject | Add-Member -Name "DiskSizeGB" -MemberType NoteProperty -value (get-HardDisk -VM $oVMGuest).CapacityGB
 
