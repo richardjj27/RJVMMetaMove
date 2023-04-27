@@ -21,58 +21,48 @@ $credential = Get-Credential
 # get-virtualportgroup -vmhost $myvmhost | ft -autosize -property name
 # get-vdswitch -VMHost $myvmhost | ft -autosize -property name
 
+Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $credential | Out-Null
+Connect-VIServer -Server "su-gbcp-vvcsa03.emea.wdpr.disney.com" -Credential $credential | Out-Null
+Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential | Out-Null
+
 # 2 to 4
-$SourceVC = Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $credential
-$TargetVC = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
 $TargetVMHost = "su-gbeq-vxrail01.emea.wdpr.disney.com"
-$TargetPortgroup = "PROD_DataCentre2-386"
-$TargetVDSwitch = "VMware HCIA Distributed Switch GBEQ Ent Tech VxRail v7 1c4bfa"
-$Targetdatastore = "VxRail-Virtual-SAN-Datastore-1c4bfaa4-60d6-4ddf-87df-419f47e931a6"
+$TargetNetwork = "OnAir-GBEQ-86"
+$TargetDatastore = "VxRail-Virtual-SAN-Datastore-1c4bfaa4-60d6-4ddf-87df-419f47e931a6"
 
 # # 4 to 2
-# $SourceVC = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
-# $TargetVC = Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $credential
 # $TargetVMHost = "su-gbeq-vxrail50.emea.wdpr.disney.com"
-# $TargetPortgroup = "PROD_DataCentre2-386"
-# $TargetVDSwitch = "VMware HCIA Distributed Switch GBEQ Ent Tech VxRail 82d1d4"
-# $Targetdatastore = "VxRail-Virtual-SAN-Datastore-82d1d453-d153-4a50-8ec2-8fa5a819b4a9"
+# $TargetNetwork = "PROD_DataCentre2-386"
+# $TargetDatastore = "VxRail-Virtual-SAN-Datastore-82d1d453-d153-4a50-8ec2-8fa5a819b4a9"
 
 # # ILTA Move
-# $SourceVC = Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $credential
-# $TargetVC = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
 # $TargetVMHost = "su-ilta-vxrail01.emea.wdpr.disney.com"
-# $TargetPortgroup = "PROD_ILTA_VLAN5"
-# $TargetVDSwitch = "VMware HCIA Distributed Switch ILTA_Ent_Tech_VxRail 3645c3-1"
-# $Targetdatastore = "VxRail-Virtual-SAN-Datastore-ILTA"
+# $TargetNetwork = "PROD_ILTA_VLAN5"
+# $TargetDatastore = "VxRail-Virtual-SAN-Datastore-ILTA"
 
 # # TRZE Move
-# $SourceVC = Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $credential
-# $TargetVC = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
 # $TargetVMHost = "su-trze-vxrail01.emea.wdpr.disney.com"
-# $TargetPortgroup = "Production_45"
-# $TargetVDSwitch = "VMware HCIA Distributed Switch TRZE Ent Tech VxRail a86fa2"
-# $Targetdatastore = "VxRail-Virtual-SAN-Datastore-a86fa29d-0e1d-4b08-9bf1-633d0064c41d"
+# $TargetNetwork = "Production_45"
+# $TargetDatastore = "VxRail-Virtual-SAN-Datastore-a86fa29d-0e1d-4b08-9bf1-633d0064c41d"
 
 $MovingVMs = Get-Content ($VMListFile)
 
 ForEach($MovingVM in $MovingVMs) {
 
     #### Get the metadata
-    $SourceVM = Get-VM -Name $MovingVM -server $SourceVC
+    $SourceVM = Get-VM -Name $MovingVM #-server $SourceVC
     Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Collect data for $SourceVM."
     $VMMetaData = get-RJVMMetaData -VMName $SourceVM
 
     #### Move the VM and convert target to thin (remove the switch if this is undesired)
     #### Todo: a pre-move compatbility check (processor stepping level etc) or make this a 'try/catch' command.
-    $networkAdapter = Get-NetworkAdapter -VM $SourceVM -Server $SourceVC
-    $TargetPortGroup = Get-VDPortgroup -Name $TargetPortGroup -Server $TargetVC -vdswitch $TargetVDSwitch
+    $TargetPortGroup = Get-VirtualPortGroup -VMHost $TargetVMHost -Name $TargetNetwork
     Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Start VM migration for $SourceVM to $TargetVMHost."
-    Move-VM -VM $SourceVM -VMotionPriority High -Destination (Get-VMhost -Server $TargetVC -Name $TargetVMHost) -Datastore (Get-Datastore -Server $targetVC -Name $TargetDatastore) -DiskStorageFormat Thin -NetworkAdapter $networkAdapter -PortGroup $TargetPortGroup | Out-Null
-
+    Move-VM -VM $SourceVM -VMotionPriority High -Destination (Get-VMhost -Name $TargetVMHost) -Datastore (Get-Datastore -Name $TargetDatastore) -DiskStorageFormat Thin -PortGroup $TargetPortGroup | Out-Null
 
     #### Write the metadata
-    $TargetVM = get-vm -Name $SourceVM -Server $TargetVC
-    #Set-RJVMCustomAttributes -VMName $SourceVM -TargetVM $TargetVM -TargetVC $TargetVC -VMMetaData $VMMetaData
+    $TargetVM = get-vm -Name $SourceVM #-Server $TargetVC
+    $TargetVC = (get-vm -name $SourceVM).Uid.Split(":")[0].Split("@")[1]
 
     $VMTargetMetaData = get-RJVMMetaData -VMName $SourceVM
 
@@ -81,7 +71,7 @@ ForEach($MovingVM in $MovingVMs) {
     }
     else {
         Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of $SourceVM succeeded."
-        Set-RJVMCustomAttributes -TargetVM $TargetVM -TargetVC $TargetVC -VMMetaData $VMMetaData
+        Set-RJVMCustomAttributes -TargetVM $TargetVM -VMMetaData $VMMetaData -TargetVC $TargetVC 
         $VMTargetMetaData = get-RJVMMetaData -VMName $SourceVM
         if ((Compare-Object -ReferenceObject @($VMMetaData.AttributeName | Select-Object) -DifferenceObject @($VMTargetMetaData.AttributeName | Select-Object)).count -eq 0)
             {Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of attribute names for $SourceVM succeeded."} 

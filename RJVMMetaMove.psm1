@@ -253,7 +253,6 @@ function Set-RJVMCustomAttributes {
         if ($AllCustomAttributeName){
             foreach ($CustomAttributeName in $AllCustomAttributeName){
                 $TargetVM | Set-Annotation -CustomAttribute $CustomAttributeName -Value $AllCustomAttributeValue[$AttributeCount] | Out-Null
-                #write-host $AllCustomAttributeValue[$AttributeCount]
                 $AttributeCount++
             }
         }
