@@ -8,7 +8,7 @@ import-Module .\RJVMMetaMove.psm1
 # P = Just one vCenter (for testing)
 # E = Just Europe
 # G = Global
-$runtype = "E"
+$runtype = "P"
 
 $output = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\Exports\vmGuestExport [$runtype] $(get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
 
@@ -20,9 +20,6 @@ if($runtype -ne "P"){
     $VC2 = Connect-VIServer -Server "su-gbcp-vvcsa03.emea.wdpr.disney.com" -Credential $credential
     $VC3 = Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential
     if($runtype -eq "G"){
-
-
-        
         $VC4 = Connect-VIServer -Server "su-cnts-vcsa01.apac.wdpr.disney.com" -Credential $credential
         $VC5 = Connect-VIServer -Server "su-cnts-vvcsa02.apac.wdpr.disney.com" -Credential $credential
         $VC6 = Connect-VIServer -Server "su-arba-vc01.ltam.wdpr.disney.com" -Credential $credential
@@ -47,9 +44,10 @@ $count = 0
 foreach ($VMGuest in $VMGuests){
     $completed = [math]::Round((($count/$VMGuests.count) * 100), 2)
     $a = get-RJVMMetaData -VMName $VMGuest
-    $a | select-object -ExcludeProperty AttributeName,AttributeValue,AttributeTag,NetworkAdaper,DiskName,DiskFileName,DiskLayoutStorageFormat,DiskLayoutPersistence,DiskLayoutDiskType,DiskSizeGB,DiskDatastore,Snapshot `
+    $a | select-object -ExcludeProperty AttributeName,AttributeValue,AttributeTag,NetworkAdaper,DiskName,DiskStoragePolicy,DiskID,DiskFileName,DiskLayoutStorageFormat,DiskLayoutPersistence,DiskLayoutDiskType,DiskSizeGB,DiskDatastore,Snapshot `
     -Property `
         VMName, `
+        VMID, `
         Powerstate, `
         VMVersion, `
         MemoryGB, `
@@ -75,7 +73,9 @@ foreach ($VMGuest in $VMGuests){
         @{N='AttributeTag';E={ if ($_.AttributeTag) { $_.AttributeTag -join("`r")}}}, `
         @{N='Network';E={ if ($_.NetworkAdapter) { $_.NetworkAdapter -join("`r")}}}, `
         @{N='DiskName';E={ if ($_.DiskName) { $_.DiskName -join("`r")}}}, `
+        @{N='DiskID';E={ if ($_.DiskID) { $_.DiskID -join("`r")}}}, `
         @{N='DiskFileName';E={ if ($_.DiskFileName) { $_.DiskFileName -join("`r")}}}, `
+        @{N='DiskStoragePolicy';E={ if ($_.DiskStoragePolicy) { $_.DiskStoragePolicy -join("`r")}}}, `
         @{N='DiskLayoutStorageFormat';E={ if ($_.DiskLayoutStorageFormat) { $_.DiskLayoutStorageFormat -join("`r")}}}, `
         #@{N='DiskLayoutPersistence';E={ if ($_.DiskLayoutPersistence) { $_.DiskLayoutPersistence -join("`r")}}}, `
         @{N='DiskLayoutPersistence';E={ $_.DiskLayoutPersistence -join("`r")}}, `
