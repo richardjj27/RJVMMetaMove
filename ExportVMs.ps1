@@ -10,7 +10,7 @@ import-Module .\RJVMMetaMove.psm1
 # G = Global
 $runtype = "E"
 
-$output = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\Exports\vmGuestExport [$runtype] $(get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
+$output = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\Exports\vmGuestExport [$runtype] $(Get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
 
 $credential = Get-Credential
 
@@ -25,19 +25,19 @@ if($runtype -ne "P"){
     }
 }
 
-$VMGuests = get-VM -server $VC1
+$VMGuests = Get-VM -server $VC1
 
 if($runtype -ne "P"){
-    $VMGuests += get-VM -server $VC2
-    $VMGuests += get-VM -server $VC3
+    $VMGuests += Get-VM -server $VC2
+    $VMGuests += Get-VM -server $VC3
     if($runtype -eq "G"){   
-        $VMGuests += get-VM -server $VC4
-        $VMGuests += get-VM -server $VC5
-        $VMGuests += get-VM -server $VC6
+        $VMGuests += Get-VM -server $VC4
+        $VMGuests += Get-VM -server $VC5
+        $VMGuests += Get-VM -server $VC6
     }
 }
 
-$VMGuests = $VMGuests | sort-object -property VMHost,Name
+$VMGuests = $VMGuests | Sort-Object -property VMHost,Name
 
 $count = 0
 foreach ($VMGuest in $VMGuests){

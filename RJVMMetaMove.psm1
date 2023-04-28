@@ -291,10 +291,10 @@ function Write-RJLog {
 
     Process{
         $Private:LogOutput = (get-date -format "yyyy/MM/dd HH:mm:ss | ")
-        if ($Severity -eq 0) {$LogOutput += "INFO | "}
-        if ($Severity -eq 1) {$LogOutput += "WARN | "}
-        if ($Severity -eq 2) {$LogOutput += "ERR  | "}
-        if ($Severity -eq 3) {$LogOutput += "CRIT | "}
+        if ($Severity -eq 0) {$LogOutput += "INFO  | "}
+        if ($Severity -eq 1) {$LogOutput += "DEBUG | "}
+        if ($Severity -eq 2) {$LogOutput += "WARN  | "}
+        if ($Severity -eq 3) {$LogOutput += "CRIT  | "}
 
         add-content $LogFile $LogOutput$LogText
         write-host $LogOutput$LogText
