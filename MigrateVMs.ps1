@@ -5,23 +5,14 @@ Import-Module -Name vmware.powercli
 Remove-Module RJVMMetaMove
 Import-Module .\RJVMMetaMove.psm1
 
-$logfile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\richard\vCenterExport\Logs\VM Migration Log $(get-date -Format "yyyy-MM-dd_HH.mm").txt"
-$VMListFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\richard\vCenterExport\VMListFull.txt"
-$credential = Get-Credential
+$LogFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\richard\vCenterExport\Logs\VM Migration Log $(get-date -Format "yyyy-MM-dd_HH.mm").txt"
+#$VMListFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\richard\vCenterExport\VMListFullGBEQ24.txt"
+$VMListFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\richard\vCenterExport\VMListFullGBEQ42.txt"
 
-Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $credential | Out-Null
-Connect-VIServer -Server "su-gbcp-vvcsa03.emea.wdpr.disney.com" -Credential $credential | Out-Null
-Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $credential | Out-Null
-
-# 2 to 4
-$TargetVMHost = "su-gbeq-vxrail01.emea.wdpr.disney.com"
-$TargetNetwork = "OnAir-GBEQ-86"
-$TargetDatastore = "VxRail-Virtual-SAN-Datastore-1c4bfaa4-60d6-4ddf-87df-419f47e931a6"
-
-# # 4 to 2
-# $TargetVMHost = "su-gbeq-vxrail50.emea.wdpr.disney.com"
-# $TargetNetwork = "PROD_DataCentre2-386"
-# $TargetDatastore = "VxRail-Virtual-SAN-Datastore-82d1d453-d153-4a50-8ec2-8fa5a819b4a9"
+$Credentials = Get-Credential
+Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $Credentials | Out-Null
+Connect-VIServer -Server "su-gbcp-vvcsa03.emea.wdpr.disney.com" -Credential $Credentials | Out-Null
+Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $Credentials | Out-Null
 
 # # ILTA Move
 # $TargetVMHost = "su-ilta-vxrail01.emea.wdpr.disney.com"
@@ -33,41 +24,59 @@ $TargetDatastore = "VxRail-Virtual-SAN-Datastore-1c4bfaa4-60d6-4ddf-87df-419f47e
 # $TargetNetwork = "Production_45"
 # $TargetDatastore = "VxRail-Virtual-SAN-Datastore-a86fa29d-0e1d-4b08-9bf1-633d0064c41d"
 
-$MovingVMs = Get-Content ($VMListFile)
+$MovingVMs = Import-CSV -Path $VMListFile
 
 ForEach($MovingVM in $MovingVMs) {
     # Todo: Check the VM, target host, network and datastore exist and write log if not.
-    $DataError = 0
+    $InputError = 0
     $SourceVM = Get-VM -Name $MovingVM.SourceVM -ErrorAction SilentlyContinue
+    $SourceVMHost = $SourceVM.vmhost
+    $SourceVC = $SourceVM.Uid.Split(":")[0].Split("@")[1]
+    $SourceCluster = (Get-Cluster -VM $SourceVM)
+
     $TargetVMHost = $MovingVM.TargetVMHost
     $TargetNetwork = $MovingVM.TargetNetwork
     $TargetDatastore = $MovingVM.TargetDatastore
-    
-    If (!$SourceVM){
-        Write-RJLog -LogFile $Logfile -Severity 3 -LogText "$SourceVM not found."
-        $DataError = 1
+    $TargetVC = (Get-VMHost -Name $TargetVMHost).uid.Split(":")[0].Split("@")[1]
+    $TargetCluster = (Get-Cluster -VMHost $TargetVMHost)
+
+    Write-RJLog -LogFile $Logfile -Severity 1 -LogText ("Start migration of " + $SourceVM + " to " + $MovingVM.TargetVMHost + ".")
+
+    If (!(Get-VM -Name $MovingVM.SourceVM -ErrorAction SilentlyContinue)){
+        Write-RJLog -LogFile $Logfile -Severity 3 -LogText ($MovingVM.SourceVM + " not found.")
+        $InputError++
     }
 
-    If (!$SourceVM){
-        Write-RJLog -LogFile $Logfile -Severity 3 -LogText "$TargetVMHost not found."
-        $DataError = 1
+    If (!(Get-VMHost $TargetVMHost -ErrorAction SilentlyContinue)){
+        Write-RJLog -LogFile $Logfile -Severity 3 -LogText ($TargetVMHost + " not found.")
+        $InputError++
     }
 
-    If (!$SourceVM){
-        Write-RJLog -LogFile $Logfile -Severity 3 -LogText "$TargetNetwork not found."
-        $DataError = 1
+    If (!(Get-VirtualPortGroup -VMHost $TargetVMHost -Name $TargetNetwork -ErrorAction SilentlyContinue)){
+        Write-RJLog -LogFile $Logfile -Severity 3 -LogText ($TargetNetwork + " not found.")
+        $InputError++
     }
 
-    If (!$SourceVM){
-        Write-RJLog -LogFile $Logfile -Severity 3 -LogText "$TargetDatastore not found."
-        $DataError = 1
+    If (!(Get-VMHost $TargetVMHost | Get-Datastore $TargetDatastore -ErrorAction SilentlyContinue)){
+        Write-RJLog -LogFile $Logfile -Severity 3 -LogText ($TargetDatastore + " not found.")
+        $InputError++
     }
 
-    if ($DataError -eq 0){
-        Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Start migration of $SourceVM from "$SourceVM.vmhost
-        Write-RJLog -LogFile $Logfile -Severity 1 -LogText "..... $TargetVMHost"
-        Write-RJLog -LogFile $Logfile -Severity 1 -LogText "..... $TargetNetwork"
-        Write-RJLog -LogFile $Logfile -Severity 1 -LogText "..... $TargetDatastore"
+    If ($SourceCluster -eq $TargetCluster){
+        Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Source and destination are on the same cluster which makes no sense."
+        $InputError++
+    }
+
+    if ($InputError -eq 0){
+        Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Source vCenter...... $SourceVC"
+        Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Source Host......... $SourceVMHost"
+        Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Source Cluster...... $SourceCluster"
+        
+        Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Target vCenter...... $TargetVC"
+        Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Target Host......... $TargetVMHost"
+        Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Target Cluster...... $TargetCluster"
+        Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Target Network...... $TargetNetwork"
+        Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Target Datastore.... $TargetDatastore"
 
         Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Collecting metadata for $SourceVM."
         $VMMetaData = get-RJVMMetaData -VMName $SourceVM
@@ -87,7 +96,7 @@ ForEach($MovingVM in $MovingVMs) {
             Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Migrating of $SourceVM failed."
         }
         else {
-            Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of $SourceVM succeeded."
+            Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of $SourceVM VMDKs succeeded."
             Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Writing metadata for $SourceVM."
             Set-RJVMCustomAttributes -TargetVM $TargetVM -VMMetaData $VMMetaData -TargetVC $TargetVC 
             $VMTargetMetaData = get-RJVMMetaData -VMName $SourceVM
@@ -105,10 +114,16 @@ ForEach($MovingVM in $MovingVMs) {
                 {Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Migration of tags for $SourceVM failed."}
         }
 
+        1..5 | ForEach-Object {
+            Write-RJLog -LogFile $LogFile -Severity 0 -LogText (((test-connection -target $SourceVM -ping -count 1 | ft destination,displayaddress,latency -hidetableheaders | out-string)).trim())
+            Start-Sleep 1
+        }
         Write-RJLog -LogFile $LogFile 
     }
-else {
-    Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Skipping to next record."
+    else {
+        Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Migration failed - skipping to next record."
+        Write-RJLog -LogFile $LogFile
+    }
 }
 
 Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Completed."
