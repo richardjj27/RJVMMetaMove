@@ -143,7 +143,7 @@ function Get-RJVMHostData {
     Begin{}
 
     Process{
-        $Private:oVMHost = get-vmhost -name $VMHost
+        $Private:oVMHost = Get-VMhost -name $VMHost
         $Private:VCServer = $oVMHost.Uid.Split(":")[0].Split("@")[1]
         $Private:CustomAttrList = Get-CustomAttribute -Server $oVMHost.Uid.Split(":")[0].Split("@")[1]
         $Private:Datastores = get-datastore -vmhost $oVMHost   
