@@ -1,6 +1,3 @@
-# Script to test the move-xvcvm function.  The 'function' side of this will eventually move to this module.
-# initially, do all the hard work here, later, put it all in a function with x parameters (VM, sourcevc object, destvc object, datastore and network attributes)
-
 Import-Module -Name vmware.powercli
 Remove-Module RJVMMetaMove
 Import-Module .\RJVMMetaMove.psm1
@@ -29,6 +26,7 @@ $MovingVMs = Import-CSV -Path $VMListFile
 ForEach($MovingVM in $MovingVMs) {
     # Todo: Check the VM, target host, network and datastore exist and write log if not.
     $InputError = 0
+    $RunError = 0
     $SourceVM = Get-VM -Name $MovingVM.SourceVM -ErrorAction SilentlyContinue
     $SourceVMHost = $SourceVM.vmhost
     $SourceVC = $SourceVM.Uid.Split(":")[0].Split("@")[1]
@@ -71,17 +69,15 @@ ForEach($MovingVM in $MovingVMs) {
         Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Source vCenter...... $SourceVC"
         Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Source Host......... $SourceVMHost"
         Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Source Cluster...... $SourceCluster"
-        
         Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Target vCenter...... $TargetVC"
         Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Target Host......... $TargetVMHost"
         Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Target Cluster...... $TargetCluster"
         Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Target Network...... $TargetNetwork"
         Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Target Datastore.... $TargetDatastore"
-
         Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Collecting metadata for $SourceVM."
-        $VMMetaData = get-RJVMMetaData -VMName $SourceVM
 
-        #### Todo: a pre-move compatbility check (processor stepping level etc) or make this a 'try/catch' command.
+        $VMMetaData = Get-RJVMMetaData -VMName $SourceVM
+
         $TargetPortGroup = Get-VirtualPortGroup -VMHost $TargetVMHost -Name $TargetNetwork
         Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Start VM migration for $SourceVM to $TargetVMHost."
         Move-VM -VM $SourceVM -VMotionPriority High -Destination (Get-VMhost -Name $TargetVMHost) -Datastore (Get-Datastore -Name $TargetDatastore) -DiskStorageFormat Thin -PortGroup $TargetPortGroup | Out-Null
@@ -94,36 +90,50 @@ ForEach($MovingVM in $MovingVMs) {
 
         if ($VMMetaData.Host -eq $VMTargetMetaData.Host) {
             Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Migrating of $SourceVM failed."
+            $RunError++
         }
-        else {
+        else{
             Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of $SourceVM VMDKs succeeded."
             Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Writing metadata for $SourceVM."
             Set-RJVMCustomAttributes -TargetVM $TargetVM -VMMetaData $VMMetaData -TargetVC $TargetVC 
             $VMTargetMetaData = get-RJVMMetaData -VMName $SourceVM
             if ((Compare-Object -ReferenceObject @($VMMetaData.AttributeName | Select-Object) -DifferenceObject @($VMTargetMetaData.AttributeName | Select-Object)).count -eq 0)
                 {Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of attribute names for $SourceVM succeeded."} 
-                else
-                {Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Migration of attribute names for $SourceVM failed."}
+                else {
+                Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Migration of attribute names for $SourceVM failed."
+                $RunError = $RunError + 0.1
+                }
             if ((Compare-Object -ReferenceObject @($VMMetaData.AttributeValue | Select-Object) -DifferenceObject @($VMTargetMetaData.AttributeValue | Select-Object)).count -eq 0)
                 {Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of attribute values for $SourceVM succeeded."}
-                else
-                {Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Migration of attribute values for $SourceVM failed."}
+                else{
+                Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Migration of attribute values for $SourceVM failed."
+                $RunError = $RunError + 0.1
+                }
             if ((Compare-Object -ReferenceObject @($VMMetaData.AttributeTag | Select-Object) -DifferenceObject @($VMTargetMetaData.AttributeTag | Select-Object)).count -eq 0)
                 {Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of tags for $SourceVM succeeded."}
-                else
-                {Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Migration of tags for $SourceVM failed."}
-        }
+                else{
+                Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Migration of tags for $SourceVM failed."
+                $RunError = $RunError + 0.1
+                }
+            }
 
         1..5 | ForEach-Object {
-            Write-RJLog -LogFile $LogFile -Severity 0 -LogText (((test-connection -target $SourceVM -ping -count 1 | ft destination,displayaddress,latency -hidetableheaders | out-string)).trim())
+            Write-RJLog -LogFile $LogFile -Severity 0 -LogText (((test-connection -target $SourceVM -ping -count 1 | Format-Table destination,displayaddress,latency -hidetableheaders | out-string)).trim())
             Start-Sleep 1
         }
-        Write-RJLog -LogFile $LogFile 
+
+        if ($RunError -eq 0) {
+            {Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of $SourceVM succeeded without errors."}
+        }
+        else {
+            {Write-RJLog -LogFile $Logfile -Severity 2 -LogText "Migration of $SourceVM succeeded with errors."}
+        }
+
     }
     else {
-        Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Migration failed - skipping to next record."
-        Write-RJLog -LogFile $LogFile
+        Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Migration of $SourceVM failed."
     }
+    Write-RJLog -LogFile $LogFile 
 }
 
 Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Completed."

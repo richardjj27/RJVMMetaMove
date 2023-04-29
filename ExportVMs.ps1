@@ -46,6 +46,7 @@ foreach ($VMGuest in $VMGuests){
     -Property `
         VMName, `
         VMID, `
+        VMHostName, `
         Powerstate, `
         VMVersion, `
         MemoryGB, `
