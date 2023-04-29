@@ -40,31 +40,38 @@ ForEach($MovingVM in $MovingVMs) {
 
     Write-RJLog -LogFile $Logfile -Severity 1 -LogText ("Start migration of " + $SourceVM + " to " + $MovingVM.TargetVMHost + ".")
 
+    # Validate Migration Parameters
+    # Does the source VM exist?
     If (!(Get-VM -Name $MovingVM.SourceVM -ErrorAction SilentlyContinue)){
         Write-RJLog -LogFile $Logfile -Severity 3 -LogText ($MovingVM.SourceVM + " not found.")
         $InputError++
     }
 
+    # Does the target VM host exist?
     If (!(Get-VMHost $TargetVMHost -ErrorAction SilentlyContinue)){
         Write-RJLog -LogFile $Logfile -Severity 3 -LogText ($TargetVMHost + " not found.")
         $InputError++
     }
 
+    # Does the target Network exist?
     If (!(Get-VirtualPortGroup -VMHost $TargetVMHost -Name $TargetNetwork -ErrorAction SilentlyContinue)){
         Write-RJLog -LogFile $Logfile -Severity 3 -LogText ($TargetNetwork + " not found.")
         $InputError++
     }
 
+    # Does the target Datastore exist?
     If (!(Get-VMHost $TargetVMHost | Get-Datastore $TargetDatastore -ErrorAction SilentlyContinue)){
         Write-RJLog -LogFile $Logfile -Severity 3 -LogText ($TargetDatastore + " not found.")
         $InputError++
     }
 
+    # Are the source and destination datatores different?
     If ($SourceCluster -eq $TargetCluster){
         Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Source and destination are on the same cluster which makes no sense."
         $InputError++
     }
 
+    # If all is well, display everything we know.
     if ($InputError -eq 0){
         Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Source vCenter...... $SourceVC"
         Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Source Host......... $SourceVMHost"
@@ -74,58 +81,69 @@ ForEach($MovingVM in $MovingVMs) {
         Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Target Cluster...... $TargetCluster"
         Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Target Network...... $TargetNetwork"
         Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Target Datastore.... $TargetDatastore"
+        
         Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Collecting metadata for $SourceVM."
-
         $VMMetaData = Get-RJVMMetaData -VMName $SourceVM
 
+        # Get target network specifics.
         $TargetPortGroup = Get-VirtualPortGroup -VMHost $TargetVMHost -Name $TargetNetwork
         Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Start VM migration for $SourceVM to $TargetVMHost."
         1..3 | ForEach-Object {
             Write-RJLog -LogFile $LogFile -Severity 0 -LogText (((test-connection -target $VMMetaData.VMHostName -ping -count 1 | Format-Table destination,displayaddress,latency -hidetableheaders | out-string)).trim())
             Start-Sleep 1
         }
+
+        # Move the VM
         Move-VM -VM $SourceVM -VMotionPriority High -Destination (Get-VMhost -Name $TargetVMHost) -Datastore (Get-Datastore -Name $TargetDatastore) -DiskStorageFormat Thin -PortGroup $TargetPortGroup | Out-Null
 
         #### Write the metadata
         $TargetVM = Get-VM -Name $SourceVM
         $TargetVC = $TargetVM.Uid.Split(":")[0].Split("@")[1]
-
         $VMTargetMetaData = get-RJVMMetaData -VMName $SourceVM
 
+        # Check the VM host is different after the migration - basically, did it migrate?
         if ($VMMetaData.Host -eq $VMTargetMetaData.Host) {
             Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Migrating of $SourceVM failed."
             $RunError++
         }
-        else{
+        else {
             Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of $SourceVM VMDKs succeeded."
             Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Writing metadata for $SourceVM."
             Set-RJVMCustomAttributes -TargetVM $TargetVM -VMMetaData $VMMetaData -TargetVC $TargetVC 
             $VMTargetMetaData = get-RJVMMetaData -VMName $SourceVM
-            if ((Compare-Object -ReferenceObject @($VMMetaData.AttributeName | Select-Object) -DifferenceObject @($VMTargetMetaData.AttributeName | Select-Object)).count -eq 0)
-                {Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of attribute names for $SourceVM succeeded."} 
+            
+            # Are the attribute names the same?
+            if ((Compare-Object -ReferenceObject @($VMMetaData.AttributeName | Select-Object) -DifferenceObject @($VMTargetMetaData.AttributeName | Select-Object)).count -eq 0) {
+                Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of attribute names for $SourceVM succeeded."} 
                 else {
-                Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Migration of attribute names for $SourceVM failed."
+                Write-RJLog -LogFile $Logfile -Severity 2 -LogText "Migration of attribute names for $SourceVM failed."
                 $RunError = $RunError + 0.1
-                }
-            if ((Compare-Object -ReferenceObject @($VMMetaData.AttributeValue | Select-Object) -DifferenceObject @($VMTargetMetaData.AttributeValue | Select-Object)).count -eq 0)
-                {Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of attribute values for $SourceVM succeeded."}
-                else{
-                Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Migration of attribute values for $SourceVM failed."
-                $RunError = $RunError + 0.1
-                }
-            if ((Compare-Object -ReferenceObject @($VMMetaData.AttributeTag | Select-Object) -DifferenceObject @($VMTargetMetaData.AttributeTag | Select-Object)).count -eq 0)
-                {Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of tags for $SourceVM succeeded."}
-                else{
-                Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Migration of tags for $SourceVM failed."
-                $RunError = $RunError + 0.1
-                }
             }
 
-        1..5 | ForEach-Object {
-            Write-RJLog -LogFile $LogFile -Severity 0 -LogText (((test-connection -target $VMTargetMetaData.VMHostName -ping -count 1 | Format-Table destination,displayaddress,latency -hidetableheaders | out-string)).trim())
-            Start-Sleep 1
+            # Are the attribute values the same?
+            if ((Compare-Object -ReferenceObject @($VMMetaData.AttributeValue | Select-Object) -DifferenceObject @($VMTargetMetaData.AttributeValue | Select-Object)).count -eq 0) {
+                Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of attribute values for $SourceVM succeeded."}
+                else {
+                Write-RJLog -LogFile $Logfile -Severity 2 -LogText "Migration of attribute values for $SourceVM failed."
+                $RunError = $RunError + 0.1
+            }
+
+            # Are the tags the same?
+            if ((Compare-Object -ReferenceObject @($VMMetaData.AttributeTag | Select-Object) -DifferenceObject @($VMTargetMetaData.AttributeTag | Select-Object)).count -eq 0) {
+                Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of tags for $SourceVM succeeded."}
+                else{
+                Write-RJLog -LogFile $Logfile -Severity 2 -LogText "Migration of tags for $SourceVM failed."
+                $RunError = $RunError + 0.1
+            }
+
+            # Do 5 pings to the log file.
+            1..5 | ForEach-Object {
+                Write-RJLog -LogFile $LogFile -Severity 0 -LogText (((test-connection -target $VMTargetMetaData.VMHostName -ping -count 1 | Format-Table destination,displayaddress,latency -hidetableheaders | out-string)).trim())
+                Start-Sleep 1
+            }
         }
 
+        # If not run errors were recorded, success!
         if ($RunError -eq 0) {
             {Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of $SourceVM succeeded without errors."}
         }
