@@ -80,6 +80,10 @@ ForEach($MovingVM in $MovingVMs) {
 
         $TargetPortGroup = Get-VirtualPortGroup -VMHost $TargetVMHost -Name $TargetNetwork
         Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Start VM migration for $SourceVM to $TargetVMHost."
+        1..3 | ForEach-Object {
+            Write-RJLog -LogFile $LogFile -Severity 0 -LogText (((test-connection -target $VMMetaData.VMHostName -ping -count 1 | Format-Table destination,displayaddress,latency -hidetableheaders | out-string)).trim())
+            Start-Sleep 1
+        }
         Move-VM -VM $SourceVM -VMotionPriority High -Destination (Get-VMhost -Name $TargetVMHost) -Datastore (Get-Datastore -Name $TargetDatastore) -DiskStorageFormat Thin -PortGroup $TargetPortGroup | Out-Null
 
         #### Write the metadata
@@ -118,7 +122,7 @@ ForEach($MovingVM in $MovingVMs) {
             }
 
         1..5 | ForEach-Object {
-            Write-RJLog -LogFile $LogFile -Severity 0 -LogText (((test-connection -target $SourceVM -ping -count 1 | Format-Table destination,displayaddress,latency -hidetableheaders | out-string)).trim())
+            Write-RJLog -LogFile $LogFile -Severity 0 -LogText (((test-connection -target $VMTargetMetaData.VMHostName -ping -count 1 | Format-Table destination,displayaddress,latency -hidetableheaders | out-string)).trim())
             Start-Sleep 1
         }
 
