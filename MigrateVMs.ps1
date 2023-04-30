@@ -1,15 +1,24 @@
+# Script to migrate a list of VMs from one cluster to another.
+
 Import-Module -Name vmware.powercli
 Remove-Module RJVMMetaMove
 Import-Module .\RJVMMetaMove.psm1
 
 $LogFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\richard\vCenterExport\Logs\VM Migration Log $(get-date -Format "yyyy-MM-dd_HH.mm").txt"
+$VCenterList = "C:\Users\rjohnson\Documents\VSCode Projects\X\VCList.csv"
 #$VMListFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\richard\vCenterExport\VMListFullGBEQ24.txt"
 $VMListFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\richard\vCenterExport\VMListFullGBEQ42.txt"
 
-$Credentials = Get-Credential
-Connect-VIServer -Server "su-gbcp-vvcsa02.emea.wdpr.disney.com" -Credential $Credentials | Out-Null
-Connect-VIServer -Server "su-gbcp-vvcsa03.emea.wdpr.disney.com" -Credential $Credentials | Out-Null
-Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $Credentials | Out-Null
+$AdminCredentials = Get-Credential
+$VCenters = Import-CSV -Path $VCenterList
+
+ForEach($VCenter in $Vcenters){
+    if($VCenter.Server.SubString(0,1) -ne "#") {
+        $VC = Connect-VIServer -Server $VCenter.Server -Credential $AdminCredentials | Out-Null
+        $VMHosts += get-VMHost -server $VC
+        $VMGuests += Get-VM -server $VC
+    }
+}
 
 # # ILTA Move
 # $TargetVMHost = "su-ilta-vxrail01.emea.wdpr.disney.com"
@@ -20,6 +29,7 @@ Connect-VIServer -Server "su-gbcp-vvcsa04.emea.wdpr.disney.com" -Credential $Cre
 # $TargetVMHost = "su-trze-vxrail01.emea.wdpr.disney.com"
 # $TargetNetwork = "Production_45"
 # $TargetDatastore = "VxRail-Virtual-SAN-Datastore-a86fa29d-0e1d-4b08-9bf1-633d0064c41d"
+
 
 $MovingVMs = Import-CSV -Path $VMListFile
 
