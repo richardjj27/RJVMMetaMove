@@ -34,4 +34,5 @@ Get multiple useful attributes and settings for the specified VM host.
 Set custom attributes for a specific VM derived from previous Get-RJVMMetaData.
 
 ### *Write-RJLog*
+`LogFile, Severity, LogText`
 Write timed, formatted log text to the file specified in $LogFile.
