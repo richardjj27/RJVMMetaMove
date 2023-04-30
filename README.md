@@ -5,7 +5,7 @@ The project contains three scripts and one module containing four functions.
 ## *ExportHosts.ps1*
 Create a report in Excel for all VM hosts from multiple vCenter servers as listed in VCList.csv.
 
-- XLOutputFile - Name and location of output file.
+- $XLOutputFile - Name and location of output file.
 - VCenterList - List of vCenter servers to be processed.
 
 ## *ExportVMs.ps1*
