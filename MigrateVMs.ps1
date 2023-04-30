@@ -1,6 +1,6 @@
 # Script to migrate a list of VMs from one cluster to another.
-# Will work cross vCenter and preserve tags and custom attributes.
-# Will write success/failure to a log file for later review.
+# Will work across vCenter servers and preserve tags and custom attributes.
+# Success/failure written to a log file for later review.
 
 Import-Module -Name vmware.powercli
 Import-Module .\RJVMMetaMove.psm1
