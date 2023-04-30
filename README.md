@@ -36,11 +36,10 @@ Get multiple useful attributes and settings for the specified VM host.
 `TargetVM` Write attributes to this VM.<br>
 `TargetVC` ...and this VC (is this needed?)<br>
 `VNNetadata` Write this metadata array to the above VM.<br>
-Set custom attributes for a specific VM derived from previous Get-RJVMMetaData.
+- Set custom attributes for a specific VM derived from previous Get-RJVMMetaData.
 
 ### *Write-RJLog*
 `LogFile`String (or is it an object) to write log entries to.<br>
 `Severity`The severity of the log entry (0 = information, 1 = debug, 2 = warning, 3 = error)<br>
 `LogText`The test to be written.<br>
-
-Write timed, formatted log text to the file specified in $LogFile.
+- Write timed, formatted log text to the file specified in $LogFile.
