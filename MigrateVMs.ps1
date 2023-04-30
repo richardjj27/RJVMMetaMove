@@ -17,16 +17,18 @@ $VCenters = Import-CSV -Path $VCenterList
 
 ForEach($VCenter in $Vcenters){
     if($VCenter.Server.SubString(0,1) -ne "#") {
+        Write-RJLog -LogFile $LogFile -Severity 0 -LogText "Connecting to $VCenter."
         $VC = Connect-VIServer -Server $VCenter.Server -Credential $AdminCredentials | Out-Null
         # $VMHosts += get-VMHost -Server $VC
         # $VMGuests += Get-VM -Server $VC
     }
 }
 
+Write-RJLog -LogFile $LogFile -Severity 0 -LogText "Reading $VMListFile."
 $MovingVMs = Import-CSV -Path $VMListFile
+Write-RJLog -LogFile $LogFile
 
 ForEach($MovingVM in $MovingVMs) {
-    # Todo: Check the VM, target host, network and datastore exist and write log if not.
     $InputError = 0
     $RunError = 0
     $SourceVM = Get-VM -Name $MovingVM.SourceVM -ErrorAction SilentlyContinue
@@ -150,10 +152,10 @@ ForEach($MovingVM in $MovingVMs) {
 
         # If no run errors were recorded, report success!
         if ($RunError -eq 0) {
-            {Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of $SourceVM succeeded without errors."}
+            Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of $SourceVM succeeded without errors."
         }
         else {
-            {Write-RJLog -LogFile $Logfile -Severity 2 -LogText "Migration of $SourceVM succeeded with errors.  Review vCenter logs and coonsole for more information."}
+            Write-RJLog -LogFile $Logfile -Severity 2 -LogText "Migration of $SourceVM succeeded with errors.  Review vCenter logs and coonsole for more information."
         }
 
     }
