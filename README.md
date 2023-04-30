@@ -24,7 +24,7 @@ Migrate a list of VMs from one cluster to another (including cross vCenter) pres
 ## *RJVMMetaDataMove.psm1*
 ### *Get-RJVMMetaData*
 Get multiple useful attributes and settings for the specified VM.
-- An explanation for each attribute is included in the notes tab of the output of ExportVMs.ps1 - todo
+- An explanation for each attribute is included in the notes tab of the output of ExportVMs.ps1 - todo.
 
 ### *Get-RJVMHostData*
 Get multiple useful attributes and settings for the specified VM host.
