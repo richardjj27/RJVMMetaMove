@@ -32,13 +32,13 @@ ForEach($MovingVM in $MovingVMs) {
     $SourceVM = Get-VM -Name $MovingVM.SourceVM -ErrorAction SilentlyContinue
     $SourceVMHost = $SourceVM.vmhost
     $SourceVC = $SourceVM.Uid.Split(":")[0].Split("@")[1]
-    $SourceCluster = (Get-Cluster -VM $SourceVM)
+    $SourceCluster = Get-Cluster -VM $SourceVM
 
     $TargetVMHost = $MovingVM.TargetVMHost
     $TargetNetwork = $MovingVM.TargetNetwork
     $TargetDatastore = $MovingVM.TargetDatastore
     $TargetVC = (Get-VMHost -Name $TargetVMHost).uid.Split(":")[0].Split("@")[1]
-    $TargetCluster = (Get-Cluster -VMHost $TargetVMHost)
+    $TargetCluster = Get-Cluster -VMHost $TargetVMHost
 
     Write-RJLog -LogFile $Logfile -Severity 0 -LogText ("Start migration of " + $SourceVM + " to " + $MovingVM.TargetVMHost + ".")
 
@@ -122,7 +122,7 @@ ForEach($MovingVM in $MovingVMs) {
                 Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of attribute names for $SourceVM succeeded."} 
                 else {
                 Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Migration of attribute names for $SourceVM failed."
-                $RunError = $RunError + 0.1
+                $RunError = $RunError + 0.01
             }
 
             # Are the attribute values the same s before?
@@ -130,7 +130,7 @@ ForEach($MovingVM in $MovingVMs) {
                 Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of attribute values for $SourceVM succeeded."}
                 else {
                 Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Migration of attribute values for $SourceVM failed."
-                $RunError = $RunError + 0.1
+                $RunError = $RunError + 0.01
             }
 
             # Are the tags the same as before?
@@ -138,7 +138,7 @@ ForEach($MovingVM in $MovingVMs) {
                 Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of tags for $SourceVM succeeded."}
                 else {
                 Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Migration of tags for $SourceVM failed."
-                $RunError = $RunError + 0.1
+                $RunError = $RunError + 0.01
             }
 
             # Do 5 pings to the log file just for information.
