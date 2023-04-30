@@ -1,0 +1,6 @@
+Target,Field,Description,Datatype,Origin,Notes
+1,Name,Virtual Machine Name,string,X,PowerCli Native
+1,State,Guest Powered on or off,Y,PowerCli Native
+2,Name,The VMHostName,Derived from,z
+2,VMID,The VMID,Derived from,a
+1,VCenter,The host on which the VM currently resides,Derived From,ge

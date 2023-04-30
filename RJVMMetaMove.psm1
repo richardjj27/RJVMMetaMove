@@ -32,9 +32,9 @@ function Get-RJVMMetaData {
         $Private:oVMGuest = Get-VM -Name $VMName
         $Private:VCServer = $oVMGuest.Uid.Split(":")[0].Split("@")[1]
         $Private:CustomAttrList = Get-CustomAttribute -Server $oVMGuest.Uid.Split(":")[0].Split("@")[1]
-        $Private:outputCustomAttrKey = @()
-        $Private:outputCustomAttrName = @()
-        $Private:outputCustomAttrValue = @()
+        $Private:OutputCustomAttrKey = @()
+        $Private:OutputCustomAttrName = @()
+        $Private:OutputCustomAttrValue = @()
         $Private:LocationCodeC = $null
         $Private:LocationCodeH = $null
         $Private:LocationCode = $null
