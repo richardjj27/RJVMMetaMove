@@ -13,8 +13,8 @@ $VCenters = Import-CSV -Path $VCenterList
 ForEach($VCenter in $Vcenters){
     if($VCenter.Server.SubString(0,1) -ne "#") {
         $VC = Connect-VIServer -Server $VCenter.Server -Credential $AdminCredentials | Out-Null
-        $VMHosts += get-VMHost -server $VC
-        # $VMGuests += Get-VM -server $VC
+        $VMHosts += get-VMHost -Server $VC
+        # $VMGuests += Get-VM -Server $VC
     }
 }
 
