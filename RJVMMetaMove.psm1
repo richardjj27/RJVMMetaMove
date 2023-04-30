@@ -5,11 +5,6 @@
 # Learn how to keep function parameters private (or not) and whether to pass an object or text is the right thing to do.
 #   https://stackoverflow.com/questions/27847809/in-powershell-how-to-set-variable-values-within-a-function-and-have-that-value
 # Add module version/ing.
-# Writing of tag/attributes writes to console.
-# Identify/mark networks which are presented to VMs.
-# Loop through list with all appropriate attributes piped.
-# More logging.
-# Give output better column headings making it clear where a value is a raw VM native value or a derived one.
 # Output each VMDK size + this total.  Capacity has many contributing factors so is worth reporting from many different points of view.
 # Export a notes tab in the results explaining each column.
 
@@ -302,5 +297,4 @@ function Write-RJLog {
     }
 
     End{}
-
 }

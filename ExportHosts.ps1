@@ -5,7 +5,7 @@ import-Module -Name ImportExcel
 import-Module .\RJVMMetaMove.psm1
 
 $XLOutputFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\Exports\vmHostExport [$runtype] $(get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
-$VCenterList = "C:\Users\rjohnson\Documents\VSCode Projects\X\VCList.csv"
+$VCenterList = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\VCList.csv"
 
 $AdminCredentials = Get-Credential
 $VCenters = Import-CSV -Path $VCenterList
