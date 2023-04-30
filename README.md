@@ -23,17 +23,24 @@ Migrate a list of VMs from one cluster to another (including cross vCenter) pres
 
 ## *RJVMMetaDataMove.psm1*
 ### *Get-RJVMMetaData*
+`VMName` The VM guest to be queried.<br>
 Get multiple useful attributes and settings for the specified VM.
 - An explanation for each attribute is included in the notes tab of the output of ExportVMs.ps1 - todo.
 
 ### *Get-RJVMHostData*
+`VNHost` The VM host to be queried.<br>
 Get multiple useful attributes and settings for the specified VM host.
 - An explanation for each attribute is included in the notes tab of the output of ExportHosts.ps1 - todo.
 
 ### *Set-RJVMCustomAttributes*
+`TargetVM` Write attributes to this VM.<br>
+`TargetVC` ...and this VC (is this needed?)<br>
+`VNNetadata` Write this metadata array to the above VM.<br>
 Set custom attributes for a specific VM derived from previous Get-RJVMMetaData.
 
 ### *Write-RJLog*
-`LogFile, Severity, LogText`
-<br> 
+`LogFile`String (or is it an object) to write log entries to.<br>
+`Severity`The severity of the log entry (0 = information, 1 = debug, 2 = warning, 3 = error)<br>
+`LogText`The test to be written.<br>
+
 Write timed, formatted log text to the file specified in $LogFile.
