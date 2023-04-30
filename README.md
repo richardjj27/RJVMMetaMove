@@ -1,24 +1,29 @@
-# export-vmmetadata
+# The project contains three scripts and one module which function as follows:
+
+## ExportHosts.ps1
+Create a report in Excel for all VM hosts from multiple vCenter servers as listed in VCList.csv.
+
+## ExportVMs.ps1
+Create a report in Excel for all VM guests from multiple vCenter servers as listed in VCList.csv.
+
+## MigrateVMs.ps1
+Migrate a list of VMs from one cluster to another (including cross vCenter) preserving tags and custom attributes.
+
+## RJVMMetaDataMove.psm1
+### Get-RJVMMetaData
+Get multiple useful attributes and settings for the specified VM.
+< An explanation for each attribute is included in the notes tab of the output of ExportVMs.ps1 > - todo
+
+## Get-RJVMHostData
+Get multiple useful attributes and settings for the specified VM host.
+< An explanation for each attribute is included in the notes tab of the output of ExportHosts.ps1 > - todo.
+
+## Set-RJVMCustomAttributes
+Set custom attributes for a specific VM.
+
+## Write-RJLog
+Write formated log text to a specified log file.
+
+## export-vmmetadata
 Powershell script to export vCenter metadata to an Excel file.
-
-Right now, the script will export the following data for all VMs on multiple vCenter Servers.
-* VM Creation date
-* VM Hardware Version
-* Attributes (multiple)
-* Tags (multiple)
-* Attached Disks (multiple)
-* Network Adapters (multiple)
-* Host information
-*   Version
-*   Build
-* Memory Allocation
-* Disk Allocation
-* CPU Allocation
-* VM Tools Version
-* Power State
-* Guest OS
-* Snapshot Status
-* Hosting Cluster
-* Notes
-
 

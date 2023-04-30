@@ -1,8 +1,7 @@
-# Script to Export all the VM Guests in multiple vCenter Servers to a native Excel file.
+# Script to Export all VM Guests on multiple vCenter Servers to an Excel file.
 
 import-Module -Name vmware.powercli
 import-Module -Name ImportExcel
-remove-module RJVMMetaMove
 import-Module .\RJVMMetaMove.psm1
 
 $XLOutputFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\Exports\vmGuestExport [$runtype] $(Get-date -Format "yyyy-MM-dd_HH.mm").xlsx"

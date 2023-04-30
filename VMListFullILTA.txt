@@ -1,0 +1,4 @@
+# # ILTA Move
+# $TargetVMHost = "su-ilta-vxrail01.emea.wdpr.disney.com"
+# $TargetNetwork = "PROD_ILTA_VLAN5"
+# $TargetDatastore = "VxRail-Virtual-SAN-Datastore-ILTA"
