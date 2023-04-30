@@ -5,21 +5,21 @@ The project contains three scripts and one module containing four functions.
 ## *ExportHosts.ps1*
 Create a report in Excel for all VM hosts from multiple vCenter servers as listed in VCList.csv.
 
-$XLOutputFile - Name and location of output file.
-$VCenterList - List of vCenter servers to be processed.
+XLOutputFile - Name and location of output file.
+VCenterList - List of vCenter servers to be processed.
 
 ## *ExportVMs.ps1*
 Create a report in Excel for all VM guests from multiple vCenter servers as listed in VCList.csv.
 
-$XLOutputFile - Name and location of output file.
-$VCenterList - List of vCenter servers to be processed.
+XLOutputFile - Name and location of output file.
+VCenterList - List of vCenter servers to be processed.
 
 ## *MigrateVMs.ps1*
 Migrate a list of VMs from one cluster to another (including cross vCenter) preserving tags and custom attributes.
 
-$LogFile - Output log file.
-$VCenterList - List of vCenter servers to be processed.  (Servers)
-$VMListFile - CSV list of VMs to be moved (VM,TargetHost,Network,Datastore)
+LogFile - Output log file.
+VCenterList - List of vCenter servers to be processed.  (Servers)
+VMListFile - CSV list of VMs to be moved (VM,TargetHost,Network,Datastore)
 
 ## *RJVMMetaDataMove.psm1*
 ### Get-RJVMMetaData
