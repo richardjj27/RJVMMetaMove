@@ -1,24 +1,26 @@
-# The project contains three scripts and one module which function as follows:
+# RJVMMetaMove
 
-## ExportHosts.ps1
+The project contains three scripts and one module containing four functions.
+
+## *ExportHosts.ps1*
 Create a report in Excel for all VM hosts from multiple vCenter servers as listed in VCList.csv.
 
-## ExportVMs.ps1
+## *ExportVMs.ps1*
 Create a report in Excel for all VM guests from multiple vCenter servers as listed in VCList.csv.
 
-## MigrateVMs.ps1
+## *MigrateVMs.ps1*
 Migrate a list of VMs from one cluster to another (including cross vCenter) preserving tags and custom attributes.
 
-## RJVMMetaDataMove.psm1
+## *RJVMMetaDataMove.psm1*
 ### Get-RJVMMetaData
 Get multiple useful attributes and settings for the specified VM.
 < An explanation for each attribute is included in the notes tab of the output of ExportVMs.ps1 > - todo
 
-## Get-RJVMHostData
+## *Get-RJVMHostData*
 Get multiple useful attributes and settings for the specified VM host.
 < An explanation for each attribute is included in the notes tab of the output of ExportHosts.ps1 > - todo.
 
-## Set-RJVMCustomAttributes
+## *Set-RJVMCustomAttributes*
 Set custom attributes for a specific VM.
 
 ## Write-RJLog
