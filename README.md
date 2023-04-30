@@ -18,14 +18,9 @@ Create a report in Excel for all VM guests from multiple vCenter servers as list
 Migrate a list of VMs from one cluster to another (including cross vCenter) preserving tags and custom attributes.
 
 - LogFile - Output log file.
-- VCenterList - List of vCenter servers to be processed.
-1. Servers
+- VCenterList - List of vCenter servers to be processed. (Servers)
 
-- VMListFile - CSV list of VMs to be moved .
-1. SourceVM
-2. TargetVMHost
-3. TargetNetwork
-4. TargetDatastore
+- VMListFile - CSV list of VMs to be moved. (SourceVM,TargetVMHost,TargetNetwork,TargetDatastore)
 
 ## *RJVMMetaDataMove.psm1*
 ### Get-RJVMMetaData
