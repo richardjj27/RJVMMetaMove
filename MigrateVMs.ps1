@@ -18,7 +18,7 @@ $VCenters = Import-CSV -Path $VCenterList
 ForEach($VCenter in $Vcenters){
     if($VCenter.Server.SubString(0,1) -ne "#") {
         Write-RJLog -LogFile $LogFile -Severity 0 -LogText "Connecting to $VCenter."
-        $VC = Connect-VIServer -Server $VCenter.Server -Credential $AdminCredentials | Out-Null
+        Connect-VIServer -Server $VCenter.Server -Credential $AdminCredentials | Out-Null
         # $VMHosts += get-VMHost -Server $VC
         # $VMGuests += Get-VM -Server $VC
     }
