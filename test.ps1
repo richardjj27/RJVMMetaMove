@@ -10,13 +10,15 @@ get-childitem "." | export-excel -path $XLOutputFile -WorksheetName "vmHostExpor
 $XLNotes = Import-CSV -Path ".\notes.csv"
 
 ForEach($XLNote in $XLNotes){
-    if($XLNote.target -eq "2") {
+    if($XLNote.target -eq "1") {
         $OutputObject = New-Object -TypeName PSObject
         $OutputObject | Add-Member -Name "Field" -MemberType NoteProperty -value $XLNote.field
         $OutputObject | Add-Member -Name "Description" -MemberType NoteProperty -value $XLNote.description
         $OutputObject | Add-Member -Name "Datatype" -MemberType NoteProperty -value $XLNote.datatype
         $OutputObject | Add-Member -Name "Origin" -MemberType NoteProperty -value $XLNote.origin
         $OutputObject | Add-Member -Name "Notes" -MemberType NoteProperty -value $XLNote.notes
+        $OutputObject | Add-Member -Name "Code" -MemberType NoteProperty -value $XLNote.Code
+        $OutputObject | Add-Member -Name "Todo" -MemberType NoteProperty -value $XLNote.Todo
         $OutputObject | export-excel -path $XLOutputFile -WorksheetName "Notes" -autosize -append
     }
 }

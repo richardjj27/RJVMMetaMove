@@ -26,7 +26,7 @@ foreach ($VMHost in $VMHosts){
     Get-RJVMHostData -VMHost $VMHost | select-object -ExcludeProperty DatastoreName,DatastoreType,DatastoreCapacityGB,Network,NetworkSwitch `
     -Property `
         Name, `
-        State, `
+        ConnectionState, `
         vCenter, `
         Cluster, `
         LocationCode, `

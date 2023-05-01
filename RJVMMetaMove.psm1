@@ -46,28 +46,28 @@ function Get-RJVMMetaData {
         $Private:OutputObject = New-Object -TypeName PSObject
 
         If ($oVMGuest) {
-            $OutputObject | Add-Member -Name "VMName" -MemberType NoteProperty -value $oVMGuest.name
-            $OutputObject | Add-Member -Name "VMID" -MemberType NoteProperty -value $oVMGuest.id
-            $OutputObject | Add-Member -Name "VMHostName" -MemberType NoteProperty -value $oVMGuest.ExtensionData.Guest.Hostname
+            $OutputObject | Add-Member -Name "Name" -MemberType NoteProperty -value $oVMGuest.name
+            $OutputObject | Add-Member -Name "ID" -MemberType NoteProperty -value $oVMGuest.id
+            $OutputObject | Add-Member -Name "HostName" -MemberType NoteProperty -value $oVMGuest.ExtensionData.Guest.Hostname
             $OutputObject | Add-Member -Name "Powerstate" -MemberType NoteProperty -value $oVMGuest.powerstate 
-            $OutputObject | Add-Member -Name "VMVersion" -MemberType NoteProperty -value $oVMGuest.extensiondata.config.version 
+            $OutputObject | Add-Member -Name "Version" -MemberType NoteProperty -value $oVMGuest.ExtensionData.Config.Version 
             $OutputObject | Add-Member -Name "MemoryGB" -MemberType NoteProperty -value $oVMGuest.memorygb 
             $OutputObject | Add-Member -Name "CPUCores" -MemberType NoteProperty -value $oVMGuest.NumCpu
             $OutputObject | Add-member -Name "TotalDiskSizeGB" -MemberType NoteProperty -Value (foreach-object {(Get-HardDisk -VM $oVMGuest | Measure-Object -Property CapacityGB -Sum).sum})
             $OutputObject | Add-Member -Name "UsedSpaceGB" -MemberType NoteProperty -value $oVMGuest.UsedSpaceGB
             $OutputObject | Add-Member -Name "ProvisionedSpaceGB" -MemberType NoteProperty -value $oVMGuest.ProvisionedSpaceGB
-            $OutputObject | Add-Member -Name "ToolsVersion" -MemberType NoteProperty -value $oVMGuest.extensiondata.guest.toolsversion 
-            $OutputObject | Add-Member -Name "GuestOS" -MemberType NoteProperty -value $oVMGuest.extensiondata.guest.guestfullname 
-            $OutputObject | Add-Member -Name "VMCreated" -MemberType NoteProperty -value $oVMGuest.extensiondata.config.createdate 
+            $OutputObject | Add-Member -Name "ToolsVersion" -MemberType NoteProperty -value $oVMGuest.ExtensionData.Guest.ToolsVersion 
+            $OutputObject | Add-Member -Name "GuestFullName" -MemberType NoteProperty -value $oVMGuest.ExtensionData.Guest.GuestFullName 
+            $OutputObject | Add-Member -Name "CreateDate" -MemberType NoteProperty -value $oVMGuest.ExtensionData.Config.CreateDate 
             $OutputObject | Add-Member -Name "vCenter" -MemberType NoteProperty -value $VCServer
-            $OutputObject | Add-Member -Name "Host" -MemberType NoteProperty -value (get-vmhost -vm $oVMGuest).name 
+            $OutputObject | Add-Member -Name "HostName" -MemberType NoteProperty -value (get-vmhost -vm $oVMGuest).name 
             $OutputObject | Add-Member -Name "HostVersion" -MemberType NoteProperty -value (get-vmhost -vm $oVMGuest).version 
             $OutputObject | Add-Member -Name "HostBuild" -MemberType NoteProperty -value (get-vmhost -vm $oVMGuest).build 
             $OutputObject | Add-Member -Name "Datacenter" -MemberType NoteProperty -value (Get-Datacenter -Server $VCServer -vm $oVMGuest.name) 
             $OutputObject | Add-Member -Name "Cluster" -MemberType NoteProperty -value (Get-Cluster -Server $VCServer -vm $oVMGuest.name) 
             $OutputObject | Add-Member -Name "ResourcePool" -MemberType NoteProperty -value (Get-ResourcePool -Server $VCServer -VM $oVMGuest) 
-            $OutputObject | Add-Member -Name "Folder" -MemberType NoteProperty -value $oVMGuest.folder
-            $OutputObject | Add-Member -Name "Notes" -MemberType NoteProperty -value $oVMGuest.notes
+            $OutputObject | Add-Member -Name "Folder" -MemberType NoteProperty -value $oVMGuest.Folder
+            $OutputObject | Add-Member -Name "Notes" -MemberType NoteProperty -value $oVMGuest.Notes
             $OutputObject | Add-Member -Name "Snapshot" -MemberType NoteProperty -value ($oVMGuest | get-snapshot).created 
             
             foreach ($CustomAttribute in $CustomAttributes) {
@@ -78,8 +78,8 @@ function Get-RJVMMetaData {
                 }
             }
             
-            $LocationCodeC = ((Get-Cluster -vm $oVMGuest.name).ExtensionData.customvalue |where-object {$_.key -eq (($CustomAttrList | where-object {$_.Name -eq 'Location ID' -and $_.TargetType -eq 'Cluster'}).key)}).value
-            $LocationCodeH = ((Get-VMHost -vm $oVMGuest.name).ExtensionData.customvalue |where-object {$_.key -eq (($CustomAttrList | where-object {$_.Name -eq 'Location ID' -and $_.TargetType -eq 'VMHost'}).key)}).value
+            $LocationCodeC = ((Get-Cluster -vm $oVMGuest.name).ExtensionData.CustomValue |where-object {$_.key -eq (($CustomAttrList | where-object {$_.Name -eq 'Location ID' -and $_.TargetType -eq 'Cluster'}).key)}).value
+            $LocationCodeH = ((Get-VMHost -vm $oVMGuest.name).ExtensionData.CustomValue |where-object {$_.key -eq (($CustomAttrList | where-object {$_.Name -eq 'Location ID' -and $_.TargetType -eq 'VMHost'}).key)}).value
 
             if ($LocationCodeC){
                 $LocationCode = $LocationCodeC
@@ -107,11 +107,6 @@ function Get-RJVMMetaData {
             $OutputObject | Add-Member -Name "DiskSizeGB" -MemberType NoteProperty -value (get-HardDisk -VM $oVMGuest).CapacityGB
 
             return $OutputObject
-        }
-
-        else {
-            Write-Error "Virtual machine not found."
-            return $null
         }
     }
 
@@ -151,11 +146,11 @@ function Get-RJVMHostData {
 
         if($oVMHost){
             $OutputObject | Add-Member -Name "Name" -MemberType NoteProperty -value $oVMHost.Name
-            $OutputObject | Add-Member -Name "State" -MemberType NoteProperty -value $oVMHost.ConnectionState
+            $OutputObject | Add-Member -Name "ConnectionState" -MemberType NoteProperty -value $oVMHost.ConnectionState
             $OutputObject | Add-Member -Name "vCenter" -MemberType NoteProperty -value $VCServer
             $OutputObject | Add-Member -Name "Cluster" -MemberType NoteProperty -value (Get-Cluster -vmhost $oVMHost) 
-            $OutputObject | Add-Member -Name "Vendor" -MemberType NoteProperty -value $oVMHost.extensiondata.hardware.systeminfo.Vendor
-            $OutputObject | Add-Member -Name "Model" -MemberType NoteProperty -value $oVMHost.extensiondata.hardware.systeminfo.Model
+            $OutputObject | Add-Member -Name "Vendor" -MemberType NoteProperty -value $oVMHost.ExtensionData.Hardware.SystemInfo.Vendor
+            $OutputObject | Add-Member -Name "Model" -MemberType NoteProperty -value $oVMHost.ExtensionData.Hardware.SystemInfo.Model
             
             if($oVMHost.ConnectionState -ne "NotResponding"){
                 $OutputObject | Add-Member -Name "SerialNumber" -MemberType NoteProperty -value ($oVMHost|get-esxcli -V2).hardware.platform.get.invoke().enclosureserialnumber
@@ -204,10 +199,6 @@ function Get-RJVMHostData {
             $OutputObject | Add-Member -Name "NetworkSwitch" -MemberType NoteProperty -value (Get-Virtualswitch -vmhost $oVMHost).name
 
             return $OutputObject
-        }
-        else {
-            Write-Error "VMHost not found."
-            return $null
         }
     }
 

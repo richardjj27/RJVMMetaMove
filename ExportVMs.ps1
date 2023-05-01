@@ -25,21 +25,21 @@ foreach ($VMGuest in $VMGuests){
     $completed = [math]::Round((($ProgressCount/$VMGuests.count) * 100), 2)
     Get-RJVMMetaData -VMName $VMGuest | select-object -ExcludeProperty AttributeName,AttributeValue,AttributeTag,NetworkAdaper,DiskName,DiskStoragePolicy,DiskID,DiskFileName,DiskLayoutStorageFormat,DiskLayoutPersistence,DiskLayoutDiskType,DiskSizeGB,DiskDatastore,Snapshot `
     -Property `
-        VMName, `
-        VMID, `
-        VMHostName, `
+        Name, `
+        ID, `
+        HostName, `
         Powerstate, `
-        VMVersion, `
+        Version, `
         MemoryGB, `
         CPUCores, `
         TotalDiskSizeGB, `
         UsedSpaceGB, `
         ProvisionedSpaceGB, `
         ToolsVersion, `
-        GuestOS, `
-        VMCreated, `
+        GuestFullName, `
+        CreateDate, `
         vCenter, `
-        Host, `
+        HostName, `
         HostVersion, `
         HostBuild, `
         Datacenter, `
