@@ -8,11 +8,13 @@ Import-Module .\RJVMMetaMove.psm1
 $XLOutputFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\Exports\vmGuestExport $(Get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
 $VCenterList = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\VCList.csv"
 
-$AdminCredentials = Get-Credential
+if (!($AdminCredentials)) {
+    $AdminCredentials = Get-Credential
+}
 
 $VCenters = Import-CSV -Path $VCenterList
 $VMGuests = $null
-ForEach($VCenter in $Vcenters){
+ForEach($VCenter in $Vcenters) {
     if($VCenter.Server.SubString(0,1) -ne "#") {
         $VC = Connect-VIServer -Server $VCenter.Server -Credential $AdminCredentials | Out-Null
         # $VMHosts += get-VMHost -Server $VC
@@ -20,7 +22,7 @@ ForEach($VCenter in $Vcenters){
     }
 }
 
-$VMGuests = $VMGuests | Get-Random -Count 10 # Limit results to a small number of servers for testing.
+$VMGuests = $VMGuests | Get-Random -Count 20 # Limit results to a small number of servers for testing.
 write-host "Processing"$VMGuests.count"VM Guests."
 $VMGuests = $VMGuests | Sort-Object -property VMHost,Name
 
@@ -72,7 +74,7 @@ foreach ($VMGuest in $VMGuests){
 }
 
 $XLNotes = Import-CSV -Path ".\notes.csv"
-ForEach($XLNote in $XLNotes){
+ForEach($XLNote in $XLNotes) {
     if($XLNote.target -eq "1") {
         $OutputObject = New-Object -TypeName PSObject
         $OutputObject | Add-Member -Name "Field" -MemberType NoteProperty -value $XLNote.field

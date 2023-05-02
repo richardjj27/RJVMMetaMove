@@ -8,7 +8,9 @@ Import-Module .\RJVMMetaMove.psm1
 $XLOutputFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\Exports\vmHostExport $(get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
 $VCenterList = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\VCList.csv"
 
-$AdminCredentials = Get-Credential
+if (!($AdminCredentials)) {
+    $AdminCredentials = Get-Credential
+}
 
 $VCenters = Import-CSV -Path $VCenterList
 $VMHosts = $null
@@ -20,7 +22,7 @@ ForEach($VCenter in $Vcenters){
     }
 }
 
-$VMHosts = $VMHosts | Get-Random -Count 10 # Limit results to a small number of servers for testing.
+$VMHosts = $VMHosts | Get-Random -Count 20 # Limit results to a small number of servers for testing.
 Write-Host "Processing"$VMHosts.count"VM Hosts."
 $VMHosts = $VMHosts | sort-object -property Name
 
