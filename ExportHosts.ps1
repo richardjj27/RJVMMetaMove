@@ -25,8 +25,6 @@ ForEach($VCenter in $VCenters){
 Write-Host "Processing"$VMHosts.count"VM Hosts."
 $VMHosts = $VMHosts | sort-object -property Name
 
-Exit
-
 $ProgressCount = 0
 foreach ($VMHost in $VMHosts){
     $completed = [math]::Round((($ProgressCount/$VMHosts.count) * 100), 2)
