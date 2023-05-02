@@ -13,16 +13,15 @@ if (!($AdminCredentials)) {
 }
 
 $VCenters = Import-CSV -Path $VCenterList
-$VMGuests = $null
 ForEach($VCenter in $VCenters) {
     if($VCenter.Server.SubString(0,1) -ne "#") {
-        $VC = Connect-VIServer -Server $VCenter.Server -Credential $AdminCredentials | Out-Null
-        # $VMHosts += get-VMHost -Server $VC
-        $VMGuests += Get-VM -Server $VC
+        Connect-VIServer -Server $VCenter.Server -Credential $AdminCredentials | Out-Null
+        # $VMHosts += get-VMHost -Server $VCenter.Server
+        $VMGuests += Get-VM -Server $VCenter.Server
     }
 }
 
-$VMGuests = $VMGuests | Get-Random -Count 20 # Limit results to a small number of servers for testing.
+# $VMGuests = $VMGuests | Get-Random -Count 20 # Limit results to a small number of servers for testing.
 write-host "Processing"$VMGuests.count"VM Guests."
 $VMGuests = $VMGuests | Sort-Object -property VMHost,Name
 

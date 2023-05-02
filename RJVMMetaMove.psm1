@@ -152,8 +152,8 @@ function Get-RJVMHostData {
             $OutputObject | Add-Member -Name "Model" -MemberType NoteProperty -value $oVMHost.ExtensionData.Hardware.SystemInfo.Model
             
             if($oVMHost.ConnectionState -ne "NotResponding"){
-                $OutputObject | Add-Member -Name "SerialNumber" -MemberType NoteProperty -value ($oVMHost|get-esxcli -V2).hardware.platform.get.invoke().enclosureserialnumber
-                $OutputObject | Add-Member -Name "IPMIIP" -MemberType NoteProperty -value ($oVMHost|get-esxcli -V2).hardware.ipmi.bmc.get.invoke().ipv4address
+                $OutputObject | Add-Member -Name "SerialNumber" -MemberType NoteProperty -value ($oVMHost|get-esxcli -V2).hardware.platform.get.invoke().enclosureserialnumber | Out-Null
+                $OutputObject | Add-Member -Name "IPMIIP" -MemberType NoteProperty -value ($oVMHost|get-esxcli -V2).hardware.ipmi.bmc.get.invoke().ipv4address | Out-Null
             }
 
             $OutputObject | Add-Member -Name "LicenseKey" -MemberType NoteProperty -value $oVMHost.LicenseKey
