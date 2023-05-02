@@ -15,7 +15,7 @@ $VMListFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\richard\vCenterExport\
 $AdminCredentials = Get-Credential
 $VCenters = Import-CSV -Path $VCenterList
 
-ForEach($VCenter in $Vcenters){
+ForEach($VCenter in $VCenters){
     if($VCenter.Server.SubString(0,1) -ne "#") {
         Write-RJLog -LogFile $LogFile -Severity 0 -LogText "Connecting to $VCenter."
         Connect-VIServer -Server $VCenter.Server -Credential $AdminCredentials | Out-Null
