@@ -1,20 +1,22 @@
 # Script to Export all VM Guests on multiple vCenter Servers to an Excel file.
 
-import-Module -Name vmware.powercli
-import-Module -Name ImportExcel
-import-Module .\RJVMMetaMove.psm1
+Import-Module -Name vmware.powercli
+Import-Module -Name ImportExcel
+Remove-Module RJVMMetaMove
+Import-Module .\RJVMMetaMove.psm1
 
 $XLOutputFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\Exports\vmGuestExport [$runtype] $(Get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
 $VCenterList = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\VCList.csv"
 
 $AdminCredentials = Get-Credential
-$VCenters = Import-CSV -Path $VCenterList
 
+$VCenters = Import-CSV -Path $VCenterList
+$VMGuests = $null
 ForEach($VCenter in $Vcenters){
     if($VCenter.Server.SubString(0,1) -ne "#") {
         $VC = Connect-VIServer -Server $VCenter.Server -Credential $AdminCredentials | Out-Null
         # $VMHosts += get-VMHost -Server $VC
-        $VMGuests += Get-VM -Server $VC
+        $VMGuests += Get-VM -Server $VC # | Where-Object {$_.MemoryGB -ge 128}
     }
 }
 
@@ -39,7 +41,6 @@ foreach ($VMGuest in $VMGuests){
         GuestFullName, `
         CreateDate, `
         vCenter, `
-        HostName, `
         HostVersion, `
         HostBuild, `
         Datacenter, `
@@ -68,9 +69,27 @@ foreach ($VMGuest in $VMGuests){
     $ProgressCount++
 }
 
+$XLNotes = Import-CSV -Path ".\notes.csv"
+ForEach($XLNote in $XLNotes){
+    if($XLNote.target -eq "1") {
+        $OutputObject = New-Object -TypeName PSObject
+        $OutputObject | Add-Member -Name "Field" -MemberType NoteProperty -value $XLNote.field
+        $OutputObject | Add-Member -Name "Description" -MemberType NoteProperty -value $XLNote.description
+        $OutputObject | Add-Member -Name "Datatype" -MemberType NoteProperty -value $XLNote.datatype
+        $OutputObject | Add-Member -Name "Origin" -MemberType NoteProperty -value $XLNote.origin
+        $OutputObject | Add-Member -Name "Notes" -MemberType NoteProperty -value $XLNote.notes
+        $OutputObject | Add-Member -Name "Code" -MemberType NoteProperty -value $XLNote.Code
+        $OutputObject | Add-Member -Name "Todo" -MemberType NoteProperty -value $XLNote.Todo
+        $OutputObject | export-excel -path $XLOutputFile -WorksheetName "Notes" -autosize -append
+    }
+}
+
 $exportXL = Export-Excel -Path $XLOutputFile -WorksheetName "vmGuestExport" -FreezeTopRowFirstColumn -autofilter -titlebold -autosize -PassThru
 $exportWS = $exportXL.vmGuestExport
 set-format $exportWS.workbook.worksheets['vmGuestExport'].cells -WrapText
+Close-ExcelPackage $exportXL
+
+$exportXL = Export-Excel -Path $XLOutputFile -WorksheetName "Notes" -FreezeTopRowFirstColumn -autofilter -titlebold -autosize -PassThru
 Close-ExcelPackage $exportXL
 
 Disconnect-VIServer -Server * -Confirm:$false

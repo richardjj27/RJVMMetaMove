@@ -1,15 +1,17 @@
 # Script to Export all VM Hosts on multiple vCenter Servers to an Excel file.
 
-import-Module -Name vmware.powercli
-import-Module -Name ImportExcel
-import-Module .\RJVMMetaMove.psm1
+Import-Module -Name vmware.powercli
+Import-Module -Name ImportExcel
+Remove-Module RJVMMetaMove
+Import-Module .\RJVMMetaMove.psm1
 
 $XLOutputFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\Exports\vmHostExport [$runtype] $(get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
 $VCenterList = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\VCList.csv"
 
 $AdminCredentials = Get-Credential
-$VCenters = Import-CSV -Path $VCenterList
 
+$VCenters = Import-CSV -Path $VCenterList
+$VMHosts = $null
 ForEach($VCenter in $Vcenters){
     if($VCenter.Server.SubString(0,1) -ne "#") {
         $VC = Connect-VIServer -Server $VCenter.Server -Credential $AdminCredentials | Out-Null
@@ -18,7 +20,7 @@ ForEach($VCenter in $Vcenters){
     }
 }
 
-$VMHosts = $VMHosts | sort-object -property name
+$VMHosts = $VMHosts | sort-object -property Name
 
 $ProgressCount = 0
 foreach ($VMHost in $VMHosts){
@@ -54,9 +56,27 @@ foreach ($VMHost in $VMHosts){
     $ProgressCount++
 }
 
+$XLNotes = Import-CSV -Path ".\notes.csv"
+ForEach($XLNote in $XLNotes){
+    if($XLNote.target -eq "2") {
+        $OutputObject = New-Object -TypeName PSObject
+        $OutputObject | Add-Member -Name "Field" -MemberType NoteProperty -value $XLNote.field
+        $OutputObject | Add-Member -Name "Description" -MemberType NoteProperty -value $XLNote.description
+        $OutputObject | Add-Member -Name "Datatype" -MemberType NoteProperty -value $XLNote.datatype
+        $OutputObject | Add-Member -Name "Origin" -MemberType NoteProperty -value $XLNote.origin
+        $OutputObject | Add-Member -Name "Notes" -MemberType NoteProperty -value $XLNote.notes
+        $OutputObject | Add-Member -Name "Code" -MemberType NoteProperty -value $XLNote.Code
+        $OutputObject | Add-Member -Name "Todo" -MemberType NoteProperty -value $XLNote.Todo
+        $OutputObject | export-excel -path $XLOutputFile -WorksheetName "Notes" -autosize -append
+    }
+}
+
 $exportXL = Export-Excel -Path $XLOutputFile -WorksheetName "vmHostExport" -FreezeTopRowFirstColumn -autofilter -titlebold -autosize -PassThru
 $exportWS = $exportXL.vmHostExport
 set-format $exportWS.workbook.worksheets['vmHostExport'].cells -WrapText
+Close-ExcelPackage $exportXL
+
+$exportXL = Export-Excel -Path $XLOutputFile -WorksheetName "Notes" -FreezeTopRowFirstColumn -autofilter -titlebold -autosize -PassThru
 Close-ExcelPackage $exportXL
 
 Disconnect-VIServer -Server * -Confirm:$false
