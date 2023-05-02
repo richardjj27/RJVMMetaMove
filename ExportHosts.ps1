@@ -5,7 +5,7 @@ Import-Module -Name ImportExcel
 Remove-Module RJVMMetaMove
 Import-Module .\RJVMMetaMove.psm1
 
-$XLOutputFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\Exports\vmHostExport [$runtype] $(get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
+$XLOutputFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\Exports\vmHostExport $(get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
 $VCenterList = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\VCList.csv"
 
 $AdminCredentials = Get-Credential
@@ -20,6 +20,8 @@ ForEach($VCenter in $Vcenters){
     }
 }
 
+$VMHosts = $VMHosts | Get-Random -Count 10 # Limit results to a small number of servers for testing.
+Write-Host "Processing"$VMHosts.count"VM Hosts."
 $VMHosts = $VMHosts | sort-object -property Name
 
 $ProgressCount = 0
@@ -52,7 +54,7 @@ foreach ($VMHost in $VMHosts){
         @{N='NetworkSwitch';E={ if ($_.NetworkSwitch) { $_.NetworkSwitch -join("`r")}}} `
         | export-excel -path $XLOutputFile -WorksheetName "vmHostExport" -autosize -append
 
-    Write-Progress -Activity "Scan Progress:" -Status "$completed% completed." -PercentComplete $completed
+    Write-Progress -Activity "Export Progress:" -Status "$completed% completed." -PercentComplete $completed
     $ProgressCount++
 }
 
@@ -73,10 +75,12 @@ ForEach($XLNote in $XLNotes){
 
 $exportXL = Export-Excel -Path $XLOutputFile -WorksheetName "vmHostExport" -FreezeTopRowFirstColumn -autofilter -titlebold -autosize -PassThru
 $exportWS = $exportXL.vmHostExport
-set-format $exportWS.workbook.worksheets['vmHostExport'].cells -WrapText
+Set-Format $exportWS.workbook.worksheets['vmHostExport'].cells -WrapText
 Close-ExcelPackage $exportXL
 
 $exportXL = Export-Excel -Path $XLOutputFile -WorksheetName "Notes" -FreezeTopRowFirstColumn -autofilter -titlebold -autosize -PassThru
 Close-ExcelPackage $exportXL
+
+Write-Progress -Activity "Export Progress:" -Status "Ready" -Completed
 
 Disconnect-VIServer -Server * -Confirm:$false

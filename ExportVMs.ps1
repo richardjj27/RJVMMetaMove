@@ -5,7 +5,7 @@ Import-Module -Name ImportExcel
 Remove-Module RJVMMetaMove
 Import-Module .\RJVMMetaMove.psm1
 
-$XLOutputFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\Exports\vmGuestExport [$runtype] $(Get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
+$XLOutputFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\Exports\vmGuestExport $(Get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
 $VCenterList = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\VCList.csv"
 
 $AdminCredentials = Get-Credential
@@ -16,10 +16,12 @@ ForEach($VCenter in $Vcenters){
     if($VCenter.Server.SubString(0,1) -ne "#") {
         $VC = Connect-VIServer -Server $VCenter.Server -Credential $AdminCredentials | Out-Null
         # $VMHosts += get-VMHost -Server $VC
-        $VMGuests += Get-VM -Server $VC # | Where-Object {$_.MemoryGB -ge 128}
+        $VMGuests += Get-VM -Server $VC 
     }
 }
 
+$VMGuests = $VMGuests | Get-Random -Count 10 # Limit results to a small number of servers for testing.
+write-host "Processing"$VMGuests.count"VM Guests."
 $VMGuests = $VMGuests | Sort-Object -property VMHost,Name
 
 $ProgressCount = 0
@@ -65,7 +67,7 @@ foreach ($VMGuest in $VMGuests){
         @{N='Snapshot';E={ if ($_.Snapshot) { $_.Snapshot -join("`r")}}} `
         | export-excel -path $XLOutputFile -WorksheetName "vmGuestExport" -autosize -append
 
-    Write-Progress -Activity "Scan Progress:" -Status "$completed% completed." -PercentComplete $completed
+    Write-Progress -Activity "Export Progress:" -Status "$completed% completed." -PercentComplete $completed
     $ProgressCount++
 }
 
@@ -86,10 +88,12 @@ ForEach($XLNote in $XLNotes){
 
 $exportXL = Export-Excel -Path $XLOutputFile -WorksheetName "vmGuestExport" -FreezeTopRowFirstColumn -autofilter -titlebold -autosize -PassThru
 $exportWS = $exportXL.vmGuestExport
-set-format $exportWS.workbook.worksheets['vmGuestExport'].cells -WrapText
+Set-Format $exportWS.workbook.worksheets['vmGuestExport'].cells -WrapText
 Close-ExcelPackage $exportXL
 
 $exportXL = Export-Excel -Path $XLOutputFile -WorksheetName "Notes" -FreezeTopRowFirstColumn -autofilter -titlebold -autosize -PassThru
 Close-ExcelPackage $exportXL
+
+Write-Progress -Activity "Export Progress:" -Status "Ready" -Completed
 
 Disconnect-VIServer -Server * -Confirm:$false
