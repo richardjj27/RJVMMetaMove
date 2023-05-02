@@ -60,7 +60,6 @@ function Get-RJVMMetaData {
             $OutputObject | Add-Member -Name "GuestFullName" -MemberType NoteProperty -value $oVMGuest.ExtensionData.Guest.GuestFullName 
             $OutputObject | Add-Member -Name "CreateDate" -MemberType NoteProperty -value $oVMGuest.ExtensionData.Config.CreateDate 
             $OutputObject | Add-Member -Name "vCenter" -MemberType NoteProperty -value $VCServer
-            $OutputObject | Add-Member -Name "HostName" -MemberType NoteProperty -value (get-vmhost -vm $oVMGuest).name 
             $OutputObject | Add-Member -Name "HostVersion" -MemberType NoteProperty -value (get-vmhost -vm $oVMGuest).version 
             $OutputObject | Add-Member -Name "HostBuild" -MemberType NoteProperty -value (get-vmhost -vm $oVMGuest).build 
             $OutputObject | Add-Member -Name "Datacenter" -MemberType NoteProperty -value (Get-Datacenter -Server $VCServer -vm $oVMGuest.name) 
