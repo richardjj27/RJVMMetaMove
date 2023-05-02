@@ -1,4 +1,0 @@
-# # TRZE Move
-# $TargetVMHost = "su-trze-vxrail01.emea.wdpr.disney.com"
-# $TargetNetwork = "Production_45"
-# $TargetDatastore = "VxRail-Virtual-SAN-Datastore-a86fa29d-0e1d-4b08-9bf1-633d0064c41d"
