@@ -7,7 +7,9 @@ Import-Module .\RJVMMetaMove.psm1
 
 $XLOutputFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\Exports\vmGuestExport $(Get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
 $VCenterList = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\VCList.csv"
+$VMGuests = $null
 
+# Only ask for credentials if they aren't already in memory.
 if (!($AdminCredentials)) {
     $AdminCredentials = Get-Credential
 }
@@ -27,7 +29,7 @@ $VMGuests = $VMGuests | Sort-Object -property VMHost,Name
 
 $ProgressCount = 0
 foreach ($VMGuest in $VMGuests){
-    $completed = [math]::Round((($ProgressCount/$VMGuests.count) * 100), 2)
+    $Completed = ('{0:d2}' -f [int]((($ProgressCount/$VMHosts.count) * 100)))
     Get-RJVMMetaData -VMName $VMGuest | select-object -ExcludeProperty AttributeName,AttributeValue,AttributeTag,NetworkAdaper,DiskName,DiskStoragePolicy,DiskID,DiskFileName,DiskLayoutStorageFormat,DiskLayoutPersistence,DiskLayoutDiskType,DiskSizeGB,DiskDatastore,Snapshot `
     -Property `
         Name, `
@@ -68,7 +70,7 @@ foreach ($VMGuest in $VMGuests){
         @{N='Snapshot';E={ if ($_.Snapshot) { $_.Snapshot -join("`r")}}} `
         | export-excel -path $XLOutputFile -WorksheetName "vmGuestExport" -autosize -append
 
-    Write-Progress -Activity "Export Progress:" -Status "$completed% completed." -PercentComplete $completed
+    Write-Progress -Activity $Completed"%" -Status $VMGuest -PercentComplete $Completed
     $ProgressCount++
 }
 
