@@ -7,13 +7,15 @@ Import-Module .\RJVMMetaMove.psm1
 
 $XLOutputFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\Exports\vmHostExport $(get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
 $VCenterList = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\vCenterExport\VCList.csv"
+$VMHosts = $null
 
+# Only ask for credentials if they aren't already in memory.
 if (!($AdminCredentials)) {
     $AdminCredentials = Get-Credential
 }
 
 $VCenters = Import-CSV -Path $VCenterList
-ForEach($VCenter in $VCenters){
+ForEach($VCenter in $VCenters) {
     if($VCenter.Server.SubString(0,1) -ne "#") {
         Connect-VIServer -Server $VCenter.Server -Credential $AdminCredentials | Out-Null
         $VMHosts += Get-VMHost -Server $VCenter.Server
@@ -27,7 +29,7 @@ $VMHosts = $VMHosts | sort-object -property Name
 
 $ProgressCount = 0
 foreach ($VMHost in $VMHosts){
-    $completed = [math]::Round((($ProgressCount/$VMHosts.count) * 100), 2)
+    $Completed = ('{0:d2}' -f [int]((($ProgressCount/$VMHosts.count) * 100)))
     Get-RJVMHostData -VMHost $VMHost | select-object -ExcludeProperty DatastoreName,DatastoreType,DatastoreCapacityGB,Network,NetworkSwitch `
     -Property `
         Name, `
@@ -55,12 +57,12 @@ foreach ($VMHost in $VMHosts){
         @{N='NetworkSwitch';E={ if ($_.NetworkSwitch) { $_.NetworkSwitch -join("`r")}}} `
         | export-excel -path $XLOutputFile -WorksheetName "vmHostExport" -autosize -append
 
-    Write-Progress -Activity "Export Progress:" -Status "$completed% completed." -PercentComplete $completed
+    Write-Progress -Activity $Completed"%" -Status $VMHost -PercentComplete $Completed
     $ProgressCount++
 }
 
 $XLNotes = Import-CSV -Path ".\notes.csv"
-ForEach($XLNote in $XLNotes){
+ForEach($XLNote in $XLNotes) {
     if($XLNote.target -eq "2") {
         $OutputObject = New-Object -TypeName PSObject
         $OutputObject | Add-Member -Name "Field" -MemberType NoteProperty -value $XLNote.field
