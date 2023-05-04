@@ -29,7 +29,7 @@ $VMGuests = $VMGuests | Sort-Object -property VMHost,Name
 
 $ProgressCount = 0
 foreach ($VMGuest in $VMGuests){
-    $Completed = ('{0:d2}' -f [int]((($ProgressCount/$VMHosts.count) * 100)))
+    $Completed = ('{0:d2}' -f [int]((($ProgressCount/$VMGuests.count) * 100)))
     Get-RJVMMetaData -VMName $VMGuest | select-object -ExcludeProperty AttributeName,AttributeValue,AttributeTag,NetworkAdaper,DiskName,DiskStoragePolicy,DiskID,DiskFileName,DiskLayoutStorageFormat,DiskLayoutPersistence,DiskLayoutDiskType,DiskSizeGB,DiskDatastore,Snapshot `
     -Property `
         Name, `
