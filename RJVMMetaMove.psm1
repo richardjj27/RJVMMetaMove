@@ -41,8 +41,12 @@ function Get-RJVMMetaData {
         $Private:CustomAttributes = $oVMGuest.ExtensionData.CustomValue
         $Private:CustomAttribute = $null
         $Private:HardDisks = get-HardDisk -VM $oVMGuest
+        $Private:LocalHardDisks = (((get-vmguest -VM $ovmguest).disks | select-object Path,CapacityGB,FreespaceGB) | sort-object path)
         $Private:HardDisk = $null
+        $Private:LocalHardDisk = $null
         $Private:OutputDiskDatastore = @()
+        #$Private:OutputLocalDisks = @()
+        $Private:OutputLocalDiskSize = $null
         $Private:OutputObject = New-Object -TypeName PSObject
 
         If ($oVMGuest) {
@@ -93,7 +97,18 @@ function Get-RJVMMetaData {
             $OutputObject | Add-Member -Name "AttributeTag" -MemberType NoteProperty -value (Get-TagAssignment -Entity $oVMGuest).Tag.Name
 
             foreach ($HardDisk in $HardDisks) { $OutputDiskDatastore += ($HardDisk.Filename | select-string '(?<=\[)[^]]+(?=\])').matches.value }
-        
+            foreach ($LocalHardDisk in $LocalHardDisks) {
+                $OutputLocalDiskSize += ($LocalHardDisk.CapacityGB - $LocalHardDisk.FreeSpaceGB)
+            }
+
+            #write-host $OutputLocalDiskSize
+            #write-host $OutputDiskFilename.count
+
+            $OutputObject | Add-Member -Name "LocalHardDisksPath" -MemberType NoteProperty -value $LocalHardDisks.path
+            $OutputObject | Add-Member -Name "LocalHardDisksCapacityGB" -MemberType NoteProperty -value $LocalHardDisks.CapacityGB
+            $OutputObject | Add-Member -Name "LocalHardDisksFreespaceGB" -MemberType NoteProperty -value $LocalHardDisks.FreespaceGB
+            $OutputObject | Add-Member -Name "LocalHardDiskTotalGB" -MemberType NoteProperty -value $OutputLocalDiskSize
+
             $OutputObject | Add-Member -Name "NetworkAdapter" -MemberType NoteProperty -value (Get-NetworkAdapter -VM $oVMGuest).NetworkName
             $OutputObject | Add-Member -Name "DiskLayoutStorageFormat" -MemberType NoteProperty -value (get-HardDisk -VM $oVMGuest).StorageFormat
             $OutputObject | Add-Member -Name "DiskLayoutPersistence" -MemberType NoteProperty -value (get-HardDisk -VM $oVMGuest).Persistence

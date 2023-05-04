@@ -23,14 +23,14 @@ ForEach($VCenter in $VCenters) {
     }
 }
 
-# $VMGuests = $VMGuests | Get-Random -Count 20 # Limit results to a small number of servers for testing.
+$VMGuests = $VMGuests | Get-Random -Count 10 # Limit results to a small number of servers for testing.
 write-host "Processing"$VMGuests.count"VM Guests."
 $VMGuests = $VMGuests | Sort-Object -property VMHost,Name
 
 $ProgressCount = 0
 foreach ($VMGuest in $VMGuests){
     $Completed = ('{0:d2}' -f [int]((($ProgressCount/$VMGuests.count) * 100)))
-    Get-RJVMMetaData -VMName $VMGuest | select-object -ExcludeProperty AttributeName,AttributeValue,AttributeTag,NetworkAdaper,DiskName,DiskStoragePolicy,DiskID,DiskFileName,DiskLayoutStorageFormat,DiskLayoutPersistence,DiskLayoutDiskType,DiskSizeGB,DiskDatastore,Snapshot `
+    Get-RJVMMetaData -VMName $VMGuest | select-object -ExcludeProperty AttributeName,AttributeValue,AttributeTag,NetworkAdaper,DiskName,DiskStoragePolicy,DiskID,DiskFileName,DiskLayoutStorageFormat,DiskLayoutPersistence,DiskLayoutDiskType,DiskSizeGB,LocalHardDisksPath,LocalHardDisksCapacityGB,LocalHardDisksFreespaceGB,DiskDatastore,Snapshot `
     -Property `
         Name, `
         ID, `
@@ -42,6 +42,7 @@ foreach ($VMGuest in $VMGuests){
         TotalDiskSizeGB, `
         UsedSpaceGB, `
         ProvisionedSpaceGB, `
+        LocalHardDiskTotalGB, `
         ToolsVersion, `
         GuestFullName, `
         CreateDate, `
@@ -66,6 +67,9 @@ foreach ($VMGuest in $VMGuests){
         @{N='DiskLayoutPersistence';E={ $_.DiskLayoutPersistence -join("`r")}}, `
         @{N='DiskLayoutDiskType';E={ if ($_.DiskLayoutDiskType) { $_.DiskLayoutDiskType -join("`r")}}}, `
         @{N='DiskSizeGB';E={ if ($_.DiskSizeGB) { $_.DiskSizeGB -join("`r")}}}, `
+        @{N='LocalHardDisksPath';E={ if ($_.LocalHardDisksPath) { $_.LocalHardDisksPath -join("`r")}}}, `
+        @{N='LocalHardDisksCapacityGB';E={ if ($_.LocalHardDisksCapacityGB) { $_.LocalHardDisksCapacityGB -join("`r")}}}, `
+        @{N='LocalHardDisksFreespaceGB';E={ if ($_.LocalHardDisksFreespaceGB) { $_.LocalHardDisksFreespaceGB -join("`r")}}}, `
         @{N='DiskDatastore';E={ if ($_.DiskDatastore) { $_.DiskDatastore -join("`r")}}}, `
         @{N='Snapshot';E={ if ($_.Snapshot) { $_.Snapshot -join("`r")}}} `
         | export-excel -path $XLOutputFile -WorksheetName "vmGuestExport" -autosize -append
