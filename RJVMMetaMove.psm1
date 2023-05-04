@@ -4,7 +4,7 @@
 # Need to tidy up variable names and follow some kind of convention and scoping.
 # Learn how to keep function parameters private (or not) and whether to pass an object or text is the right thing to do.
 #   https://stackoverflow.com/questions/27847809/in-powershell-how-to-set-variable-values-within-a-function-and-have-that-value
-# Add module version/ing.
+# Add module versioning.
 # Output each VMDK size + this total.  Capacity has many contributing factors so is worth reporting from many different points of view.
 # Export a notes tab in the results explaining each column.
 
