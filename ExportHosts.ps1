@@ -28,7 +28,7 @@ Write-Host "Processing"$VMHosts.count"VM Hosts."
 $VMHosts = $VMHosts | sort-object -property Name
 
 $ProgressCount = 0
-foreach ($VMHost in $VMHosts){
+foreach ($VMHost in $VMHosts) {
     $Completed = ('{0:d2}' -f [int]((($ProgressCount/$VMHosts.count) * 100)))
     Get-RJVMHostData -VMHost $VMHost | select-object -ExcludeProperty DatastoreName,DatastoreType,DatastoreCapacityGB,Network,NetworkSwitch `
     -Property `

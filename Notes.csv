@@ -39,7 +39,7 @@ Target,Field,Description,Datatype,Origin,Notes,Code,Todo
 1,LocalHardDisksPath,List of Disks as Seen From Within The VM,String Array,,,(get-VMGuest -VM $oVMGuest).Disks.Path,
 1,LocalHardDisksCapacityGB,List of Disks as Seen From Within The VM,String Array,,,(get-VMGuest -VM $oVMGuest).Disks.CapacityGB,
 1,LocalHardDisksFreespaceGB,List of Disks as Seen From Within The VM,String Array,,,(get-VMGuest -VM $oVMGuest).Disks.FreespaceGB,
-1,LocalHardDiskTotalGB,Total Used Space of Disks within the VM,Number,Total CapacityGB minus Total FreeSpaceGB,,,
+1,LocalHardDiskTotalGB,Total Used Space of Disks within the VM,Number,Total CapacityGB minus Total FreeSpaceGB.  If script is unable to access the local VM OS this value is taken from ProvisionedSpaceGB,,,
 2,Name,Host Name,String,Native PowerCLI,,$_.Name,
 2,ConnectionState,Power Status,String,Native PowerCLI,,$_.ConnectionState,
 2,vCenter,Parent vCenter Server,String,Native PowerCLI,,,

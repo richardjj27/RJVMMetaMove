@@ -101,6 +101,8 @@ function Get-RJVMMetaData {
                 $OutputLocalDiskSize += ($LocalHardDisk.CapacityGB - $LocalHardDisk.FreeSpaceGB)
             }
 
+            if ($null -eq $OutputLocalDiskSize -or $OutputLocalDiskSize -eq 0) { $OutputLocalDiskSize = $oVMGuest.ProvisionedSpaceGB }
+            
             #write-host $OutputLocalDiskSize
             #write-host $OutputDiskFilename.count
 
