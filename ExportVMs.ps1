@@ -23,7 +23,7 @@ ForEach($VCenter in $VCenters) {
     }
 }
 
-$VMGuests = $VMGuests | Get-Random -Count 2 # Limit results to a small number of servers for testing.
+# $VMGuests = $VMGuests | Get-Random -Count 4 # Limit results to a small number of servers for testing.
 write-host "Processing"$VMGuests.count"VM Guests."
 $VMGuests = $VMGuests | Sort-Object -property VMHost,Name
 
@@ -100,6 +100,8 @@ $exportWS = $exportXL.vmGuestExport
 Set-Format $exportWS.workbook.worksheets['vmGuestExport'].cells -WrapText
 8..11 | Set-ExcelColumn -Worksheet $exportWS.workbook.worksheets['vmGuestExport'] -NumberFormat "#,###.00"
 14 | Set-ExcelColumn -Worksheet $exportWS.workbook.worksheets['vmGuestExport'] -NumberFormat "Short Date"
+35 | Set-ExcelColumn -Worksheet $exportWS.workbook.worksheets['vmGuestExport'] -HorizontalAlignment "Right"
+37..38 | Set-ExcelColumn -Worksheet $exportWS.workbook.worksheets['vmGuestExport'] -HorizontalAlignment "Right"
 Close-ExcelPackage $exportXL
 
 $exportXL = Export-Excel -Path $XLOutputFile -WorksheetName "Notes" -FreezeTopRowFirstColumn -autofilter -titlebold -autosize -PassThru
