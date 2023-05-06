@@ -7,7 +7,7 @@ Import-Module .\RJVMMetaMove.psm1
 
 $XLOutputFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\RJVMMetaMove\Exports\vmHostExport $(get-date -Format "yyyy-MM-dd_HH.mm").xlsx"
 $VCenterList = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\RJVMMetaMove\VCList.csv"
-$VMHosts = $null
+$VMHosts = $Null
 
 # Only ask for credentials if they aren't already in memory.
 if (!($AdminCredentials)) {
@@ -15,8 +15,8 @@ if (!($AdminCredentials)) {
 }
 
 $VCenters = Import-CSV -Path $VCenterList
-ForEach($VCenter in $VCenters) {
-    if($VCenter.Server.SubString(0,1) -ne "#") {
+ForEach ($VCenter in $VCenters) {
+    if ($VCenter.Server.SubString(0, 1) -ne "#") {
         Connect-VIServer -Server $VCenter.Server -Credential $AdminCredentials | Out-Null
         $VMHosts += Get-VMHost -Server $VCenter.Server
         # $VMGuests += Get-VM -Server $VCenter.Server
@@ -28,10 +28,10 @@ Write-Host "Processing"$VMHosts.count"VM Hosts."
 $VMHosts = $VMHosts | sort-object -property Name
 
 $ProgressCount = 0
-foreach ($VMHost in $VMHosts) {
-    $Completed = ('{0:d2}' -f [int]((($ProgressCount/$VMHosts.count) * 100)))
-    Get-RJVMHostData -VMHost $VMHost | select-object -ExcludeProperty DatastoreName,DatastoreType,DatastoreCapacityGB,Network,NetworkSwitch `
-    -Property `
+ForEach ($VMHost in $VMHosts) {
+    $Completed = ('{0:d2}' -f [int]((($ProgressCount / $VMHosts.count) * 100)))
+    Get-RJVMHostData -VMHost $VMHost | select-object -ExcludeProperty DatastoreName, DatastoreType, DatastoreCapacityGB, Network, NetworkSwitch `
+        -Property `
         Name, `
         ConnectionState, `
         vCenter, `
@@ -50,20 +50,20 @@ foreach ($VMHost in $VMHosts) {
         MemoryTotalGB, `
         MaxEVCMode, `
         ProcessorType, `
-        @{N='DatastoreName';E={ if ($_.DatastoreName) { $_.DatastoreName -join("`r")}}}, `
-        @{N='DatastoreType';E={ if ($_.DatastoreType) { $_.DatastoreType -join("`r")}}}, `
-        @{N='DatastoreCapacityGB';E={ if ($_.DatastoreCapacityGB) { $_.DatastoreCapacityGB -join("`r")}}}, `
-        @{N='Network';E={ if ($_.Network) { $_.Network -join("`r")}}}, `
-        @{N='NetworkSwitch';E={ if ($_.NetworkSwitch) { $_.NetworkSwitch -join("`r")}}} `
-        | export-excel -path $XLOutputFile -WorksheetName "vmHostExport" -autosize -append
+    @{N = 'DatastoreName'; E = { if ($_.DatastoreName) { $_.DatastoreName -join ("`r") } } }, `
+    @{N = 'DatastoreType'; E = { if ($_.DatastoreType) { $_.DatastoreType -join ("`r") } } }, `
+    @{N = 'DatastoreCapacityGB'; E = { if ($_.DatastoreCapacityGB) { $_.DatastoreCapacityGB -join ("`r") } } }, `
+    @{N = 'Network'; E = { if ($_.Network) { $_.Network -join ("`r") } } }, `
+    @{N = 'NetworkSwitch'; E = { if ($_.NetworkSwitch) { $_.NetworkSwitch -join ("`r") } } } `
+    | export-excel -path $XLOutputFile -WorksheetName "vmHostExport" -autosize -append
 
     Write-Progress -Activity $Completed"%" -Status $VMHost -PercentComplete $Completed
     $ProgressCount++
 }
 
 $XLNotes = Import-CSV -Path ".\notes.csv"
-ForEach($XLNote in $XLNotes) {
-    if($XLNote.target -eq "2") {
+ForEach ($XLNote in $XLNotes) {
+    if ($XLNote.target -eq "2") {
         $OutputObject = New-Object -TypeName PSObject
         $OutputObject | Add-Member -Name "Field" -MemberType NoteProperty -value $XLNote.field
         $OutputObject | Add-Member -Name "Description" -MemberType NoteProperty -value $XLNote.description
