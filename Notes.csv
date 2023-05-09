@@ -55,7 +55,7 @@ Column,Target,Field,Description,Datatype,Origin,Notes,Code,Todo,Format
 8,1,TotalDiskSizeGB,Total Allocated Disk Space,Number,Calculated from actual disk assigned totals.,,,,"#,###.00"
 
 ,1,Base Host Config,,,,,,,
-1,2,Name,Host Name,String,Native PowerCLI Value,,$_.Name,,
+1,2,Name,Host Name,String,Native PowerCLI Value,,$_.Name,,R
 2,2,ConnectionState,Power Status of the Host,String,Native PowerCLI Value,,$_.ConnectionState,,
 13,2,Version,ESXi Version,String,Native PowerCLI Value,,$_.Version,,
 14,2,Build,ESXi Build Number,String,Native PowerCLI Value,,$_.Build,,
@@ -64,14 +64,14 @@ Column,Target,Field,Description,Datatype,Origin,Notes,Code,Todo,Format
 ,1,Parent and upstream,,,,,,,
 3,2,vCenter,Parent vCenter Server,String,Native PowerCLI Value,,,,
 4,2,Cluster,Parent Cluster,String,Native PowerCLI Value,,(Get-Cluster -vmhost $oVMHost),,
-19,2,DatastoreName,List of Available Datastore Names,String Array,Native PowerCLI Value,,,,
+19,2,DatastoreName,List of Available Datastore Names,String Array,Native PowerCLI Value,,,,R
 20,2,DatastoreType,List of Available Datastore Types,String Array,Native PowerCLI Value,,,,
 22,2,Network,List of Networks,String Array,Native PowerCLI Value,,(Get-VirtualPortGroup -vmhost $oVMHost).name,,
 23,2,NetworkSwitch,List of Network Switches,String Array,Native PowerCLI Value,,(Get-Virtualswitch -vmhost $oVMHost).name,,
 
 
 ,1,Capacity,,,,,,,
-11,2,NumCpu,Number of CPU Cores,Numeric,Native PowerCLI Value,,$_.NumCpu,,
+11,2,NumCpu,Number of CPU Cores,Numeric,Native PowerCLI Value,,$_.NumCpu,,"#,###.00"
 15,2,MemoryTotalGB,Total Memory / GB,Numeric,Native PowerCLI Value,,$_.MemoryTotalGB,,
 21,2,DatastoreCapacityGB,List of Datastore Capacities / GB,Numeric Array,Native PowerCLI Value,,,,R
 
