@@ -27,10 +27,18 @@ ForEach ($VCenter in $VCenters) {
 Write-Host "Processing"$VMHosts.count"VM Hosts."
 $VMHosts = $VMHosts | sort-object -property Name
 
+# read notes file for properties to display
+# if its an array, do the 'r thing.
+# If ($XLNote.Format.ToLower().contains("R")) {} # Format / Right
+#If ($XLNote.Format.ToLower().contains("L")) {} # Format / Left
+#If ($XLNote.Format.ToLower().contains("D")) {} # Format / Date
+#If ($XLNote.Format.ToLower().contains("T")) {} # Format / 2 digit number
+#If ($XLNote.Format.ToLower().contains("I")) {} # Format / Integer
+
 $ProgressCount = 0
 ForEach ($VMHost in $VMHosts) {
     $Completed = ('{0:d2}' -f [int]((($ProgressCount / $VMHosts.count) * 100)))
-    Get-RJVMHostData -VMHost $VMHost | select-object -ExcludeProperty DatastoreName, DatastoreType, DatastoreCapacityGB, Network, NetworkSwitch `
+    $Output = Get-RJVMHostData -VMHost $VMHost | select-object -ExcludeProperty DatastoreName, DatastoreType, DatastoreCapacityGB, Network, NetworkSwitch `
         -Property `
         Name, `
         ConnectionState, `
@@ -55,11 +63,14 @@ ForEach ($VMHost in $VMHosts) {
     @{N = 'DatastoreCapacityGB'; E = { if ($_.DatastoreCapacityGB) { $_.DatastoreCapacityGB -join ("`r") } } }, `
     @{N = 'Network'; E = { if ($_.Network) { $_.Network -join ("`r") } } }, `
     @{N = 'NetworkSwitch'; E = { if ($_.NetworkSwitch) { $_.NetworkSwitch -join ("`r") } } } `
-    | export-excel -path $XLOutputFile -WorksheetName "vmHostExport" -autosize -append
+    
+    $Output | export-excel -path $XLOutputFile -WorksheetName "vmHostExport" -autosize -append
 
     Write-Progress -Activity $Completed"%" -Status $VMHost -PercentComplete $Completed
     $ProgressCount++
 }
+
+# This section needs a bit of a rewrite to include cell formatting logic too.
 
 $XLNotes = Import-CSV -Path ".\notes.csv"
 ForEach ($XLNote in $XLNotes) {
