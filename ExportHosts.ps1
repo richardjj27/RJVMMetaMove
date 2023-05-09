@@ -30,7 +30,6 @@ $VMHosts = $VMHosts | sort-object -property Name
 # read notes file for properties to display
 # if its an array, do the 'r thing.
 
-
 $XLNotes = Import-CSV -Path ".\notes.csv"
 $XLNotes = $XLNotes |sort-object -Property { [int]$_.Column }
 $ObjectOrder = @()
@@ -84,11 +83,11 @@ ForEach ($XLNote in $XLNotes) {
         write-host $xlnote.Format.toupper()
 
         # Need to get the column index.
-        If ($XLNote.Format.ToUpper().contains("R")) {Set-ExcelColumn -Worksheet $exportXL.workbook.worksheets['vmHostExport'] -Column 1 -HorizontalAlignment "Right"} # Format / Right
-        If ($XLNote.Format.ToUpper().contains("L")) {Set-ExcelColumn -Worksheet $exportXL.workbook.worksheets['vmHostExport'] -Column 1 -HorizontalAlignment "Left"} # Format / } # Format / Left
-        If ($XLNote.Format.ToUpper().contains("D")) {Set-ExcelColumn -worksheet $exportXL.Workbook.Worksheets['vmHostExport'] -Column 1 -NumberFormat 'Short Date'} # Format / Date
-        If ($XLNote.Format.ToUpper().contains("T")) {Set-ExcelColumn -Worksheet $exportXL.workbook.worksheets['vmHostExport'] -Column 1 -NumberFormat "#,###.00"} # Format / 2 digit number
-        If ($XLNote.Format.ToUpper().contains("I")) {Set-ExcelColumn -Worksheet $exportXL.workbook.worksheets['vmHostExport'] -Column 1 -NumberFormat "#,###"} # Format / Integer
+        If ($XLNote.Format.ToUpper().contains("R")) {Set-ExcelColumn -Worksheet $exportXL.workbook.worksheets['vmHostExport'] -Column $XLNote.Column -HorizontalAlignment "Right"} # Format / Right
+        If ($XLNote.Format.ToUpper().contains("L")) {Set-ExcelColumn -Worksheet $exportXL.workbook.worksheets['vmHostExport'] -Column $XLNote.Column -HorizontalAlignment "Left"} # Format / } # Format / Left
+        If ($XLNote.Format.ToUpper().contains("D")) {Set-ExcelColumn -worksheet $exportXL.Workbook.Worksheets['vmHostExport'] -Column $XLNote.Column -NumberFormat 'Short Date'} # Format / Date
+        If ($XLNote.Format.ToUpper().contains("T")) {Set-ExcelColumn -Worksheet $exportXL.workbook.worksheets['vmHostExport'] -Column $XLNote.Column -NumberFormat "#,###.00"} # Format / 2 digit number
+        If ($XLNote.Format.ToUpper().contains("I")) {Set-ExcelColumn -Worksheet $exportXL.workbook.worksheets['vmHostExport'] -Column $XLNote.Column -NumberFormat "#,###"} # Format / Integer
     }
 }
 
