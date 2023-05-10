@@ -1,89 +1,64 @@
 Column,Target,Field,Description,Datatype,Origin,Notes,Code,Todo,Format
-
-,1,Base VM config,,,,,,,,
 1,1,Name,Guest Name,String,Native PowerCLI Value,,$_.Name,,
-4,1,Powerstate,Power/Connection State,String,Native PowerCLI Value,,$_.Powerstate,,
-3,1,HostName,VMs DNS Name,String,Native PowerCLI Value,,$_..ExtensionData.Guest.Hostname,***,
-12,1,GuestFullName,VM Tools Detected Guest Name,String,Native PowerCLI Value,,$_.ExtensionData.Guest.Guestfullname,***,
-11,1,ToolsVersion,Installed VM Tools Version,String,Native PowerCLI Value,,$_.ToolsVersion,,
 2,1,ID,VM UID,String,Native PowerCLI Value,,$_.ID,,
+3,1,HostName,VMs DNS Name,String,Native PowerCLI Value,,$_..ExtensionData.Guest.Hostname,***,
+4,1,Powerstate,Power/Connection State,String,Native PowerCLI Value,,$_.Powerstate,,
 5,1,Version,Hardware Version,String,Native PowerCLI Value,,$_.extensiondata.config.version,,
-13,1,CreateDate,Date Created,Date,Native PowerCLI Value,,$_.ExtensionData.Config.CreateDate,,D
-24,1,LocationCode,Four Letter Location Code,String,Derived from LocationID custom attribute.,If guest attribute is empty use the same attribute on the parent host.,,,
-
-,1,VM Capacity,,,,,,,,
 6,1,MemoryGB,Allocation Memory /GB,Number,Native PowerCLI Value,,$_.MemoryGB,,
 7,1,CPUCores,Allocated CPU Cores,Number,Native PowerCLI Value,,$_.NumCpu,,
-
-,1,Host and upstream Information,,,,,,,,
-14,1,vCenter,Parent vCenter Server,String,Native PowerCLI Value,,,,
-15,1,XHostName,Parent Host Name,String,Native PowerCLI Value,,(get-vmhost -vm $oVMGuest).name,***,
-16,1,HostVersion,Parent ESXi Host Version,String,Native PowerCLI Value,,(get-vmhost -vm $oVMGuest).version,,
-17,1,HostBuild,Parent ESXi Host Build Number,String,Native PowerCLI Value,,(get-vmhost -vm $oVMGuest).build,,
-18,1,Datacenter,Parent Datacentre,String,Native PowerCLI Value,,(Get-Datacenter -Server $VCServer -vm $oVMGuest.name),,
-19,1,Cluster,Parent Cluster,String,Native PowerCLI Value,,(Get-Cluster -Server $VCServer -vm $oVMGuest.name),,
-20,1,ResourcePool,Parent Resource Pool,String,Native PowerCLI Value,,(Get-ResourcePool -Server $VCServer -VM $oVMGuest),,
-21,1,Folder,Parent Folder,String,Native PowerCLI Value,,$_.Folder,,
-
-,1,Metadata,,,,,,,,
-22,1,Notes,Notes,String,Native PowerCLI Value,,$_.Notes,,
-25,1,AttributeName,List of Attribute Names,String Array,Native PowerCLI Value,,,,
-26,1,AttributeValue,List of Attribute Values,String Array,Native PowerCLI Value,,,,
-27,1,AttributeTag,List of Tags,String Array,Native PowerCLI Value,,(Get-TagAssignment -Entity $oVMGuest).Tag.Name,,
-
-,1,Storage Capacity,,,,,,,,
+8,1,TotalDiskSizeGB,Total Allocated Disk Space,Number,Calculated from actual disk assigned totals.,,,,T
 9,1,UsedSpaceGB,Total Used Disk Space / GB,Number,Native PowerCLI Value,,$_.UsedSpaceGB,,T
 10,1,ProvisionedSpaceGB,Total Provisoned Disk Space / GB,Number,Native PowerCLI Value,,$_.ProvisionedSpaceGB,,T
-
-29,1,DiskLayoutStorageFormat,List of Disks / Layout,String Array,Native PowerCLI Value,,(get-HardDisk -VM $oVMGuest).StorageFormat,,
-30,1,DiskLayoutPersistence,List of Disks / Persistence,String Array,Native PowerCLI Value,,(get-HardDisk -VM $oVMGuest).Persistence,,
-31,1,DiskLayoutDiskType,List of Disks / Type,String Array,Native PowerCLI Value,,(get-HardDisk -VM $oVMGuest).DiskType,,
-32,1,DiskDatastore,List of Disks / Datastores,String Array,Native PowerCLI Value,,,,
-33,1,DiskName,List of Disks / Names,String Array,Native PowerCLI Value,,(get-HardDisk -VM $oVMGuest).Name,,
-34,1,DiskID,List of Disks / ID,String Array,Native PowerCLI Value,,(Get-SpbmEntityConfiguration -HardDisk (Get-HardDisk -VM $oVMGuest)).id,,
-35,1,DiskStoragePolicy,List of Disks / Storage Policy,String Array,Native PowerCLI Value,,(Get-SpbmEntityConfiguration -HardDisk (Get-HardDisk -VM $oVMGuest)).storagepolicy.name,,
-36,1,DiskFileName,List of Disks / File Name,String Array,Native PowerCLI Value,,(get-HardDisk -VM $oVMGuest).Filename,,
-37,1,DiskSizeGB,List of Disks / Size GB,String Array,Native PowerCLI Value,,(get-HardDisk -VM $oVMGuest).CapacityGB,,R
-38,1,LocalHardDisksPath,List of Disks as Seen From Within The VM,String Array,,,(get-VMGuest -VM $oVMGuest).Disks.Path,,
-39,1,LocalHardDisksCapacityGB,List of Disks as Seen From Within The VM,String Array,,,(get-VMGuest -VM $oVMGuest).Disks.CapacityGB,,R
-40,1,LocalHardDisksFreespaceGB,List of Disks as Seen From Within The VM,String Array,,,(get-VMGuest -VM $oVMGuest).Disks.FreespaceGB,,R
-41,1,LocalHardDiskTotalGB,Total Used Space of Disks within the VM,Number,Total CapacityGB minus Total FreeSpaceGB,If script is unable to access the local VM OS this value is taken from ProvisionedSpaceGB,,,T
-
-,1,Other,,,,,,,
-23,1,Snapshot,List of Snapshots by Date Created.,String Array,Native PowerCLI Value,,($oVMGuest | get-snapshot).created,,
-28,1,NetworkAdapter,List of Network Adapters,String Array,Native PowerCLI Value,,(Get-NetworkAdapter -VM $oVMGuest).NetworkName,,
-8,1,TotalDiskSizeGB,Total Allocated Disk Space,Number,Calculated from actual disk assigned totals.,,,,T
-
-,1,Base Host Config,,,,,,,
+11,1,ToolsVersion,Installed VM Tools Version,String,Native PowerCLI Value,,$_.ToolsVersion,,
+12,1,GuestFullName,VM Tools Detected Guest Name,String,Native PowerCLI Value,,$_.ExtensionData.Guest.Guestfullname,***,
+13,1,CreateDate,Date Created,Date,Native PowerCLI Value,,$_.ExtensionData.Config.CreateDate,,D
+14,1,vCenter,Parent vCenter Server,String,Native PowerCLI Value,,,,
+15,1,HostVersion,Parent ESXi Host Version,String,Native PowerCLI Value,,(get-vmhost -vm $oVMGuest).version,,
+16,1,HostBuild,Parent ESXi Host Build Number,String,Native PowerCLI Value,,(get-vmhost -vm $oVMGuest).build,,
+17,1,Datacenter,Parent Datacentre,String,Native PowerCLI Value,,(Get-Datacenter -Server $VCServer -vm $oVMGuest.name),,
+18,1,Cluster,Parent Cluster,String,Native PowerCLI Value,,(Get-Cluster -Server $VCServer -vm $oVMGuest.name),,
+19,1,ResourcePool,Parent Resource Pool,String,Native PowerCLI Value,,(Get-ResourcePool -Server $VCServer -VM $oVMGuest),,
+20,1,Folder,Parent Folder,String,Native PowerCLI Value,,$_.Folder,,
+21,1,Notes,Notes,String,Native PowerCLI Value,,$_.Notes,,
+22,1,Snapshot,List of Snapshots by Date Created.,String Array,Native PowerCLI Value,,($oVMGuest | get-snapshot).created,,
+23,1,LocationCode,Four Letter Location Code,String,Derived from LocationID custom attribute.,If guest attribute is empty use the same attribute on the parent host.,,,
+24,1,AttributeName,List of Attribute Names,String Array,Native PowerCLI Value,,,,
+25,1,AttributeValue,List of Attribute Values,String Array,Native PowerCLI Value,,,,
+26,1,AttributeTag,List of Tags,String Array,Native PowerCLI Value,,(Get-TagAssignment -Entity $oVMGuest).Tag.Name,,
+27,1,NetworkAdapter,List of Network Adapters,String Array,Native PowerCLI Value,,(Get-NetworkAdapter -VM $oVMGuest).NetworkName,,
+28,1,DiskLayoutStorageFormat,List of Disks / Layout,String Array,Native PowerCLI Value,,(get-HardDisk -VM $oVMGuest).StorageFormat,,
+29,1,DiskLayoutPersistence,List of Disks / Persistence,String Array,Native PowerCLI Value,,(get-HardDisk -VM $oVMGuest).Persistence,,
+30,1,DiskLayoutDiskType,List of Disks / Type,String Array,Native PowerCLI Value,,(get-HardDisk -VM $oVMGuest).DiskType,,
+31,1,DiskDatastore,List of Disks / Datastores,String Array,Native PowerCLI Value,,,,
+32,1,DiskName,List of Disks / Names,String Array,Native PowerCLI Value,,(get-HardDisk -VM $oVMGuest).Name,,
+33,1,DiskID,List of Disks / ID,String Array,Native PowerCLI Value,,(Get-SpbmEntityConfiguration -HardDisk (Get-HardDisk -VM $oVMGuest)).id,,
+34,1,DiskStoragePolicy,List of Disks / Storage Policy,String Array,Native PowerCLI Value,,(Get-SpbmEntityConfiguration -HardDisk (Get-HardDisk -VM $oVMGuest)).storagepolicy.name,,
+35,1,DiskFileName,List of Disks / File Name,String Array,Native PowerCLI Value,,(get-HardDisk -VM $oVMGuest).Filename,,
+36,1,DiskSizeGB,List of Disks / Size GB,String Array,Native PowerCLI Value,,(get-HardDisk -VM $oVMGuest).CapacityGB,,R
+37,1,LocalHardDisksPath,List of Disks as Seen From Within The VM,String Array,,,(get-VMGuest -VM $oVMGuest).Disks.Path,,
+38,1,LocalHardDisksCapacityGB,List of Disks as Seen From Within The VM,String Array,,,(get-VMGuest -VM $oVMGuest).Disks.CapacityGB,,R
+39,1,LocalHardDisksFreespaceGB,List of Disks as Seen From Within The VM,String Array,,,(get-VMGuest -VM $oVMGuest).Disks.FreespaceGB,,R
+40,1,LocalHardDiskTotalGB,Total Used Space of Disks within the VM,Number,Total CapacityGB minus Total FreeSpaceGB,If script is unable to access the local VM OS this value is taken from ProvisionedSpaceGB,,,T
 1,2,Name,Host Name,String,Native PowerCLI Value,,$_.Name,,
 2,2,ConnectionState,Power Status of the Host,String,Native PowerCLI Value,,$_.ConnectionState,,
-13,2,Version,ESXi Version,String,Native PowerCLI Value,,$_.Version,,
-14,2,Build,ESXi Build Number,String,Native PowerCLI Value,,$_.Build,,
-18,2,LocationCode,Four Letter Location Code,String,Derived from LocationID custom attribute.,,,,
-
-,1,Parent and upstream,,,,,,,
 3,2,vCenter,Parent vCenter Server,String,Native PowerCLI Value,,,,
 4,2,Cluster,Parent Cluster,String,Native PowerCLI Value,,(Get-Cluster -vmhost $oVMHost),,
-19,2,DatastoreName,List of Available Datastore Names,String Array,Native PowerCLI Value,,,,
-20,2,DatastoreType,List of Available Datastore Types,String Array,Native PowerCLI Value,,,,
-22,2,Network,List of Networks,String Array,Native PowerCLI Value,,(Get-VirtualPortGroup -vmhost $oVMHost).name,,
-23,2,NetworkSwitch,List of Network Switches,String Array,Native PowerCLI Value,,(Get-Virtualswitch -vmhost $oVMHost).name,,
-
-
-,1,Capacity,,,,,,,
-11,2,NumCpu,Number of CPU Cores,Numeric,Native PowerCLI Value,,$_.NumCpu,,
-15,2,MemoryTotalGB,Total Memory / GB,Numeric,Native PowerCLI Value,,$_.MemoryTotalGB,,
-21,2,DatastoreCapacityGB,List of Datastore Capacities / GB,Numeric Array,Native PowerCLI Value,,,,R
-
-,1,Hardware,,,,,,,
 5,2,Vendor,Hardware Vendor,String,Native PowerCLI Value,,$oVMHost.ExtensionData.Hardware.SystemInfo.Vendor,,
 6,2,Model,Hardware Model,String,Native PowerCLI Value,,$oVMHost.ExtensionData.Hardware.SystemInfo.Model,,
 7,2,SerialNumber,Hardware Serial Number,String,Native PowerCLI Value,,($oVMHost|get-esxcli -V2).hardware.platform.get.invoke().enclosureserialnumber,,
 8,2,PSNT,"Dell VxRail ""DE"" Serial Number",String,Native PowerCLI Value,,,,
 9,2,IPMIIP,iDRAC/iLo IP Address,String,Native PowerCLI Value,,($oVMHost|get-esxcli -V2).hardware.ipmi.bmc.get.invoke().ipv4address,,
+10,2,LicenseKey,Associated VM License Key,String,Native PowerCLI Value,,$_.LicenseKey,,
+11,2,NumCpu,Number of CPU Cores,Numeric,Native PowerCLI Value,,$_.NumCpu,,
+12,2,CryptoState,Crypography Capability State,String,Native PowerCLI Value,,$_.CryptoState,,
+13,2,Version,ESXi Version,String,Native PowerCLI Value,,$_.Version,,
+14,2,Build,ESXi Build Number,String,Native PowerCLI Value,,$_.Build,,
+15,2,MemoryTotalGB,Total Memory / GB,Numeric,Native PowerCLI Value,,$_.MemoryTotalGB,,
 16,2,MaxEVCMode,CPU Capability Level,String,Native PowerCLI Value,,$_.MaxEVCMode,,
 17,2,ProcessorType,CPU Type,String,Native PowerCLI Value,,$_.ProcessorType,,
-
-,1,Misc,,,,,,,
-10,2,LicenseKey,Associated VM License Key,String,Native PowerCLI Value,,$_.LicenseKey,,
-12,2,CryptoState,Crypography Capability State,String,Native PowerCLI Value,,$_.CryptoState,,
+18,2,LocationCode,Four Letter Location Code,String,Derived from LocationID custom attribute.,,,,
+19,2,DatastoreName,List of Available Datastore Names,String Array,Native PowerCLI Value,,,,
+20,2,DatastoreType,List of Available Datastore Types,String Array,Native PowerCLI Value,,,,
+21,2,DatastoreCapacityGB,List of Datastore Capacities / GB,Numeric Array,Native PowerCLI Value,,,,R
+22,2,Network,List of Networks,String Array,Native PowerCLI Value,,(Get-VirtualPortGroup -vmhost $oVMHost).name,,
+23,2,NetworkSwitch,List of Network Switches,String Array,Native PowerCLI Value,,(Get-Virtualswitch -vmhost $oVMHost).name,,
