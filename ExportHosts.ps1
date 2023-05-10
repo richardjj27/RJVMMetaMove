@@ -30,14 +30,14 @@ $VMHosts = $VMHosts | sort-object -property Name
 # read notes file for properties to display
 # if its an array, do the 'r thing.
 
-$XLNotes = Import-CSV -Path ".\notes.csv"
-$XLNotes = $XLNotes |sort-object -Property { [int]$_.Column }
+$XLFormats = Import-CSV -Path ".\ExcelFormat.csv"
+$XLFormats = $XLFormats | sort-object -Property { [int]$_.Column }
 $ObjectOrder = @()
-ForEach ($XLNote in $XLNotes) {
+ForEach ($XLFormat in $XLFormats) {
     
-    if ($XLNote.target -eq "2" -and $XLNote.Column) {
-        $ObjectOrder += $XLNote.Field
-        $ObjectFormat += $XLNote.Format
+    if ($XLFormat.target -eq "2" -and $XLFormat.Column) {
+        $ObjectOrder += $XLFormat.Field
+        $ObjectFormat += $XLFormat.Format
     }
 }
 
@@ -51,6 +51,7 @@ ForEach ($VMHost in $VMHosts) {
     $Output = Get-RJVMHostData -VMHost $VMHost | Select-Object -Property $ObjectOrder
     $Output.DatastoreName = $Output.DatastoreName -join ("`r")
     $Output.DatastoreType = $Output.DatastoreType -join ("`r")
+    #$Output.DatastoreCapacityGB = ('{0:N0}' -f $Output.DatastoreCapacityGB) -join ("`r")
     $Output.DatastoreCapacityGB = $Output.DatastoreCapacityGB -join ("`r")
     $Output.Network = $Output.Network -join ("`r")
     $Output.NetworkSwitch = $Output.NetworkSwitch -join ("`r")
@@ -62,46 +63,53 @@ ForEach ($VMHost in $VMHosts) {
 
 # This section needs a bit of a rewrite to include cell formatting logic too.
 
-$XLNotes = Import-CSV -Path ".\Notes.csv"
+#exit
 
-exit
+
+
+ForEach ($XLFormat in $XLFormats) {
+    if ($XLFormat.target -eq "2") {
+        $OutputObject = New-Object -TypeName PSObject
+        $OutputObject | Add-Member -Name "Field" -MemberType NoteProperty -value $XLFormat.field
+        $OutputObject | Add-Member -Name "Description" -MemberType NoteProperty -value $XLFormat.description
+        $OutputObject | Add-Member -Name "Datatype" -MemberType NoteProperty -value $XLFormat.datatype
+        $OutputObject | Add-Member -Name "Origin" -MemberType NoteProperty -value $XLFormat.origin
+        $OutputObject | Add-Member -Name "Notes" -MemberType NoteProperty -value $XLFormat.notes
+        $OutputObject | Add-Member -Name "Code" -MemberType NoteProperty -value $XLFormat.Code
+        $OutputObject | Add-Member -Name "Todo" -MemberType NoteProperty -value $XLFormat.Todo
+        $OutputObject | export-excel -path $XLOutputFile -WorksheetName "Notes" -autosize -append
+    }
+}
 
 $ExportXL = Open-ExcelPackage -path $XLOutputFile
-
-ForEach ($XLNote in $XLNotes) {
-    if ($XLNote.target -eq "2") {
-        $OutputObject = New-Object -TypeName PSObject
-        $OutputObject | Add-Member -Name "Field" -MemberType NoteProperty -value $XLNote.field
-        $OutputObject | Add-Member -Name "Description" -MemberType NoteProperty -value $XLNote.description
-        $OutputObject | Add-Member -Name "Datatype" -MemberType NoteProperty -value $XLNote.datatype
-        $OutputObject | Add-Member -Name "Origin" -MemberType NoteProperty -value $XLNote.origin
-        $OutputObject | Add-Member -Name "Notes" -MemberType NoteProperty -value $XLNote.notes
-        $OutputObject | Add-Member -Name "Code" -MemberType NoteProperty -value $XLNote.Code
-        $OutputObject | Add-Member -Name "Todo" -MemberType NoteProperty -value $XLNote.Todo
-        $OutputObject | export-excel -path $XLOutputFile -WorksheetName "Notes" -autosize -append
-
-        write-host $xlnote.Format.toupper()
+ForEach ($XLFormat in $XLFormats) {
+    if ($XLFormat.target -eq "2") {
+        # write-host $XLFormat.Format.toupper()
 
         # Need to get the column index.
-        If ($XLNote.Format.ToUpper().contains("R")) {Set-ExcelColumn -Worksheet $exportXL.workbook.worksheets['vmHostExport'] -Column $XLNote.Column -HorizontalAlignment "Right"} # Format / Right
-        If ($XLNote.Format.ToUpper().contains("L")) {Set-ExcelColumn -Worksheet $exportXL.workbook.worksheets['vmHostExport'] -Column $XLNote.Column -HorizontalAlignment "Left"} # Format / } # Format / Left
-        If ($XLNote.Format.ToUpper().contains("D")) {Set-ExcelColumn -worksheet $exportXL.Workbook.Worksheets['vmHostExport'] -Column $XLNote.Column -NumberFormat 'Short Date'} # Format / Date
-        If ($XLNote.Format.ToUpper().contains("T")) {Set-ExcelColumn -Worksheet $exportXL.workbook.worksheets['vmHostExport'] -Column $XLNote.Column -NumberFormat "#,###.00"} # Format / 2 digit number
-        If ($XLNote.Format.ToUpper().contains("I")) {Set-ExcelColumn -Worksheet $exportXL.workbook.worksheets['vmHostExport'] -Column $XLNote.Column -NumberFormat "#,###"} # Format / Integer
+        If ($XLFormat.Format.ToUpper().contains("R")) {Set-ExcelColumn -Worksheet $exportXL.workbook.worksheets['vmHostExport'] -Column $XLFormat.Column -HorizontalAlignment "Right"} # Format / Right
+        If ($XLFormat.Format.ToUpper().contains("L")) {Set-ExcelColumn -Worksheet $exportXL.workbook.worksheets['vmHostExport'] -Column $XLFormat.Column -HorizontalAlignment "Left"} # Format / } # Format / Left
+        If ($XLFormat.Format.ToUpper().contains("D")) {Set-ExcelColumn -worksheet $exportXL.Workbook.Worksheets['vmHostExport'] -Column $XLFormat.Column -NumberFormat 'Short Date'} # Format / Date
+        If ($XLFormat.Format.ToUpper().contains("T")) {Set-ExcelColumn -Worksheet $exportXL.workbook.worksheets['vmHostExport'] -Column $XLFormat.Column -NumberFormat "#,###.00"} # Format / 2 digit number
+        If ($XLFormat.Format.ToUpper().contains("I")) {Set-ExcelColumn -Worksheet $exportXL.workbook.worksheets['vmHostExport'] -Column $XLFormat.Column -NumberFormat "#,###"} # Format / Integer
     }
 }
 
 Close-ExcelPackage -excelpackage $exportXL
 
+$ExportXL = Export-Excel -Path $XLOutputFile -WorksheetName "vmHostExport" -FreezeTopRowFirstColumn -autofilter -titlebold -autosize -PassThru
+Close-ExcelPackage $exportXL
+
+$ExportXL = Export-Excel -Path $XLOutputFile -WorksheetName "Notes" -FreezeTopRowFirstColumn -autofilter -titlebold -autosize -PassThru
+Close-ExcelPackage $exportXL
+
 $ExportXL = Open-ExcelPackage -path $XLOutputFile
 Set-Format $exportXL.workbook.worksheets['vmHostExport'].cells -WrapText
 Close-ExcelPackage -excelpackage $exportXL
 
-$exportXL = Export-Excel -Path $XLOutputFile -WorksheetName "vmHostExport" -FreezeTopRowFirstColumn -autofilter -titlebold -autosize -PassThru
-Close-ExcelPackage $exportXL
 
-$exportXL = Export-Excel -Path $XLOutputFile -WorksheetName "Notes" -FreezeTopRowFirstColumn -autofilter -titlebold -autosize -PassThru
-Close-ExcelPackage $exportXL
+
+
 
 
 # Set-ExcelColumn -worksheet $exportXL.Workbook.Worksheets['vmHostExport'] -column 14 -numberformat 'Short Date'

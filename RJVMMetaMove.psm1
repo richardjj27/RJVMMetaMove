@@ -40,8 +40,8 @@ function Get-RJVMMetaData {
         $Private:LocationCode = $Null
         $Private:CustomAttributes = $oVMGuest.ExtensionData.CustomValue
         $Private:CustomAttribute = $Null
-        $Private:HardDisks = get-HardDisk -VM $oVMGuest
-        $Private:LocalHardDisks = (((get-vmguest -VM $ovmguest).disks | select-object Path, CapacityGB, FreespaceGB) | sort-object path)
+        $Private:HardDisks = Get-HardDisk -VM $oVMGuest
+        $Private:LocalHardDisks = (((Get-VMGuest -VM $ovmguest).disks | select-object Path, CapacityGB, FreespaceGB) | sort-object path)
         $Private:HardDisk = $Null
         $Private:LocalHardDisk = $Null
         $Private:OutputDiskDatastore = @()
@@ -70,7 +70,7 @@ function Get-RJVMMetaData {
             $OutputObject | Add-Member -Name "ResourcePool" -MemberType NoteProperty -value (Get-ResourcePool -Server $VCServer -VM $oVMGuest) 
             $OutputObject | Add-Member -Name "Folder" -MemberType NoteProperty -value $oVMGuest.Folder
             $OutputObject | Add-Member -Name "Notes" -MemberType NoteProperty -value $oVMGuest.Notes
-            $OutputObject | Add-Member -Name "Snapshot" -MemberType NoteProperty -value ($oVMGuest | get-snapshot).created 
+            $OutputObject | Add-Member -Name "Snapshot" -MemberType NoteProperty -value ($oVMGuest | get-snapshot).Created 
             
             ForEach ($CustomAttribute in $CustomAttributes) {
                 if ($CustomAttribute.Value) {
@@ -113,7 +113,7 @@ function Get-RJVMMetaData {
             $OutputObject | Add-Member -Name "DiskDatastore" -MemberType NoteProperty -value $outputDiskDatastore
             $OutputObject | Add-Member -Name "DiskName" -MemberType NoteProperty -value (get-HardDisk -VM $oVMGuest).Name
             $OutputObject | Add-Member -Name "DiskID" -MemberType NoteProperty -value (Get-SpbmEntityConfiguration -HardDisk (Get-HardDisk -VM $oVMGuest)).id
-            $OutputObject | Add-Member -Name "DiskStoragePolicy" -MemberType NoteProperty -value (Get-SpbmEntityConfiguration -HardDisk (Get-HardDisk -VM $oVMGuest)).storagepolicy.name
+            $OutputObject | Add-Member -Name "DiskStoragePolicy" -MemberType NoteProperty -value (Get-SpbmEntityConfiguration -HardDisk (Get-HardDisk -VM $oVMGuest)).StoragePolicy.Name
             $OutputObject | Add-Member -Name "DiskFileName" -MemberType NoteProperty -value (get-HardDisk -VM $oVMGuest).Filename
             $OutputObject | Add-Member -Name "DiskSizeGB" -MemberType NoteProperty -value (get-HardDisk -VM $oVMGuest).CapacityGB
 
@@ -195,10 +195,10 @@ function Get-RJVMHostData {
                 $OutputObject | Add-Member -Name "DatastoreCapacityGB" -MemberType NoteProperty -value $Datastores.CapacityGB
             }
 
-            if (($oVMHost.extensiondata.hardware.systeminfo.Model).substring(0, 6) -eq 'vxrail') {
+            if (($oVMHost.extensiondata.hardware.systeminfo.Model).Substring(0, 6) -eq 'vxrail') {
                 ForEach ($Datastore in $Datastores) {
-                    if ($Datastore.name.substring(0, 2) -eq 'DE') {
-                        $OutputObject | Add-Member -Name "PSNT" -MemberType NoteProperty -value $Datastore.Name.substring(0, 14)
+                    if ($Datastore.Name.Substring(0, 2) -eq 'DE') {
+                        $OutputObject | Add-Member -Name "PSNT" -MemberType NoteProperty -value $Datastore.Name.Substring(0, 14)
                     }
                 }
             }
@@ -206,7 +206,7 @@ function Get-RJVMHostData {
                 $OutputObject | Add-Member -Name "PSNT" -MemberType NoteProperty -value $Null
             }
 
-            $OutputObject | Add-Member -Name "Network" -MemberType NoteProperty -value (Get-VirtualPortGroup -vmhost $oVMHost).name
+            $OutputObject | Add-Member -Name "NetworkAdapter" -MemberType NoteProperty -value (Get-VirtualPortGroup -vmhost $oVMHost).name
             $OutputObject | Add-Member -Name "NetworkSwitch" -MemberType NoteProperty -value (Get-Virtualswitch -vmhost $oVMHost).name
 
             return $OutputObject
