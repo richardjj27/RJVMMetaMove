@@ -1,0 +1,3 @@
+SourceVM,TargetVMHost,TargetNetwork,TargetDatastore
+TestVMRename,"su-gbeq-vxrail01.emea.wdpr.disney.com","OnAir-GBEQ-86","VxRail-Virtual-SAN-Datastore-1c4bfaa4-60d6-4ddf-87df-419f47e931a6"
+TestVM02,"su-gbeq-vxrail01.emea.wdpr.disney.com","OnAir-GBEQ-86","VxRail-Virtual-SAN-Datastore-1c4bfaa4-60d6-4ddf-87df-419f47e931a6"
