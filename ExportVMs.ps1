@@ -23,8 +23,8 @@ ForEach ($VCenter in $VCenters) {
     }
 }
 
-$VMGuests = $VMGuests | Get-Random -Count 4 # Limit results to a small number of servers for testing.
-write-host "Processing"$VMGuests.count"VM Guests."
+# $VMGuests = $VMGuests | Get-Random -Count 4 # Limit results to a small number of servers for testing.
+Write-Host "Processing"$VMGuests.count"VM Guests."
 $VMGuests = $VMGuests | Sort-Object -property VMHost, Name
 
 $XLFormats = Import-CSV -Path ".\ExcelFormat.csv"
@@ -62,34 +62,13 @@ ForEach ($VMGuest in $VMGuests) {
     $Output.Snapshot = $Output.Snapshot -join ("`r")
     
 
-    # @{N = 'AttributeName'; E = { if ($_.AttributeName) { $_.AttributeName -join ("`r") } } }, #22
-    # @{N = 'AttributeValue'; E = { if ($_.AttributeValue) { $_.AttributeValue -join ("`r") } } }, #23
-    # @{N = 'AttributeTag'; E = { if ($_.AttributeTag) { $_.AttributeTag -join ("`r") } } }, #24
-    # @{N = 'Network'; E = { if ($_.NetworkAdapter) { $_.NetworkAdapter -join ("`r") } } }, #25
-    # @{N = 'DiskName'; E = { if ($_.DiskName) { $_.DiskName -join ("`r") } } }, #26
-    # @{N = 'DiskID'; E = { if ($_.DiskID) { $_.DiskID -join ("`r") } } }, #27
-    # @{N = 'DiskFileName'; E = { if ($_.DiskFileName) { $_.DiskFileName -join ("`r") } } }, #28
-    # @{N = 'DiskStoragePolicy'; E = { if ($_.DiskStoragePolicy) { $_.DiskStoragePolicy -join ("`r") } } }, #29
-    # @{N = 'DiskLayoutStorageFormat'; E = { if ($_.DiskLayoutStorageFormat) { $_.DiskLayoutStorageFormat -join ("`r") } } }, #30
-    # @{N = 'DiskLayoutPersistence'; E = { $_.DiskLayoutPersistence -join ("`r") } }, #31
-    # @{N = 'DiskLayoutDiskType'; E = { if ($_.DiskLayoutDiskType) { $_.DiskLayoutDiskType -join ("`r") } } }, #32
-    # @{N = 'DiskSizeGB'; E = { if ($_.DiskSizeGB) { $_.DiskSizeGB -join ("`r") } } }, #33 R
-    # TotalDiskSizeGB, #34 N
-    # @{N = 'LocalHardDisksPath'; E = { if ($_.LocalHardDisksPath) { $_.LocalHardDisksPath -join ("`r") } } }, #35
-    # @{N = 'LocalHardDisksCapacityGB'; E = { if ($_.LocalHardDisksCapacityGB) { $_.LocalHardDisksCapacityGB -join ("`r") } } }, #36 R
-    # @{N = 'LocalHardDisksFreespaceGB'; E = { if ($_.LocalHardDisksFreespaceGB) { $_.LocalHardDisksFreespaceGB -join ("`r") } } }, #37 R
-    # LocalHardDiskTotalGB, #38 N
-    # @{N = 'DiskDatastore'; E = { if ($_.DiskDatastore) { $_.DiskDatastore -join ("`r") } } }, #39
-    # @{N = 'Snapshot'; E = { if ($_.Snapshot) { $_.Snapshot -join ("`r") } } } ` #40
-    
-    
+
     $Output | export-excel -path $XLOutputFile -WorksheetName "vmGuestExport" -autosize -append
 
     Write-Progress -Activity $Completed"%" -Status $VMGuest -PercentComplete $Completed
     $ProgressCount++
 }
 
-#$XLFormats = Import-CSV -Path ".\ExcelFormat.csv"
 ForEach ($XLFormat in $XLFormats) {
     if ($XLFormat.target -eq "1") {
         $OutputObject = New-Object -TypeName PSObject
@@ -107,14 +86,11 @@ ForEach ($XLFormat in $XLFormats) {
 $ExportXL = Open-ExcelPackage -path $XLOutputFile
 ForEach ($XLFormat in $XLFormats) {
     if ($XLFormat.target -eq "1") {
-        # write-host $XLFormat.Format.toupper()
-
-        # Need to get the column index.
-        If ($XLFormat.Format.ToUpper().contains("R")) {Set-ExcelColumn -Worksheet $exportXL.workbook.worksheets['vmGuestExport'] -Column $XLFormat.Column -HorizontalAlignment "Right"} # Format / Right
-        If ($XLFormat.Format.ToUpper().contains("L")) {Set-ExcelColumn -Worksheet $exportXL.workbook.worksheets['vmGuestExport'] -Column $XLFormat.Column -HorizontalAlignment "Left"} # Format / } # Format / Left
+        If ($XLFormat.Format.ToUpper().contains("R")) {Set-ExcelColumn -Worksheet $exportXL.Workbook.Worksheets['vmGuestExport'] -Column $XLFormat.Column -HorizontalAlignment "Right"} # Format / Right
+        If ($XLFormat.Format.ToUpper().contains("L")) {Set-ExcelColumn -Worksheet $exportXL.Workbook.Worksheets['vmGuestExport'] -Column $XLFormat.Column -HorizontalAlignment "Left"} # Format / } # Format / Left
         If ($XLFormat.Format.ToUpper().contains("D")) {Set-ExcelColumn -worksheet $exportXL.Workbook.Worksheets['vmGuestExport'] -Column $XLFormat.Column -NumberFormat 'Short Date'} # Format / Date
-        If ($XLFormat.Format.ToUpper().contains("T")) {Set-ExcelColumn -Worksheet $exportXL.workbook.worksheets['vmGuestExport'] -Column $XLFormat.Column -NumberFormat "#,###.00"} # Format / 2 digit number
-        If ($XLFormat.Format.ToUpper().contains("I")) {Set-ExcelColumn -Worksheet $exportXL.workbook.worksheets['vmGuestExport'] -Column $XLFormat.Column -NumberFormat "#,###"} # Format / Integer
+        If ($XLFormat.Format.ToUpper().contains("T")) {Set-ExcelColumn -Worksheet $exportXL.Workbook.Worksheets['vmGuestExport'] -Column $XLFormat.Column -NumberFormat "#,###.00"} # Format / 2 digit number
+        If ($XLFormat.Format.ToUpper().contains("I")) {Set-ExcelColumn -Worksheet $exportXL.Workbook.Worksheets['vmGuestExport'] -Column $XLFormat.Column -NumberFormat "#,###"} # Format / Integer
     }
 }
 
@@ -127,27 +103,8 @@ $ExportXL = Export-Excel -Path $XLOutputFile -WorksheetName "Notes" -FreezeTopRo
 Close-ExcelPackage $exportXL
 
 $ExportXL = Open-ExcelPackage -path $XLOutputFile
-Set-Format $ExportXL.workbook.worksheets['vmGuestExport'].cells -WrapText
+Set-Format $ExportXL.Workbook.Worksheets['vmGuestExport'].cells -WrapText
 Close-ExcelPackage -excelpackage $ExportXL
-
-
-
-
-# $ExportXL = Export-Excel -Path $XLOutputFile -WorksheetName "vmGuestExport" -FreezeTopRowFirstColumn -autofilter -titlebold -autosize -PassThru
-# $exportWS = $exportXL.vmGuestExport
-# Set-Format $exportWS.workbook.worksheets['vmGuestExport'].cells -WrapText
-# 8..9 | Set-ExcelColumn -Worksheet $exportWS.workbook.worksheets['vmGuestExport'] -NumberFormat "#,###.00"
-# 34 | Set-ExcelColumn -Worksheet $exportWS.workbook.worksheets['vmGuestExport'] -NumberFormat "#,###.00"
-# 38 | Set-ExcelColumn -Worksheet $exportWS.workbook.worksheets['vmGuestExport'] -NumberFormat "#,###.00"
-# 12 | Set-ExcelColumn -Worksheet $exportWS.workbook.worksheets['vmGuestExport'] -NumberFormat "Short Date"
-# 33 | Set-ExcelColumn -Worksheet $exportWS.workbook.worksheets['vmGuestExport'] -HorizontalAlignment "Right"
-# 36..37 | Set-ExcelColumn -Worksheet $exportWS.workbook.worksheets['vmGuestExport'] -HorizontalAlignment "Right"
-# Close-ExcelPackage $exportXL
-# $exportXL = Export-Excel -Path $XLOutputFile -WorksheetName "Notes" -FreezeTopRowFirstColumn -autofilter -titlebold -autosize -PassThru
-# Close-ExcelPackage $exportXL
-
-
-
 
 Write-Progress -Activity "Export Progress:" -Status "Ready" -Completed
 
