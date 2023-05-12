@@ -12,13 +12,13 @@ function Get-RJVMMetaData {
     [CmdletBinding()]
     <#
     .SYNOPSIS
-        A function to collect metadata from a spefified VM.
+        A function to collect metadata from a specified VM.
 
     .DESCRIPTION
         The function returns an array object containing the VM's Tags and attributes.
 
     .EXAMPLE
-        $VMData = Get-RJVMMetaData -VMName "TheBigServer"
+        $VMData = Get-RJVMMetaData -VMName "TheServer"
     #>
 
     param (
@@ -73,7 +73,7 @@ function Get-RJVMMetaData {
             $OutputObject | Add-Member -Name "Snapshot" -MemberType NoteProperty -value ($oVMGuest | get-snapshot).Created 
             
             ForEach ($CustomAttribute in $CustomAttributes) {
-                if ($CustomAttribute.Value) {
+                If ($CustomAttribute.Value) {
                     $outputCustomAttrKey += $CustomAttribute.key
                     $outputCustomAttrName += ($CustomAttrList | where-object { $_.Key -eq $CustomAttribute.Key }).Name
                     $outputCustomAttrValue += $CustomAttribute.value
@@ -83,7 +83,7 @@ function Get-RJVMMetaData {
             $LocationCodeC = ((Get-Cluster -vm $oVMGuest.name).ExtensionData.CustomValue | where-object { $_.key -eq (($CustomAttrList | where-object { $_.Name -eq 'Location ID' -and $_.TargetType -eq 'Cluster' }).key) }).value
             $LocationCodeH = ((Get-VMHost -vm $oVMGuest.name).ExtensionData.CustomValue | where-object { $_.key -eq (($CustomAttrList | where-object { $_.Name -eq 'Location ID' -and $_.TargetType -eq 'VMHost' }).key) }).value
 
-            if ($LocationCodeC) {
+            If ($LocationCodeC) {
                 $LocationCode = $LocationCodeC
             }
             else {
@@ -100,7 +100,7 @@ function Get-RJVMMetaData {
                 $OutputLocalDiskSize += ($LocalHardDisk.CapacityGB - $LocalHardDisk.FreeSpaceGB)
             }
 
-            if ($Null -eq $OutputLocalDiskSize -or $OutputLocalDiskSize -eq 0) { $OutputLocalDiskSize = $oVMGuest.ProvisionedSpaceGB }
+            If ($Null -eq $OutputLocalDiskSize -or $OutputLocalDiskSize -eq 0) { $OutputLocalDiskSize = $oVMGuest.ProvisionedSpaceGB }
 
             $OutputObject | Add-Member -Name "LocalHardDisksPath" -MemberType NoteProperty -value $LocalHardDisks.path
             $OutputObject | Add-Member -Name "LocalHardDisksCapacityGB" -MemberType NoteProperty -value $LocalHardDisks.CapacityGB
@@ -170,20 +170,18 @@ function Get-RJVMHostData {
         # EMEA recovery keys stored on \\gbcp-isilon100\eiss\backup\vmware\vxrailsecureboot - migrate to Password Manager Pro
 
 
-        if ($oVMHost) {
+        If ($oVMHost) {
             $OutputObject | Add-Member -Name "Name" -MemberType NoteProperty -value $oVMHost.Name
             $OutputObject | Add-Member -Name "ConnectionState" -MemberType NoteProperty -value $oVMHost.ConnectionState
             $OutputObject | Add-Member -Name "vCenter" -MemberType NoteProperty -value $VCServer
             $OutputObject | Add-Member -Name "Cluster" -MemberType NoteProperty -value (Get-Cluster -vmhost $oVMHost) 
             $OutputObject | Add-Member -Name "Vendor" -MemberType NoteProperty -value $oVMHost.ExtensionData.Hardware.SystemInfo.Vendor
             $OutputObject | Add-Member -Name "Model" -MemberType NoteProperty -value $oVMHost.ExtensionData.Hardware.SystemInfo.Model
-            Try { $OutputObject | Add-Member -Name "TPMKey" -MemberType NoteProperty -value ( Get-EsxCli -VMHost $oVMHost | Select-Object $_.System.Settings.Encryption.Recovery.List()) } Catch {}
             
-            
-
-            if ($oVMHost.ConnectionState -ne "NotResponding") {
-                $OutputObject | Add-Member -Name "SerialNumber" -MemberType NoteProperty -value ($oVMHost | get-esxcli -V2).hardware.platform.get.invoke().enclosureserialnumber | Out-Null
-                $OutputObject | Add-Member -Name "IPMIIP" -MemberType NoteProperty -value ($oVMHost | get-esxcli -V2).hardware.ipmi.bmc.get.invoke().ipv4address | Out-Null
+            If ($oVMHost.ConnectionState -ne "NotResponding") {
+                Try { $OutputObject | Add-Member -Name "TPMRID" -MemberType NoteProperty -value ($oVMHost | Get-EsxCli).System.Settings.Encryption.Recovery.List().RecoveryID | Out-Null } Catch {}
+                Try { $OutputObject | Add-Member -Name "SerialNumber" -MemberType NoteProperty -value ($oVMHost | Get-EsxCli -V2).hardware.platform.get.invoke().Enclosureserialnumber | Out-Null }  Catch {}
+                Try { $OutputObject | Add-Member -Name "IPMIIP" -MemberType NoteProperty -value ($oVMHost | Get-esxCli -V2).hardware.ipmi.bmc.get.invoke().ipv4address | Out-Null } Catch {}
             }
 
             $OutputObject | Add-Member -Name "LicenseKey" -MemberType NoteProperty -value $oVMHost.LicenseKey
@@ -198,7 +196,7 @@ function Get-RJVMHostData {
             $LocationCodeC = ((Get-Cluster -vmhost $ovmhost.name).ExtensionData.customvalue | where-object { $_.key -eq (($CustomAttrList | where-object { $_.Name -eq 'Location ID' -and $_.TargetType -eq 'Cluster' }).key) }).value
             $LocationCodeH = ((Get-VMHost -name $ovmhost.name).ExtensionData.customvalue | where-object { $_.key -eq (($CustomAttrList | where-object { $_.Name -eq 'Location ID' -and $_.TargetType -eq 'VMHost' }).key) }).value
 
-            if ($LocationCodeC) {
+            If ($LocationCodeC) {
                 $LocationCode = $LocationCodeC
             }
             else {
@@ -207,15 +205,15 @@ function Get-RJVMHostData {
 
             $OutputObject | Add-Member -Name "LocationCode" -MemberType NoteProperty -value $LocationCode
 
-            if ($Datastores) {
+            If ($Datastores) {
                 $OutputObject | Add-Member -Name "DatastoreName" -MemberType NoteProperty -value $Datastores.Name
                 $OutputObject | Add-Member -Name "DatastoreType" -MemberType NoteProperty -value $Datastores.Type
                 $OutputObject | Add-Member -Name "DatastoreCapacityGB" -MemberType NoteProperty -value $Datastores.CapacityGB
             }
 
-            if (($oVMHost.extensiondata.hardware.systeminfo.Model).Substring(0, 6) -eq 'vxrail') {
+            If (($oVMHost.extensiondata.hardware.systeminfo.Model).Substring(0, 6) -eq 'vxrail') {
                 ForEach ($Datastore in $Datastores) {
-                    if ($Datastore.Name.Substring(0, 2) -eq 'DE') {
+                    If ($Datastore.Name.Substring(0, 2) -eq 'DE') {
                         $OutputObject | Add-Member -Name "PSNT" -MemberType NoteProperty -value $Datastore.Name.Substring(0, 14)
                     }
                 }
@@ -266,14 +264,14 @@ function Set-RJVMCustomAttributes {
         $Private:CustomAttributeTag
         $Private:AttributeCount = 0
 
-        if ($AllCustomAttributeName) {
+        If ($AllCustomAttributeName) {
             ForEach ($CustomAttributeName in $AllCustomAttributeName) {
                 $TargetVM | Set-Annotation -CustomAttribute $CustomAttributeName -Value $AllCustomAttributeValue[$AttributeCount] | Out-Null
                 $AttributeCount++
             }
         }
 
-        if ($AllCustomAttributeTag) {
+        If ($AllCustomAttributeTag) {
             ForEach ($CustomAttributeTag in $AllCustomAttributeTag) {
                 New-TagAssignment -Tag $CustomAttributeTag -Entity $TargetVM -Server $TargetVC | Out-Null
             }
@@ -307,10 +305,10 @@ function Write-RJLog {
 
     Process {
         $Private:LogOutput = (get-date -format "yyyy/MM/dd HH:mm:ss | ")
-        if ($Severity -eq 0) { $LogOutput += "INFO  | " }
-        if ($Severity -eq 1) { $LogOutput += "DEBUG | " }
-        if ($Severity -eq 2) { $LogOutput += "WARN  | " }
-        if ($Severity -eq 3) { $LogOutput += "CRIT  | " }
+        If ($Severity -eq 0) { $LogOutput += "INFO  | " }
+        If ($Severity -eq 1) { $LogOutput += "DEBUG | " }
+        If ($Severity -eq 2) { $LogOutput += "WARN  | " }
+        If ($Severity -eq 3) { $LogOutput += "CRIT  | " }
 
         add-content $LogFile $LogOutput$LogText
         write-host $LogOutput$LogText

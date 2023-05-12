@@ -2,14 +2,14 @@
 
 Import-Module -Name vmware.powercli
 Import-Module -Name ImportExcel
-Remove-Module RJVMMetaMove
+Try {Remove-Module RJVMMetaMove } Catch {}
 Import-Module .\RJVMMetaMove.psm1
 
 $XLOutputFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\RJVMMetaMove\Exports\vmHostExport $(Get-Date -Format "yyyy-MM-dd_HH.mm").xlsx"
 $VCenterList = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\RJVMMetaMove\VCList.csv"
 $VMHosts = $Null
 
-# Only ask for credentials If they aren't already in memory.
+# Only ask for credentials if they aren't already in memory.
 If (!($AdminCredentials)) {
     $AdminCredentials = Get-Credential
 }
@@ -23,7 +23,7 @@ ForEach ($VCenter in $VCenters) {
     }
 }
 
-# $VMHosts = $VMHosts | Get-Random -Count 5 # Limit results to a small number of servers for testing.
+#$VMHosts = $VMHosts | Get-Random -Count 5 # Limit results to a small number of servers for testing.
 Write-Host "Processing"$VMHosts.count"VM Hosts."
 $VMHosts = $VMHosts | Sort-Object -Property Name
 
@@ -93,4 +93,4 @@ Close-ExcelPackage -ExcelPackage $ExportXL
 
 Write-Progress -Activity "Export Progress:" -Status "Ready" -Completed
 
-Disconnect-VIServer -Server * -Confirm:$False
+#Disconnect-VIServer -Server * -Confirm:$False

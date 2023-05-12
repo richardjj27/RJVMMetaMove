@@ -45,7 +45,7 @@ Column,Target,Field,Description,Datatype,Origin,Notes,Code,Todo,Format
 4,2,Cluster,Parent Cluster,String,Native PowerCLI Value,,(Get-Cluster -vmhost $oVMHost),,
 5,2,Vendor,Hardware Vendor,String,Native PowerCLI Value,,$oVMHost.ExtensionData.Hardware.SystemInfo.Vendor,,
 6,2,Model,Hardware Model,String,Native PowerCLI Value,,$oVMHost.ExtensionData.Hardware.SystemInfo.Model,,
-7,2,TPMKey,TPMKey,String Array,Native PowerCLI Calue,,Get-EsxCli -VMHost $oVMHost | Select-Object $_.System.Settings.Encryption.Recovery.List(),,
+7,2,TPMRID,TPM Recovery ID,String Array,Native PowerCLI Calue,,($oVMHost | Get-EsxCli).System.Settings.Encryption.Recovery.List().RecoveryID,,
 8,2,SerialNumber,Hardware Serial Number,String,Native PowerCLI Value,,($oVMHost | get-esxcli -V2).hardware.platform.get.invoke().enclosureserialnumber,,
 9,2,PSNT,"Dell VxRail ""DE"" Serial Number",String,Native PowerCLI Value,,,,
 10,2,IPMIIP,iDRAC/iLo IP Address,String,Native PowerCLI Value,,($oVMHost|get-esxcli -V2).hardware.ipmi.bmc.get.invoke().ipv4address,,

@@ -43,3 +43,12 @@ Get multiple useful attributes and settings for the specified VM host.
 `Severity`The severity of the log entry (0 = information, 1 = debug, 2 = warning, 3 = error)<br>
 `LogText`The test to be written.<br>
 - Write timed, formatted log text to the file specified in $LogFile.
+
+## *Dependent Files*
+### *ExcelFormat.csv*
+- Defines the selection, order, formatting and notes for each exported field.
+- Target 1 is for the VM hosts report.
+- Target 2 is for the VM guests report.
+
+### *VCList.csv*
+- Defines the list of vCenter Servers (their FQDN) to be interrogated.
