@@ -23,7 +23,7 @@ ForEach ($VCenter in $VCenters) {
     }
 }
 
-$VMHosts = $VMHosts | Get-Random -Count 10 # Limit results to a small number of servers for testing.
+# $VMHosts = $VMHosts | Get-Random -Count 10 # Limit results to a small number of servers for testing.
 Write-Host "Processing"$VMHosts.count"VM Hosts."
 $VMHosts = $VMHosts | Sort-Object -Property Name
 
@@ -93,4 +93,4 @@ Close-ExcelPackage -ExcelPackage $ExportXL
 
 Write-Progress -Activity "Export Progress:" -Status "Ready" -Completed
 
-#Disconnect-VIServer -Server * -Confirm:$False
+Disconnect-VIServer -Server * -Confirm:$False
