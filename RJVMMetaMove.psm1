@@ -155,6 +155,21 @@ function Get-RJVMHostData {
         $Private:LocationCode = $Null
         $Private:OutputObject = New-Object -TypeName PSObject
 
+        # foreach ($VMHost in $VMHosts) {big
+        #     $esxcli = Get-EsxCli -VMHost $VMHost
+        #     try {
+        #         $key = $esxcli.system.settings.encryption.recovery.list()
+        #         Write-Host "$VMHost;$($key.RecoveryID);$($key.Key)"
+        #     }
+        
+        #     catch {
+                
+        #     }
+        # }
+        
+        # EMEA recovery keys stored on \\gbcp-isilon100\eiss\backup\vmware\vxrailsecureboot - migrate to Password Manager Pro
+
+
         if ($oVMHost) {
             $OutputObject | Add-Member -Name "Name" -MemberType NoteProperty -value $oVMHost.Name
             $OutputObject | Add-Member -Name "ConnectionState" -MemberType NoteProperty -value $oVMHost.ConnectionState
@@ -162,7 +177,10 @@ function Get-RJVMHostData {
             $OutputObject | Add-Member -Name "Cluster" -MemberType NoteProperty -value (Get-Cluster -vmhost $oVMHost) 
             $OutputObject | Add-Member -Name "Vendor" -MemberType NoteProperty -value $oVMHost.ExtensionData.Hardware.SystemInfo.Vendor
             $OutputObject | Add-Member -Name "Model" -MemberType NoteProperty -value $oVMHost.ExtensionData.Hardware.SystemInfo.Model
+            Try { $OutputObject | Add-Member -Name "TPMKey" -MemberType NoteProperty -value ( Get-EsxCli -VMHost $oVMHost | Select-Object $_.System.Settings.Encryption.Recovery.List()) } Catch {}
             
+            
+
             if ($oVMHost.ConnectionState -ne "NotResponding") {
                 $OutputObject | Add-Member -Name "SerialNumber" -MemberType NoteProperty -value ($oVMHost | get-esxcli -V2).hardware.platform.get.invoke().enclosureserialnumber | Out-Null
                 $OutputObject | Add-Member -Name "IPMIIP" -MemberType NoteProperty -value ($oVMHost | get-esxcli -V2).hardware.ipmi.bmc.get.invoke().ipv4address | Out-Null
