@@ -1,6 +1,6 @@
 # Script to Export all VM Guests on multiple vCenter Servers to an Excel file.
 
-Import-Module -Name vmware.powercli
+Import-Module -Name Vmware.PowerCli
 Import-Module -Name ImportExcel
 Remove-Module RJVMMetaMove
 Import-Module .\RJVMMetaMove.psm1

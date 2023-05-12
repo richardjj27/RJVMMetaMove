@@ -179,9 +179,12 @@ function Get-RJVMHostData {
             $OutputObject | Add-Member -Name "Model" -MemberType NoteProperty -value $oVMHost.ExtensionData.Hardware.SystemInfo.Model
             
             If ($oVMHost.ConnectionState -ne "NotResponding") {
-                Try { $OutputObject | Add-Member -Name "TPMRID" -MemberType NoteProperty -value ($oVMHost | Get-EsxCli).System.Settings.Encryption.Recovery.List().RecoveryID | Out-Null } Catch {}
-                Try { $OutputObject | Add-Member -Name "SerialNumber" -MemberType NoteProperty -value ($oVMHost | Get-EsxCli -V2).hardware.platform.get.invoke().Enclosureserialnumber | Out-Null }  Catch {}
-                Try { $OutputObject | Add-Member -Name "IPMIIP" -MemberType NoteProperty -value ($oVMHost | Get-esxCli -V2).hardware.ipmi.bmc.get.invoke().ipv4address | Out-Null } Catch {}
+                Try { $OutputObject | Add-Member -Name "EncryptionMode" -MemberType NoteProperty -Value ($oVMHost | Get-EsxCli -v2).System.Settings.Encryption.Get.Invoke().Mode | Out-Null } Catch {}
+                Try { $OutputObject | Add-Member -Name "RequireSecureBoot" -MemberType NoteProperty -Value ($oVMHost | Get-EsxCli -v2).System.Settings.Encryption.Get.Invoke().RequireSecureBoot | Out-Null } Catch {}
+                Try { $OutputObject | Add-Member -Name "EncryptionRecoveryID" -MemberType NoteProperty -value ($oVMHost | Get-EsxCli -v2).System.Settings.Encryption.Recovery.List.Invoke().RecoveryId | Out-Null } Catch {}
+                Try { $OutputObject | Add-Member -Name "EncryptionRecoveryKey" -MemberType NoteProperty -value ($oVMHost | Get-EsxCli -v2).System.Settings.Encryption.Recovery.List.Invoke().Key | Out-Null } Catch {}
+                Try { $OutputObject | Add-Member -Name "SerialNumber" -MemberType NoteProperty -value ($oVMHost | Get-EsxCli -V2).Hardware.Platform.Get.Invoke().Enclosureserialnumber | Out-Null }  Catch {}
+                Try { $OutputObject | Add-Member -Name "IPMIIP" -MemberType NoteProperty -value ($oVMHost | Get-esxCli -V2).Hardware.Ipmi.Bmc.Get.Invoke().Ipv4Address | Out-Null } Catch {}
             }
 
             $OutputObject | Add-Member -Name "LicenseKey" -MemberType NoteProperty -value $oVMHost.LicenseKey

@@ -1,8 +1,8 @@
 # Script to Export all VM Hosts on multiple vCenter Servers to an Excel file.
 
-Import-Module -Name vmware.powercli
+Import-Module -Name Vmware.PowerCli
 Import-Module -Name ImportExcel
-Try {Remove-Module RJVMMetaMove } Catch {}
+Remove-Module RJVMMetaMove
 Import-Module .\RJVMMetaMove.psm1
 
 $XLOutputFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\RJVMMetaMove\Exports\vmHostExport $(Get-Date -Format "yyyy-MM-dd_HH.mm").xlsx"
@@ -23,7 +23,7 @@ ForEach ($VCenter in $VCenters) {
     }
 }
 
-#$VMHosts = $VMHosts | Get-Random -Count 5 # Limit results to a small number of servers for testing.
+$VMHosts = $VMHosts | Get-Random -Count 10 # Limit results to a small number of servers for testing.
 Write-Host "Processing"$VMHosts.count"VM Hosts."
 $VMHosts = $VMHosts | Sort-Object -Property Name
 
