@@ -28,28 +28,27 @@ Migrate a list of VMs from one cluster to another (including cross vCenter) pres
 
 ## *RJVMMetaDataMove.psm1*
 ### *Get-RJVMMetaData*
-`VMName` The VM guest to be queried.<br>
-
 Get multiple useful attributes and settings for the specified VM.
 
-### *Get-RJVMHostData*
-`VNHost` The VM host to be queried.<br>
+`VMName` The VM guest to be queried.<br>
 
+### *Get-RJVMHostData*
 Get multiple useful attributes and settings for the specified VM host.
 
+`VNHost` The VM host to be queried.<br>
+
 ### *Set-RJVMCustomAttributes*
+Set custom attributes for a specific VM derived from previous Get-RJVMMetaData.
+
 `TargetVM` Write attributes to this VM.<br>
-`TargetVC` ...and this VC (is this needed?)<br>
 `VNNetadata` Write this metadata array to the above VM.<br>
 
-- Set custom attributes for a specific VM derived from previous Get-RJVMMetaData.
-
 ### *Write-RJLog*
-`LogFile`String (or is it an object) to write log entries to.<br>
-`Severity`The severity of the log entry (0 = information, 1 = debug, 2 = warning, 3 = error)<br>
-`LogText`The test to be written.<br>
+Write a formatted log text to the file specified in $LogFile with timings.
 
-- Write a formatted log text to the file specified in $LogFile with timings.
+`LogFile` String (or is it an object) to write log entries to.<br>
+`Severity` The severity of the log entry (0 = information, 1 = debug, 2 = warning, 3 = error)<br>
+`LogText` The test to be written.<br>
 
 ## *Dependent Files*
 ### *ExcelOutput.csv*
@@ -59,10 +58,10 @@ Get multiple useful attributes and settings for the specified VM host.
 
 ### *$VMListFile*
 - Defines the list of VMs to be migrated.  This needs to provide the following.
-- `SourceVM` - The machine name to be moved.
-- `TargetVMHost` - The target VM Host - just pick any host from within the target cluster and let the destination DRS keep things balanced.
-- `TargetNetwork` - The target network.
-- `TargetDatastore` - The target datastore.
+- `SourceVM` - The machine name to be moved.<br>
+- `TargetVMHost` - The target VM Host - just pick any host from within the target cluster and let the destination DRS keep things balanced.<br>
+- `TargetNetwork` - The target network.<br>
+- `TargetDatastore` - The target datastore.<br>
 
 ### *VCList.csv*
 - Defines the list of vCenter Servers (their FQDN) to be interrogated.
