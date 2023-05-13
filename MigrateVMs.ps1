@@ -3,14 +3,14 @@
 # Success/failure written to a log file for later review.
 
 Import-Module -Name vmware.powercli
+Remove-Module RJVMMetaMove
 Import-Module .\RJVMMetaMove.psm1
 
-$LogFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\richard\RJVMMetaMove\Logs\VM Migration Log $(get-date -Format "yyyy-MM-dd_HH.mm").txt"
-$VCenterList = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\richard\RJVMMetaMove\VCList.csv"
-#$VMListFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\richard\RJVMMetaMove\VMListFullGBEQ24.csv"
-$VMListFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\richard\RJVMMetaMove\VMListFullGBEQ42.csv"
-#$VMListFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\richard\RJVMMetaMove\VMListFullILTA.csv"
-#$VMListFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\richard\RJVMMetaMove\VMListFullTRZE.csv"
+$WorkingFolder = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\RJVMMetaMove\Exports"
+
+$LogFile = $WorkingFolder + "\Logs\VM Migration Log $(get-date -Format "yyyy-MM-dd_HH.mm").txt"
+$VCenterList = $WorkingFolder + "\VCList.csv"
+$VMListFile = $WorkingFolder + "\VMListFullGBEQ42.csv"
 
 $AdminCredentials = Get-Credential
 $VCenters = Import-CSV -Path $VCenterList

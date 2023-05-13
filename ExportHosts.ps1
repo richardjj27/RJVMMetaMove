@@ -5,8 +5,12 @@ Import-Module -Name ImportExcel
 Remove-Module RJVMMetaMove
 Import-Module .\RJVMMetaMove.psm1
 
-$XLOutputFile = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\RJVMMetaMove\Exports\vmHostExport $(Get-Date -Format "yyyy-MM-dd_HH.mm").xlsx"
-$VCenterList = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\RJVMMetaMove\VCList.csv"
+$WorkingFolder = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\RJVMMetaMove\Exports"
+
+$XLOutputFile = $WorkingFolder + "\vmHostExport $(Get-Date -Format "yyyy-MM-dd_HH.mm").xlsx"
+$VCenterList = $WorkingFolder + "\VCList.csv"
+$XLOutputs = Import-CSV -Path ".\ExcelFormat.csv"
+$XLOutputs = $XLOutputs | Sort-Object -Property { [int]$_.Column }
 $VMHosts = $Null
 
 # Only ask for credentials if they aren't already in memory.
@@ -27,14 +31,12 @@ ForEach ($VCenter in $VCenters) {
 Write-Host "Processing"$VMHosts.count"VM Hosts."
 $VMHosts = $VMHosts | Sort-Object -Property Name
 
-$XLFormats = Import-CSV -Path ".\ExcelFormat.csv"
-$XLFormats = $XLFormats | Sort-Object -Property { [int]$_.Column }
 $ObjectOrder = @()
-ForEach ($XLFormat in $XLFormats) {
+ForEach ($XLOutput in $XLOutputs) {
     
-    If ($XLFormat.target -eq "2" -and $XLFormat.Column) {
-        $ObjectOrder += $XLFormat.Field
-        $ObjectFormat += $XLFormat.Format
+    If ($XLOutput.target -eq "2" -and $XLOutput.Column) {
+        $ObjectOrder += $XLOutput.Field
+        $ObjectFormat += $XLOutput.Format
     }
 }
 
@@ -44,7 +46,6 @@ ForEach ($VMHost in $VMHosts) {
     $Output = Get-RJVMHostData -VMHost $VMHost | Select-Object -Property $ObjectOrder
     $Output.DatastoreName = $Output.DatastoreName -Join ("`r")
     $Output.DatastoreType = $Output.DatastoreType -Join ("`r")
-    #$Output.DatastoreCapacityGB = ('{0:N0}' -f $Output.DatastoreCapacityGB) -Join ("`r")
     $Output.DatastoreCapacityGB = $Output.DatastoreCapacityGB -Join ("`r")
     $Output.Network = $Output.Network -Join ("`r")
     $Output.NetworkSwitch = $Output.NetworkSwitch -Join ("`r")
@@ -54,28 +55,28 @@ ForEach ($VMHost in $VMHosts) {
     $ProgressCount++
 }
 
-ForEach ($XLFormat in $XLFormats) {
-    If ($XLFormat.target -eq "2") {
+ForEach ($XLOutput in $XLOutputs) {
+    If ($XLOutput.target -eq "2") {
         $OutputObject = New-Object -TypeName PSObject
-        $OutputObject | Add-Member -Name "Field" -MemberType NoteProperty -value $XLFormat.Field
-        $OutputObject | Add-Member -Name "Description" -MemberType NoteProperty -value $XLFormat.Description
-        $OutputObject | Add-Member -Name "Datatype" -MemberType NoteProperty -value $XLFormat.Datatype
-        $OutputObject | Add-Member -Name "Origin" -MemberType NoteProperty -value $XLFormat.Origin
-        $OutputObject | Add-Member -Name "Notes" -MemberType NoteProperty -value $XLFormat.Notes
-        $OutputObject | Add-Member -Name "Code" -MemberType NoteProperty -value $XLFormat.Code
-        $OutputObject | Add-Member -Name "Todo" -MemberType NoteProperty -value $XLFormat.Todo
+        $OutputObject | Add-Member -Name "Field" -MemberType NoteProperty -value $XLOutput.Field
+        $OutputObject | Add-Member -Name "Description" -MemberType NoteProperty -value $XLOutput.Description
+        $OutputObject | Add-Member -Name "Datatype" -MemberType NoteProperty -value $XLOutput.Datatype
+        $OutputObject | Add-Member -Name "Origin" -MemberType NoteProperty -value $XLOutput.Origin
+        $OutputObject | Add-Member -Name "Notes" -MemberType NoteProperty -value $XLOutput.Notes
+        $OutputObject | Add-Member -Name "Code" -MemberType NoteProperty -value $XLOutput.Code
+        $OutputObject | Add-Member -Name "Todo" -MemberType NoteProperty -value $XLOutput.Todo
         $OutputObject | Export-Excel -path $XLOutputFile -WorksheetName "Notes" -Autosize -Append
     }
 }
 
 $ExportXL = Open-ExcelPackage -path $XLOutputFile
-ForEach ($XLFormat in $XLFormats) {
-    If ($XLFormat.target -eq "2") {
-        If ($XLFormat.Format.ToUpper().contains("R")) {Set-ExcelColumn -Worksheet $exportXL.Workbook.Worksheets['vmHostExport'] -Column $XLFormat.Column -HorizontalAlignment "Right"} # Format / Right
-        If ($XLFormat.Format.ToUpper().contains("L")) {Set-ExcelColumn -Worksheet $exportXL.Workbook.Worksheets['vmHostExport'] -Column $XLFormat.Column -HorizontalAlignment "Left"} # Format / } # Format / Left
-        If ($XLFormat.Format.ToUpper().contains("D")) {Set-ExcelColumn -worksheet $exportXL.Workbook.Worksheets['vmHostExport'] -Column $XLFormat.Column -NumberFormat 'Short Date'} # Format / Date
-        If ($XLFormat.Format.ToUpper().contains("T")) {Set-ExcelColumn -Worksheet $exportXL.Workbook.Worksheets['vmHostExport'] -Column $XLFormat.Column -NumberFormat "#,###.00"} # Format / 2 digit number
-        If ($XLFormat.Format.ToUpper().contains("I")) {Set-ExcelColumn -Worksheet $exportXL.Workbook.Worksheets['vmHostExport'] -Column $XLFormat.Column -NumberFormat "#,###"} # Format / Integer
+ForEach ($XLOutput in $XLOutputs) {
+    If ($XLOutput.target -eq "2") {
+        If ($XLOutput.Format.ToUpper().contains("R")) {Set-ExcelColumn -Worksheet $exportXL.Workbook.Worksheets['vmHostExport'] -Column $XLOutput.Column -HorizontalAlignment "Right"} # Format / Right
+        If ($XLOutput.Format.ToUpper().contains("L")) {Set-ExcelColumn -Worksheet $exportXL.Workbook.Worksheets['vmHostExport'] -Column $XLOutput.Column -HorizontalAlignment "Left"} # Format / } # Format / Left
+        If ($XLOutput.Format.ToUpper().contains("D")) {Set-ExcelColumn -worksheet $exportXL.Workbook.Worksheets['vmHostExport'] -Column $XLOutput.Column -NumberFormat 'Short Date'} # Format / Date
+        If ($XLOutput.Format.ToUpper().contains("T")) {Set-ExcelColumn -Worksheet $exportXL.Workbook.Worksheets['vmHostExport'] -Column $XLOutput.Column -NumberFormat "#,###.00"} # Format / 2 digit number
+        If ($XLOutput.Format.ToUpper().contains("I")) {Set-ExcelColumn -Worksheet $exportXL.Workbook.Worksheets['vmHostExport'] -Column $XLOutput.Column -NumberFormat "#,###"} # Format / Integer
     }
 }
 

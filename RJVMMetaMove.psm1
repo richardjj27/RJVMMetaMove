@@ -155,21 +155,6 @@ function Get-RJVMHostData {
         $Private:LocationCode = $Null
         $Private:OutputObject = New-Object -TypeName PSObject
 
-        # foreach ($VMHost in $VMHosts) {big
-        #     $esxcli = Get-EsxCli -VMHost $VMHost
-        #     try {
-        #         $key = $esxcli.system.settings.encryption.recovery.list()
-        #         Write-Host "$VMHost;$($key.RecoveryID);$($key.Key)"
-        #     }
-        
-        #     catch {
-                
-        #     }
-        # }
-        
-        # EMEA recovery keys stored on \\gbcp-isilon100\eiss\backup\vmware\vxrailsecureboot - migrate to Password Manager Pro
-
-
         If ($oVMHost) {
             $OutputObject | Add-Member -Name "Name" -MemberType NoteProperty -value $oVMHost.Name
             $OutputObject | Add-Member -Name "ConnectionState" -MemberType NoteProperty -value $oVMHost.ConnectionState
