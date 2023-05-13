@@ -41,7 +41,7 @@ Get multiple useful attributes and settings for the specified VM host.
 Set custom attributes for a specific VM derived from previous Get-RJVMMetaData.
 
 `TargetVM` Write attributes to this VM.<br>
-`VNNetadata` Write this metadata array to the above VM.<br>
+`VNMetadata` Write this metadata array to the above VM.<br>
 
 ### *Write-RJLog*
 Write a formatted log text to the file specified in $LogFile with timings.
@@ -59,7 +59,7 @@ Write a formatted log text to the file specified in $LogFile with timings.
 ### *VCList.csv*
 - Defines the list of vCenter Servers (their FQDN) to be interrogated.
 
-### *$VMListFile*
+### *$VMListFile* (specified in code)
 - Defines the list of VMs to be migrated.  This needs to provide the following.
 - `SourceVM` - The machine name to be moved.<br>
 - `TargetVMHost` - The target VM Host - just pick any host from within the target cluster and let the destination DRS keep things balanced.<br>
