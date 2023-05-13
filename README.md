@@ -66,5 +66,5 @@ Write a formatted log text to the file specified in $LogFile with timings.
 3. `TargetNetwork` - The target network.<br>
 4. `TargetDatastore` - The target datastore.<br>
 
-It goes without saying that vMotion needs to be routable between the source and destination.  If not, a temporary vMotion kernel can be created using an alternative network and is details in <name>'s article in confluence.
-<link>
+It goes without saying that vMotion needs to be routable between the source and destination.  If not, a temporary vMotion kernel can be created using an alternative network and is detailed in -name-'s excellent article in confluence.
+-link-
