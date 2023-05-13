@@ -4,21 +4,21 @@ The project contains three wrapper scripts for the module which contains the fol
 
 ## *RJVMMetaDataMove.psm1*
 ### *Get-RJVMMetaData*
-Get multiple useful attributes and settings for the specified VM.
+Get multiple useful attributes and settings for the specified VM.<br>
 Returns an object containing numerous attributes of the specfied guest, including custom attributes and tags.
 
 `VMName` The VM guest to be queried.<br>
 
 ### *Get-RJVMHostData*
-Get multiple useful attributes and settings for the specified VM host.
+Get multiple useful attributes and settings for the specified VM host.<br>
 Returns an object containing numerous attributes of the specified host.
 
-`VNHost` The VM host to be queried.<br>
+`VMHost` The VM host to be queried.<br>
 
 ### *Set-RJVMCustomAttributes*
 Set custom attributes for a specific VM derived from previous Get-RJVMMetaData.
 
-`TargetVM` Write attributes to this VM.<br>
+`TargetVM` Attribute/Tag object specified below will be written to this VM.<br>
 `VNMetadata` Write this metadata object to the above VM.<br>
 
 ### *Write-RJLog*
