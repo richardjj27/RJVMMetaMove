@@ -61,7 +61,10 @@ Write a formatted log text to the file specified in $LogFile with timings.
 
 ### *$VMListFile* (specified in code)
 - Defines the list of VMs to be migrated.  This needs to provide the following.
-1. `SourceVM` - The machine name to be moved.<br>
+1. `SourceVM` - The name of the machine to be moved.<br>
 2. `TargetVMHost` - The target VM Host - just pick any host from within the target cluster and let the destination DRS keep things balanced.<br>
 3. `TargetNetwork` - The target network.<br>
 4. `TargetDatastore` - The target datastore.<br>
+
+It goes without saying that vMotion needs to be routable between the source and destination.  If not, a temporary vMotion kernel can be created using an alternative network and is details in <name>'s article in confluence.
+<link>
