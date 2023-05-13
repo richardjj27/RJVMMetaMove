@@ -1,6 +1,6 @@
 # RJVMMetaMove
 
-The project contains three wrapper scripts for the module which contains the following four functions.
+## The project contains three wrapper scripts for the module which contains the following four functions.
 
 ## *RJVMMetaDataMove.psm1*
 ### *Get-RJVMMetaData*
@@ -28,7 +28,7 @@ Write a formatted log text to the file specified in $LogFile with timings.
 `Severity` The severity of the log entry (0 = information, 1 = debug, 2 = warning, 3 = error)<br>
 `LogText` The text to be written.<br>
 
-The three wrapper scripts.
+## The three wrapper scripts.
 
 ## *ExportHosts.ps1*
 Create a report in Excel for all VM hosts in multiple vCenter servers as listed in VCList.csv.
