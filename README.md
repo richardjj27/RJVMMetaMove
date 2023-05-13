@@ -1,30 +1,30 @@
 # RJVMMetaMove
 
-The project contains three scripts and one module containing four functions.
+The project contains three wrapper scripts for the module containing four functions.
 
 ## *ExportHosts.ps1*
 Create a report in Excel for all VM hosts from multiple vCenter servers as listed in VCList.csv.
 
-- `$WorkingFolder` - The path of where your export will go.
-- `$XLOutputs` - A CSV list of fields to be exported, their order and formatting.
-- `$XLOutputFile` - Name and location of output files.
-- `$VCenterList` - List of vCenter servers to be processed.  The script will authenticate to all of these.
+- `$WorkingFolder` - The path of where your export will go.<br>
+- `$XLOutputs` - A CSV list of fields to be exported, their order and formatting.<br>
+- `$XLOutputFile` - Name and location of output files.<br>
+- `$VCenterList` - List of vCenter servers to be processed.  The script will authenticate to all of these.<br>
 
 ## *ExportVMs.ps1*
 Create a report in Excel for all VM guests from multiple vCenter servers as listed in VCList.csv.
 
-- `$WorkingFolder` - The path of where your export will go.
-- `$XLOutputs` - A CSV list of fields to be exported, their order and formatting.
-- `$XLOutputFile` - Name and location of output file.
-- `$VCenterList` - List of vCenter servers to be processed.  The script will authenticate to all of these.
+- `$WorkingFolder` - The path of where your export will go.<br>
+- `$XLOutputs` - A CSV list of fields to be exported, their order and formatting.<br>
+- `$XLOutputFile` - Name and location of output file.<br>
+- `$VCenterList` - List of vCenter servers to be processed.  The script will authenticate to all of these.<br>
 
 ## *MigrateVMs.ps1*
 Migrate a list of VMs from one cluster to another (including cross vCenter) preserving tags and custom attributes.
 
-- `$WorkingFolder` - The path of where your output and logs will go, plus your list of servers to be migrated.
-- `$LogFile` - Output log file.
-- `$VCenterList` -   The script will authenticate to all of these.
-- `$VMListFile` - CSV list of VMs to be moved. (SourceVM,TargetVMHost,TargetNetwork,TargetDatastore)
+- `$WorkingFolder` - The path of where your output and logs will go, plus your list of servers to be migrated.<br>
+- `$LogFile` - Migration log file.<br>
+- `$VCenterList` -   The script will authenticate to all of these.<br>
+- `$VMListFile` - CSV list of VMs to be moved. (SourceVM,TargetVMHost,TargetNetwork,TargetDatastore)<br>
 
 ## *RJVMMetaDataMove.psm1*
 ### *Get-RJVMMetaData*
@@ -46,15 +46,18 @@ Set custom attributes for a specific VM derived from previous Get-RJVMMetaData.
 ### *Write-RJLog*
 Write a formatted log text to the file specified in $LogFile with timings.
 
-`LogFile` String (or is it an object) to write log entries to.<br>
+`LogFile` Target for migration log files.<br>
 `Severity` The severity of the log entry (0 = information, 1 = debug, 2 = warning, 3 = error)<br>
 `LogText` The test to be written.<br>
 
 ## *Dependent Files*
 ### *ExcelOutput.csv*
-- Defines the selection, order, formatting and notes for each exported field.
-- Target 1 is for the VM hosts report.
-- Target 2 is for the VM guests report.
+- Defines the selection, order, formatting and notes for each exported field.<br>
+- Target 1 is for the VM hosts report.<br>
+- Target 2 is for the VM guests report.<br>
+
+### *VCList.csv*
+- Defines the list of vCenter Servers (their FQDN) to be interrogated.
 
 ### *$VMListFile*
 - Defines the list of VMs to be migrated.  This needs to provide the following.
@@ -62,6 +65,3 @@ Write a formatted log text to the file specified in $LogFile with timings.
 - `TargetVMHost` - The target VM Host - just pick any host from within the target cluster and let the destination DRS keep things balanced.<br>
 - `TargetNetwork` - The target network.<br>
 - `TargetDatastore` - The target datastore.<br>
-
-### *VCList.csv*
-- Defines the list of vCenter Servers (their FQDN) to be interrogated.
