@@ -61,7 +61,7 @@ Write a formatted log text to the file specified in $LogFile with timings.
 
 ### *$VMListFile* (specified in code)
 - Defines the list of VMs to be migrated.  This needs to provide the following.
-- `SourceVM` - The machine name to be moved.<br>
-- `TargetVMHost` - The target VM Host - just pick any host from within the target cluster and let the destination DRS keep things balanced.<br>
-- `TargetNetwork` - The target network.<br>
-- `TargetDatastore` - The target datastore.<br>
+1 `SourceVM` - The machine name to be moved.<br>
+2 `TargetVMHost` - The target VM Host - just pick any host from within the target cluster and let the destination DRS keep things balanced.<br>
+3 `TargetNetwork` - The target network.<br>
+4 `TargetDatastore` - The target datastore.<br>
