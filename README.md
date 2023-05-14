@@ -1,6 +1,6 @@
 # RJVMMetaMove
 
-## The project contains three wrapper scripts for the module which contains the following four functions.
+## The project contains three wrapper scripts for the module which hold the following four functions.
 
 ## *RJVMMetaDataMove.psm1*
 ### *Get-RJVMMetaData*
