@@ -9,7 +9,7 @@ $WorkingFolder = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\RJVMMetaMov
 
 $XLOutputFile = $WorkingFolder + "\Exports\vmHostExport $(Get-Date -Format "yyyy-MM-dd_HH.mm").xlsx"
 $VCenterList = $WorkingFolder + "\VCList.csv"
-$XLOutputs = Import-CSV -Path ".\ExcelFormat.csv"
+$XLOutputs = Import-CSV -Path ".\ExcelOutput.csv"
 $XLOutputs = $XLOutputs | Sort-Object -Property { [int]$_.Column }
 $VMHosts = $Null
 
