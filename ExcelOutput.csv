@@ -64,5 +64,5 @@ Column,Target,Field,Description,Datatype,Origin,Notes,Code,Todo,Format
 23,2,DatastoreName,List of Available Datastore Names,String Array,Native PowerCLI Value,,,,
 24,2,DatastoreType,List of Available Datastore Types,String Array,Native PowerCLI Value,,,,
 25,2,DatastoreCapacityGB,List of Datastore Capacities / GB,Numeric Array,Native PowerCLI Value,,,,R
-26,2,Network,List of Networks,String Array,Native PowerCLI Value,,(Get-VirtualPortGroup -vmhost $oVMHost).name,,
+26,2,NetworkAdapter,List of Networks,String Array,Native PowerCLI Value,,(Get-VirtualPortGroup -vmhost $oVMHost).name,,
 27,2,NetworkSwitch,List of Network Switches,String Array,Native PowerCLI Value,,(Get-Virtualswitch -vmhost $oVMHost).name,,

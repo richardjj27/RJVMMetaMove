@@ -211,7 +211,7 @@ function Get-RJVMHostData {
             }
 
             $OutputObject | Add-Member -Name "NetworkAdapter" -MemberType NoteProperty -value (Get-VirtualPortGroup -vmhost $oVMHost).name
-            $OutputObject | Add-Member -Name "NetworkSwitch" -MemberType NoteProperty -value (Get-Virtualswitch -vmhost $oVMHost).name
+            $OutputObject | Add-Member -Name "NetworkSwitch" -MemberType NoteProperty -value (Get-VirtualSwitch -vmhost $oVMHost).name
 
             return $OutputObject
         }
