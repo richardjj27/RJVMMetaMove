@@ -51,8 +51,8 @@ Migrate a list of VMs from one cluster to another (including cross vCenter) pres
 
 - `$WorkingFolder` - The path of where your output and logs will go, plus your list of servers to be migrated.<br>
 - `$LogFile` - The migration log file.<br>
-- `$VCenterList` -  The script will authenticate these vCenter servers and is required to for rights to  move guests from the source to the destination hosts.<br>
-- `$VMListFile` - CSV list of VMs to be moved. (SourceVM,TargetVMHost,TargetNetwork,TargetDatastore)<br>
+- `$VCenterList` -  The script will authenticate these vCenter servers and is required to for rights to  move guests from the source to the destination hosts. Example included.<br>
+- `$VMListFile` - CSV list of VMs to be moved. (SourceVM,TargetVMHost,TargetNetwork,TargetDatastore). Example included.<br>
 
 ## *Dependent Files*
 ### *ExcelOutput.csv*
