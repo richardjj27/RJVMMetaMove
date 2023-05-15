@@ -6,18 +6,22 @@ Import-Module -Name vmware.powercli
 Remove-Module RJVMMetaMove
 Import-Module .\RJVMMetaMove.psm1
 
-$WorkingFolder = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\RJVMMetaMove\Exports"
+$WorkingFolder = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\RJVMMetaMove"
 
 $LogFile = $WorkingFolder + "\Logs\VM Migration Log $(get-date -Format "yyyy-MM-dd_HH.mm").txt"
 $VCenterList = $WorkingFolder + "\VCList.csv"
 $VMListFile = $WorkingFolder + "\VMListFullGBEQ42.csv"
 
-$AdminCredentials = Get-Credential
+# Only ask for credentials if they aren't already in memory.
+If (!($AdminCredentials)) {
+    $AdminCredentials = Get-Credential
+}
+
 $VCenters = Import-CSV -Path $VCenterList
 
 ForEach($VCenter in $Vcenters){
     if($VCenter.Server.SubString(0,1) -ne "#") {
-        Write-RJLog -LogFile $LogFile -Severity 0 -LogText "Connecting to $VCenter."
+        Write-RJLog -LogFile $LogFile -Severity 0 -LogText ("Connecting to " + $VCenter.Server)
         Connect-VIServer -Server $VCenter.Server -Credential $AdminCredentials | Out-Null
         # $VMHosts += get-VMHost -Server $VC
         # $VMGuests += Get-VM -Server $VC
@@ -92,12 +96,17 @@ ForEach($MovingVM in $MovingVMs) {
         # Get target network specifics.
         $TargetPortGroup = Get-VirtualPortGroup -VMHost $TargetVMHost -Name $TargetNetwork
         Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Start VM migration for $SourceVM to $TargetVMHost."
-        # Do 3 pings to the log file just for information.
-        1..3 | ForEach-Object {
-            Write-RJLog -LogFile $LogFile -Severity 0 -LogText (((test-connection -target $VMMetaData.VMHostName -ping -count 1 | Format-Table destination,displayaddress,latency -hidetableheaders | out-string)).trim())
-            Start-Sleep 1
-        }
 
+        # Do 3 pings to the log file just for information.
+        If (Resolve-DnsName -name $SourceVM -ErrorAction SilentlyContinue) {
+            1..3 | ForEach-Object {
+                $PingResult = (Test-connection -target $SourceVM -ping -count 1 -ErrorAction SilentlyContinue).status
+                Write-RJLog -LogFile $LogFile -Severity 0 -LogText "Ping result for $SourceVM - $PingResult"
+                Start-Sleep 1
+            }
+        }
+        else { Write-RJLog -LogFile $LogFile -Severity 0 -LogText "DNS resolution for $SourceVM failed." }
+        
         # Move the VM
         Move-VM -VM $SourceVM -VMotionPriority High -Destination (Get-VMhost -Name $TargetVMHost) -Datastore (Get-Datastore -Name $TargetDatastore) -DiskStorageFormat Thin -PortGroup $TargetPortGroup | Out-Null
 
@@ -107,8 +116,8 @@ ForEach($MovingVM in $MovingVMs) {
         $VMTargetMetaData = get-RJVMMetaData -VMName $SourceVM
 
         # Check the VM host is different after the migration - basically, did it migrate?
-        if ($VMMetaData.Host -eq $VMTargetMetaData.Host) {
-            Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Migrating of $SourceVM failed for some unknown reason.  Review vCenter logs and coonsole for more information."
+        if ($VMMetaData.HostName -eq $VMTargetMetaData.HostName) {
+            Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Migrating of $SourceVM failed for some unknown reason.  Review vCenter logs and coonsole for more information. ($RunError)"
             $RunError++
         }
         else {
@@ -127,7 +136,7 @@ ForEach($MovingVM in $MovingVMs) {
                 $RunError = $RunError + 0.01
             }
 
-            # Are the attribute values the same s before?
+            # Are the attribute values the same before?
             if ((Compare-Object -ReferenceObject @($VMMetaData.AttributeValue | Select-Object) -DifferenceObject @($VMTargetMetaData.AttributeValue | Select-Object)).count -eq 0) {
                 Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of attribute values for $SourceVM succeeded."}
                 else {
@@ -144,10 +153,15 @@ ForEach($MovingVM in $MovingVMs) {
             }
 
             # Do 5 pings to the log file just for information.
-            1..5 | ForEach-Object {
-                Write-RJLog -LogFile $LogFile -Severity 0 -LogText (((test-connection -target $VMTargetMetaData.VMHostName -ping -count 1 | Format-Table destination,displayaddress,latency -hidetableheaders | out-string)).trim())
-                Start-Sleep 1
+            If (Resolve-DnsName -name $SourceVM -ErrorAction SilentlyContinue) {
+                1..5 | ForEach-Object {
+                    $PingResult = (Test-connection -target $SourceVM -ping -count 1 -ErrorAction SilentlyContinue).status
+                    Write-RJLog -LogFile $LogFile -Severity 0 -LogText "Ping result for $SourceVM - $PingResult"
+                    Start-Sleep 1
+                }
             }
+            else { Write-RJLog -LogFile $LogFile -Severity 0 -LogText "DNS resolution for $SourceVM failed." }
+            
         }
 
         # If no run errors were recorded, report success!
@@ -155,14 +169,16 @@ ForEach($MovingVM in $MovingVMs) {
             Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of $SourceVM succeeded without errors."
         }
         else {
-            Write-RJLog -LogFile $Logfile -Severity 2 -LogText "Migration of $SourceVM succeeded with errors.  Review vCenter logs and coonsole for more information."
+            Write-RJLog -LogFile $Logfile -Severity 2 -LogText "Migration of $SourceVM succeeded with errors.  Review vCenter logs and coonsole for more information. ($RunError)"
         }
 
     }
     else {
         Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Migration of $SourceVM failed due to incorrect parameters - skipping."
     }
+    Write-RJLog -LogFile $LogFile
     Write-RJLog -LogFile $LogFile 
+    Write-RJLog -LogFile $LogFile  
 }
 
 Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration batch completed."

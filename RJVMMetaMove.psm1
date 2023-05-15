@@ -51,7 +51,7 @@ function Get-RJVMMetaData {
         If ($oVMGuest) {
             $OutputObject | Add-Member -Name "Name" -MemberType NoteProperty -value $oVMGuest.name
             $OutputObject | Add-Member -Name "ID" -MemberType NoteProperty -value $oVMGuest.id
-            $OutputObject | Add-Member -Name "HostName" -MemberType NoteProperty -value $oVMGuest.ExtensionData.Guest.Hostname
+            $OutputObject | Add-Member -Name "HostName" -MemberType NoteProperty -value $oVMGuest.VMHost.Name
             $OutputObject | Add-Member -Name "Powerstate" -MemberType NoteProperty -value $oVMGuest.powerstate 
             $OutputObject | Add-Member -Name "Version" -MemberType NoteProperty -value $oVMGuest.ExtensionData.Config.Version 
             $OutputObject | Add-Member -Name "MemoryGB" -MemberType NoteProperty -value $oVMGuest.memorygb 

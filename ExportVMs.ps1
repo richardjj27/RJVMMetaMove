@@ -6,9 +6,9 @@ Remove-Module RJVMMetaMove
 Import-Module .\RJVMMetaMove.psm1
 
 
-$WorkingFolder = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\RJVMMetaMove\Exports"
+$WorkingFolder = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\RJVMMetaMove"
 
-$XLOutputFile = $WorkingFolder + "\vmGuestExport $(Get-Date -Format "yyyy-MM-dd_HH.mm").xlsx"
+$XLOutputFile = $WorkingFolder + "\Exports\vmGuestExport $(Get-Date -Format "yyyy-MM-dd_HH.mm").xlsx"
 $VCenterList = $WorkingFolder + "\VCList.csv"
 $XLOutputs = Import-CSV -Path ".\ExcelFormat.csv"
 $XLOutputs = $XLOutputs | Sort-Object -Property { [int]$_.Column }
