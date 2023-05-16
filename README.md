@@ -1,6 +1,7 @@
 # RJVMMetaMove
 
-## The project contains the following four functions plus three wrapper scripts for typical migration and export tasks.  The installation of the latest version of PowerCLI is required.
+## The project contains four functions plus three wrapper scripts for typical VMWare ESXi vCenter migration and export tasks.
+The installation of the latest version of PowerCLI is required.
 
 ## *RJVMMetaDataMove.psm1*
 ### *Get-RJVMMetaData*
