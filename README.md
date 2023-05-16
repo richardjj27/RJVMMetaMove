@@ -1,6 +1,6 @@
 # RJVMMetaMove
 
-## The project contains four functions plus three wrapper scripts for typical VMWare ESXi vCenter migration and export tasks.
+The project contains four functions plus three wrapper scripts for typical VMWare ESXi vCenter migration and export tasks.
 
 ## *RJVMMetaDataMove.psm1*
 ### *Get-RJVMMetaData*
