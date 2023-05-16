@@ -1,6 +1,6 @@
 # RJVMMetaMove
 
-## The project contains the following four functions plus three wrapper scripts for typical migration and export tasks.  The installation of the latest version of PowerCLI is required.
+This project contains four functions plus three wrapper scripts for typical VMWare ESXi vCenter migration and export tasks.
 
 ## *RJVMMetaDataMove.psm1*
 ### *Get-RJVMMetaData*
@@ -75,3 +75,5 @@ It goes without saying that vMotion needs to be routable between the source and 
 
 Our hosts do not currently use proper authoritative certificates so the following command may be required to use PowerCli.
 - `Set-PowerCliConfiguration -InvalidCertificateAction Ignore`
+
+The installation of the latest version of PowerCLI is required.
