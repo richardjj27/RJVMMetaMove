@@ -61,7 +61,7 @@ Migrate a list of VMs from one cluster to another (including cross vCenter) pres
 - Target 2 is for the VM guests report.<br>
 
 ### *VCList.csv*
-- Defines the list of vCenter Servers (their FQDN) to be interrogated.
+- Defines the list of vCenter Servers (their FQDN) to be interrogated.  Remark (#) out any which are out of scope.
 
 ### *$VMListFile* (specified in code)
 - Defines the list of VMs to be migrated.  This needs to provide the following.
@@ -71,4 +71,7 @@ Migrate a list of VMs from one cluster to another (including cross vCenter) pres
 4. `TargetDatastore` - The target datastore.<br>
 
 It goes without saying that vMotion needs to be routable between the source and destination hosts.  If not, a temporary vMotion kernel can be created using an alternative routable VLAN.  This process is detailed in Jim Shen's excellent article in confluence.
-(https://confluence.disney.com/display/INTLEISS/switchless+2-Node+VxRail+vMotion)
+- `https://confluence.disney.com/display/INTLEISS/switchless+2-Node+VxRail+vMotion`
+
+Our hosts do not currently use proper authoritative certificates so the following command may be required to use PowerCli.
+- `Set-PowerCliConfiguration -InvalidCertificateAction Ignore`

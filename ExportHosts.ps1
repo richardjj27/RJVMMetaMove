@@ -7,11 +7,21 @@ Import-Module .\RJVMMetaMove.psm1
 
 $WorkingFolder = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\RJVMMetaMove"
 
-$XLOutputFile = $WorkingFolder + "\Exports\vmHostExport $(Get-Date -Format "yyyy-MM-dd_HH.mm").xlsx"
+$ExportFolder = $WorkingFolder + "\Exports"
+$XLOutputFile = $ExportFolder + "\vmHostExport $(Get-Date -Format "yyyy-MM-dd_HH.mm").xlsx"
 $VCenterList = $WorkingFolder + "\VCList.csv"
 $XLOutputs = Import-CSV -Path ".\ExcelOutput.csv"
 $XLOutputs = $XLOutputs | Sort-Object -Property { [int]$_.Column }
 $VMHosts = $Null
+
+If (!(Test-Path -Path $WorkingFolder)) {
+    Write-Host "$WorkingFolder Does not exist. Terminating."
+    exit
+}
+
+If (!(Test-Path -Path $ExportFolder)) {
+    New-Item -Path $ExportFolder -ItemType Directory | Out-Null
+}
 
 # Only ask for credentials if they aren't already in memory.
 If (!($AdminCredentials)) {
@@ -47,7 +57,7 @@ ForEach ($VMHost in $VMHosts) {
     $Output.DatastoreName = $Output.DatastoreName -Join ("`r")
     $Output.DatastoreType = $Output.DatastoreType -Join ("`r")
     $Output.DatastoreCapacityGB = $Output.DatastoreCapacityGB -Join ("`r")
-    $Output.Network = $Output.Network -Join ("`r")
+    $Output.NetworkAdapter = $Output.NetworkAdapter -Join ("`r")
     $Output.NetworkSwitch = $Output.NetworkSwitch -Join ("`r")
     $Output | Export-Excel -Path $XLOutputFile -WorksheetName "vmHostExport" -Autosize -Append
 

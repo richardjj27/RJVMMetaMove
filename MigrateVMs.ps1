@@ -8,9 +8,19 @@ Import-Module .\RJVMMetaMove.psm1
 
 $WorkingFolder = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\RJVMMetaMove"
 
-$LogFile = $WorkingFolder + "\Logs\VM Migration Log $(get-date -Format "yyyy-MM-dd_HH.mm").txt"
+$LogFolder = $WorkingFolder + "\Logs"
+$LogFile = $LogFolder + "\VM Migration Log $(Get-Date -Format "yyyy-MM-dd_HH.mm").txt"
 $VCenterList = $WorkingFolder + "\VCList.csv"
-$VMListFile = $WorkingFolder + "\VMListFullGBEQ42.csv"
+$VMListFile = $WorkingFolder + "\Batch01.csv"
+
+If (!(Test-Path -Path $WorkingFolder)) {
+    Write-Host "$WorkingFolder Does not exist. Terminating."
+    exit
+}
+
+If (!(Test-Path -Path $LogFolder)) {
+    New-Item -Path $LogFolder -ItemType Directory | Out-Null
+}
 
 # Only ask for credentials if they aren't already in memory.
 If (!($AdminCredentials)) {
@@ -75,7 +85,7 @@ ForEach($MovingVM in $MovingVMs) {
 
     # Are the source and destination datatores different?
     If ($SourceCluster -eq $TargetCluster){
-        Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Source and destination are on the same cluster which makes no sense."
+        Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Source and destination appear to be on the same cluster."
         $InputError++
     }
 
@@ -98,15 +108,19 @@ ForEach($MovingVM in $MovingVMs) {
         Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Start VM migration for $SourceVM to $TargetVMHost."
 
         # Do 3 pings to the log file just for information.
+        $PingSuccess = 0
         If (Resolve-DnsName -name $SourceVM -ErrorAction SilentlyContinue) {
             1..3 | ForEach-Object {
                 $PingResult = (Test-connection -target $SourceVM -ping -count 1 -ErrorAction SilentlyContinue).status
                 Write-RJLog -LogFile $LogFile -Severity 0 -LogText "Ping result for $SourceVM - $PingResult"
+                If ($PingResult -eq "Success") {$PingSuccess++}
                 Start-Sleep 1
             }
+            Write-RJLog -LogFile $LogFile -Severity 0 -LogText "Ping result for $SourceVM - $PingSuccess/3"
         }
-        else { Write-RJLog -LogFile $LogFile -Severity 0 -LogText "DNS resolution for $SourceVM failed." }
-        
+        else { Write-RJLog -LogFile $LogFile -Severity 1 -LogText "DNS resolution for $SourceVM failed." }
+    
+
         # Move the VM
         Move-VM -VM $SourceVM -VMotionPriority High -Destination (Get-VMhost -Name $TargetVMHost) -Datastore (Get-Datastore -Name $TargetDatastore) -DiskStorageFormat Thin -PortGroup $TargetPortGroup | Out-Null
 
@@ -132,7 +146,7 @@ ForEach($MovingVM in $MovingVMs) {
             if ((Compare-Object -ReferenceObject @($VMMetaData.AttributeName | Select-Object) -DifferenceObject @($VMTargetMetaData.AttributeName | Select-Object)).count -eq 0) {
                 Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of attribute names for $SourceVM succeeded."} 
                 else {
-                Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Migration of attribute names for $SourceVM failed."
+                Write-RJLog -LogFile $Logfile -Severity 2 -LogText "Migration of attribute names for $SourceVM failed."
                 $RunError = $RunError + 0.01
             }
 
@@ -140,7 +154,7 @@ ForEach($MovingVM in $MovingVMs) {
             if ((Compare-Object -ReferenceObject @($VMMetaData.AttributeValue | Select-Object) -DifferenceObject @($VMTargetMetaData.AttributeValue | Select-Object)).count -eq 0) {
                 Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of attribute values for $SourceVM succeeded."}
                 else {
-                Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Migration of attribute values for $SourceVM failed."
+                Write-RJLog -LogFile $Logfile -Severity 2 -LogText "Migration of attribute values for $SourceVM failed."
                 $RunError = $RunError + 0.01
             }
 
@@ -148,7 +162,7 @@ ForEach($MovingVM in $MovingVMs) {
             if ((Compare-Object -ReferenceObject @($VMMetaData.AttributeTag | Select-Object) -DifferenceObject @($VMTargetMetaData.AttributeTag | Select-Object)).count -eq 0) {
                 Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of tags for $SourceVM succeeded."}
                 else {
-                Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Migration of tags for $SourceVM failed."
+                Write-RJLog -LogFile $Logfile -Severity 2 -LogText "Migration of tags for $SourceVM failed."
                 $RunError = $RunError + 0.01
             }
 
@@ -156,6 +170,7 @@ ForEach($MovingVM in $MovingVMs) {
             If (Resolve-DnsName -name $SourceVM -ErrorAction SilentlyContinue) {
                 1..5 | ForEach-Object {
                     $PingResult = (Test-connection -target $SourceVM -ping -count 1 -ErrorAction SilentlyContinue).status
+                    If ($PingResult -eq "Success") {$PingSuccess--}
                     Write-RJLog -LogFile $LogFile -Severity 0 -LogText "Ping result for $SourceVM - $PingResult"
                     Start-Sleep 1
                 }
@@ -164,12 +179,19 @@ ForEach($MovingVM in $MovingVMs) {
             
         }
 
+        If ($PingSuccess -le 0) {
+            Write-RJLog -LogFile $LogFile -Severity 0 -LogText "Ping result for $SourceVM look fine."
+        }
+        else {
+            Write-RJLog -LogFile $LogFile -Severity 3 -LogText "Post migration pings for $SourceVM look sub-optimal.  Needs investigation."
+        }
+
         # If no run errors were recorded, report success!
         if ($RunError -eq 0) {
             Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of $SourceVM succeeded without errors."
         }
         else {
-            Write-RJLog -LogFile $Logfile -Severity 2 -LogText "Migration of $SourceVM succeeded with errors.  Review vCenter logs and coonsole for more information. ($RunError)"
+            Write-RJLog -LogFile $Logfile -Severity 2 -LogText "Migration of $SourceVM succeeded with errors.  Review vCenter logs and console for more information. ($RunError)"
         }
 
     }
