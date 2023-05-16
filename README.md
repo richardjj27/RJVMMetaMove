@@ -1,7 +1,6 @@
 # RJVMMetaMove
 
 ## The project contains four functions plus three wrapper scripts for typical VMWare ESXi vCenter migration and export tasks.
-The installation of the latest version of PowerCLI is required.
 
 ## *RJVMMetaDataMove.psm1*
 ### *Get-RJVMMetaData*
@@ -73,3 +72,5 @@ Migrate a list of VMs from one cluster to another (including cross vCenter) pres
 
 It goes without saying that vMotion needs to be routable between the source and destination hosts.  If not, a temporary vMotion kernel can be created using an alternative routable VLAN.  This process is detailed in Jim Shen's excellent article in confluence.
 (https://confluence.disney.com/display/INTLEISS/switchless+2-Node+VxRail+vMotion)
+
+The installation of the latest version of PowerCLI is required.
