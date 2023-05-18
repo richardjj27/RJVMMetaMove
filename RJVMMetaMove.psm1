@@ -70,7 +70,7 @@ function Get-RJVMMetaData {
             $OutputObject | Add-Member -Name "ResourcePool" -MemberType NoteProperty -value (Get-ResourcePool -Server $VCServer -VM $oVMGuest) 
             $OutputObject | Add-Member -Name "Folder" -MemberType NoteProperty -value $oVMGuest.Folder
             $OutputObject | Add-Member -Name "Notes" -MemberType NoteProperty -value $oVMGuest.Notes
-            $OutputObject | Add-Member -Name "Snapshot" -MemberType NoteProperty -value ($oVMGuest | get-snapshot).Created 
+            $OutputObject | Add-Member -Name "Snapshot" -MemberType NoteProperty -value ($oVMGuest | Get-Snapshot).Created 
             
             ForEach ($CustomAttribute in $CustomAttributes) {
                 If ($CustomAttribute.Value) {

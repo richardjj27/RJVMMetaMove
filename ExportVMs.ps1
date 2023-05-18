@@ -72,8 +72,6 @@ ForEach ($VMGuest in $VMGuests) {
     $Output.LocalHardDisksFreespaceGB = $Output.LocalHardDisksFreespaceGB -join ("`r")
     $Output.DiskDatastore = $Output.DiskDatastore -join ("`r")
     $Output.Snapshot = $Output.Snapshot -join ("`r")
-    
-
 
     $Output | export-excel -path $XLOutputFile -WorksheetName "vmGuestExport" -autosize -append
 

@@ -57,7 +57,7 @@ ForEach ($VMHost in $VMHosts) {
     $Output.DatastoreName = $Output.DatastoreName -Join ("`r")
     $Output.DatastoreType = $Output.DatastoreType -Join ("`r")
     $Output.DatastoreCapacityGB = $Output.DatastoreCapacityGB -Join ("`r")
-    $Output.NetworkAdapter = $Output.NetworkAdapter -Join ("`r")
+    $Output.NetworkAdapter = $Output.Network.Adapter -Join ("`r")
     $Output.NetworkSwitch = $Output.NetworkSwitch -Join ("`r")
     $Output | Export-Excel -Path $XLOutputFile -WorksheetName "vmHostExport" -Autosize -Append
 

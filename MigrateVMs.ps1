@@ -11,7 +11,8 @@ $WorkingFolder = "\\gbcp-isilon100.emea.wdpr.disney.com\eiss\Richard\RJVMMetaMov
 $LogFolder = $WorkingFolder + "\Logs"
 $LogFile = $LogFolder + "\VM Migration Log $(Get-Date -Format "yyyy-MM-dd_HH.mm").txt"
 $VCenterList = $WorkingFolder + "\VCList.csv"
-$VMListFile = $WorkingFolder + "\Batch01.csv"
+$VMListFile = $WorkingFolder + "\VMListFullGBEQ24-1.csv"
+$MovingVMs = $Null
 
 If (!(Test-Path -Path $WorkingFolder)) {
     Write-Host "$WorkingFolder Does not exist. Terminating."
@@ -46,22 +47,30 @@ ForEach($MovingVM in $MovingVMs) {
     $InputError = 0
     $RunError = 0
     $SourceVM = Get-VM -Name $MovingVM.SourceVM -ErrorAction SilentlyContinue
-    $SourceVMHost = $SourceVM.vmhost
-    $SourceVC = $SourceVM.Uid.Split(":")[0].Split("@")[1]
-    $SourceCluster = Get-Cluster -VM $SourceVM
+    
+    $VMMetaData = Get-RJVMMetaData -VMName $SourceVM
+    
+    $SourceVMHost = $VMMetaData.HostName
+    $SourceVC = $VMMetaData.vCenter
+    $SourceCluster = $VMMetaData.Cluster
+    $SourceResPool = $VMMetaData.ResourcePool
+    $SourceDatacenter = $VMMetaData.Datacenter
+    $SourceFolder = $VMMetaData.Folder
+    $SourceNetwork = $VMMetaData.NetworkAdapter
 
     $TargetVMHost = $MovingVM.TargetVMHost
     $TargetNetwork = $MovingVM.TargetNetwork
     $TargetDatastore = $MovingVM.TargetDatastore
     $TargetVC = (Get-VMHost -Name $TargetVMHost).uid.Split(":")[0].Split("@")[1]
     $TargetCluster = Get-Cluster -VMHost $TargetVMHost
+    $TargetDatacenter = Get-Datacenter -cluster $TargetCluster
 
     Write-RJLog -LogFile $Logfile -Severity 0 -LogText ("Start migration of " + $SourceVM + " to " + $MovingVM.TargetVMHost + ".")
 
     # Validate Migration Parameters
-    # Does the source VM exist?
-    If (!(Get-VM -Name $MovingVM.SourceVM -ErrorAction SilentlyContinue)){
-        Write-RJLog -LogFile $Logfile -Severity 3 -LogText ($MovingVM.SourceVM + " not found.")
+    # Is this machine unique and exists?
+    If ((Get-VM -Name $MovingVM.SourceVM -ErrorAction SilentlyContinue).count -ne 1) {
+        Write-RJLog -LogFile $Logfile -Severity 3 -LogText ($MovingVM.SourceVM + " count isn't 1.")
         $InputError++
     }
 
@@ -85,24 +94,32 @@ ForEach($MovingVM in $MovingVMs) {
 
     # Are the source and destination datatores different?
     If ($SourceCluster -eq $TargetCluster){
-        Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Source and destination appear to be on the same cluster."
+        Write-RJLog -LogFile $Logfile -Severity 3 -LogText "VM appears to be already on the destination cluster."
         $InputError++
     }
 
     # If all is well, display everything we know and start migration tasks.
     if ($InputError -eq 0){
         Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Source vCenter...... $SourceVC"
-        Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Source Host......... $SourceVMHost"
+        Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Source DataCenter... $SourceDatacenter"
         Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Source Cluster...... $SourceCluster"
+        Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Source Host......... $SourceVMHost"
+
+        Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Source Network...... $SourceNetwork"
+          
+        
+        Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Source ResPool...... $SourceResPool"
+        Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Source Folder....... $SourceFolder"
+
         Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Target vCenter...... $TargetVC"
-        Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Target Host......... $TargetVMHost"
+        Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Target DataCenter... $TargetDatacenter"
         Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Target Cluster...... $TargetCluster"
+        Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Target Host......... $TargetVMHost"
         Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Target Network...... $TargetNetwork"
         Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Target Datastore.... $TargetDatastore"
         
-        Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Collecting metadata for $SourceVM."
-        $VMMetaData = Get-RJVMMetaData -VMName $SourceVM
-
+        Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Collecting Metadata for $SourceVM."
+        
         # Get target network specifics.
         $TargetPortGroup = Get-VirtualPortGroup -VMHost $TargetVMHost -Name $TargetNetwork
         Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Start VM migration for $SourceVM to $TargetVMHost."
@@ -112,35 +129,67 @@ ForEach($MovingVM in $MovingVMs) {
         If (Resolve-DnsName -name $SourceVM -ErrorAction SilentlyContinue) {
             1..3 | ForEach-Object {
                 $PingResult = (Test-connection -target $SourceVM -ping -count 1 -ErrorAction SilentlyContinue).status
-                Write-RJLog -LogFile $LogFile -Severity 0 -LogText "Ping result for $SourceVM - $PingResult"
+                Write-RJLog -LogFile $LogFile -Severity 0 -LogText "Ping result for $SourceVM - $PingResult."
                 If ($PingResult -eq "Success") {$PingSuccess++}
                 Start-Sleep 1
             }
-            Write-RJLog -LogFile $LogFile -Severity 0 -LogText "Ping result for $SourceVM - $PingSuccess/3"
+            Write-RJLog -LogFile $LogFile -Severity 0 -LogText "Ping result for $SourceVM - $PingSuccess/3."
         }
         else { Write-RJLog -LogFile $LogFile -Severity 1 -LogText "DNS resolution for $SourceVM failed." }
     
-
         # Move the VM
+        Write-RJLog -LogFile $LogFile -Severity 0 -LogText "Relocating VMDKs for $SourceVM."
         Move-VM -VM $SourceVM -VMotionPriority High -Destination (Get-VMhost -Name $TargetVMHost) -Datastore (Get-Datastore -Name $TargetDatastore) -DiskStorageFormat Thin -PortGroup $TargetPortGroup | Out-Null
 
         #### Write the metadata
         $TargetVM = Get-VM -Name $SourceVM
         $TargetVC = $TargetVM.Uid.Split(":")[0].Split("@")[1]
-        $VMTargetMetaData = get-RJVMMetaData -VMName $SourceVM
+        $VMTargetMetaData = Get-RJVMMetaData -VMName $SourceVM
 
         # Check the VM host is different after the migration - basically, did it migrate?
         if ($VMMetaData.HostName -eq $VMTargetMetaData.HostName) {
-            Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Migrating of $SourceVM failed for some unknown reason.  Review vCenter logs and coonsole for more information. ($RunError)"
+            Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Relocation of $SourceVM failed for some unknown reason.  Review vCenter logs and coonsole for more information."
             $RunError++
         }
         else {
-            Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of $SourceVM VMDKs succeeded."
-            Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Writing metadata for $SourceVM."
+            Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Relocation of $SourceVM VMDKs succeeded."
+            # Move to Resource Pool
+            # 1. Is the VM actually in a non root level ResourcePool?  i.e. is it in a Resource Pool called 'Resources' which is the root level default.
+            If (!($SourceResPool -eq "Resources")) {
+                # 2. Does this Resource Pool exist on the target cluster?
+                Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Does the Resource Pool $SourceResPool exist?"
+                $DestResPool = Get-ResourcePool $SourceResPool -Location $TargetCluster -ErrorAction 'SilentlyContinue'
+                If (!($DestResPool.Name)) {
+                    # 3. Create the non-existent Resource Pool on the TargetCluster.
+                    New-ResourcePool -Name $SourceResPool -Location $TargetCluster -ErrorAction 'SilentlyContinue' | out-null
+                    $DestResPool = Get-ResourcePool $SourceResPool -Location $TargetCluster -ErrorAction 'SilentlyContinue'
+                }
+                # 3. Move the VM into the Resource Pool.
+                Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Move $SourceVM to Resource Pool."
+                Move-VM -VM $SourceVM.Name -Location $DestResPool -ErrorAction SilentlyContinue | out-null
+            }
+
+            # Move to Folder
+            # 1. Is the VM actually in a non root level Folder?  i.e. is it in a Folder called 'vm' which is the root level default.
+            If (!($SourceFolder.name -eq "vm")) {
+                # 2. Does this Folder exist on the target cluster?
+                $DestFolder = Get-Folder $SourceFolder.name -Location $TargetDatacenter.name -Server $TargetVC -ErrorAction 'SilentlyContinue'
+                If (!($DestFolder.Name)) {
+                    # 3. Create the non-existent Folder on the TargetCluster.
+                    Write-RJLog -LogFile $Logfile -Severity 1 -LogText "Folder Doesn't Exist.  Create $SourceFolder."
+                    new-Folder -Name $SourceFolder.name -Location (Get-Folder vm -Location $TargetDatacenter.name -server $TargetVC) -Server $TargetVC -ErrorAction 'SilentlyContinue' | out-null
+                    $DestFolder = Get-Folder $SourceFolder.name -Location $TargetDatacenter.name -Server $TargetVC -ErrorAction 'SilentlyContinue'
+                 }
+                # 3. Move the VM into the Folder.
+                Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Move $SourceVM to Folder."
+                Move-VM -VM $SourceVM.Name -InventoryLocation $DestFolder -ErrorAction SilentlyContinue | out-null
+            }
+
+            Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Writing Metadata for $SourceVM."
             Set-RJVMCustomAttributes -TargetVM $TargetVM -VMMetaData $VMMetaData -TargetVC $TargetVC 
             
             # Get Metadata for the migrated VM so that it can be compared to the source.
-            $VMTargetMetaData = get-RJVMMetaData -VMName $SourceVM
+            $VMTargetMetaData = Get-RJVMMetaData -VMName $SourceVM
             
             # Are the attribute names the same as before?
             if ((Compare-Object -ReferenceObject @($VMMetaData.AttributeName | Select-Object) -DifferenceObject @($VMTargetMetaData.AttributeName | Select-Object)).count -eq 0) {
@@ -171,38 +220,44 @@ ForEach($MovingVM in $MovingVMs) {
                 1..5 | ForEach-Object {
                     $PingResult = (Test-connection -target $SourceVM -ping -count 1 -ErrorAction SilentlyContinue).status
                     If ($PingResult -eq "Success") {$PingSuccess--}
-                    Write-RJLog -LogFile $LogFile -Severity 0 -LogText "Ping result for $SourceVM - $PingResult"
+                    Write-RJLog -LogFile $LogFile -Severity 0 -LogText "Ping result for $SourceVM - $PingResult."
                     Start-Sleep 1
+                }
+                If ($PingSuccess -gt 0) {
+                    Write-RJLog -LogFile $LogFile -Severity 3 -LogText "Post migration pings for $SourceVM look sub-optimal.  Needs investigation."
                 }
             }
             else { Write-RJLog -LogFile $LogFile -Severity 0 -LogText "DNS resolution for $SourceVM failed." }
             
         }
 
-        If ($PingSuccess -le 0) {
-            Write-RJLog -LogFile $LogFile -Severity 0 -LogText "Ping result for $SourceVM look fine."
-        }
-        else {
-            Write-RJLog -LogFile $LogFile -Severity 3 -LogText "Post migration pings for $SourceVM look sub-optimal.  Needs investigation."
-        }
-
         # If no run errors were recorded, report success!
         if ($RunError -eq 0) {
             Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration of $SourceVM succeeded without errors."
         }
-        else {
+        
+        if ($RunError -gt 0 -and $RunError -lt 1) {
             Write-RJLog -LogFile $Logfile -Severity 2 -LogText "Migration of $SourceVM succeeded with errors.  Review vCenter logs and console for more information. ($RunError)"
         }
 
     }
     else {
-        Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Migration of $SourceVM failed due to incorrect parameters - skipping."
+        Write-RJLog -LogFile $Logfile -Severity 3 -LogText "Migration of $SourceVM failed validation - skipping."
     }
     Write-RJLog -LogFile $LogFile
-    Write-RJLog -LogFile $LogFile 
-    Write-RJLog -LogFile $LogFile  
+    Write-RJLog -LogFile $LogFile
 }
 
+Write-RJLog -LogFile $LogFile
+Write-RJLog -LogFile $LogFile -Severity 0 "Migration Summary:"
+Write-RJLog -LogFile $LogFile -Severity 0 -LogText ("VM Name".PadRight(25) + " | " + "Cluster".PadRight(25) + " | Host")
+
+ForEach($MovingVM in $MovingVMs) {
+    $Result = Get-RJVMMetaData -VMName $MovingVM.SourceVM
+    Write-RJLog -LogFile $LogFile -Severity 0 -LogText (($Result.Name).PadRight(25) + " | " + ($Result.Cluster.Name).PadRight(25) + " | " + $Result.HostName)
+}
+
+Write-RJLog -LogFile $LogFile
 Write-RJLog -LogFile $Logfile -Severity 0 -LogText "Migration batch completed."
 
-Disconnect-VIServer -Server * -Confirm:$false
+#Disconnect-VIServer -Server * -Confirm:$false

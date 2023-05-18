@@ -54,7 +54,7 @@ Migrate a list of VMs from one cluster to another (including cross vCenter) pres
 - `$VCenterList` -  The script will authenticate these vCenter servers and is required to for rights to  move guests from the source to the destination hosts. Example included.<br>
 - `$VMListFile` - CSV list of VMs to be moved. (SourceVM,TargetVMHost,TargetNetwork,TargetDatastore). Example included.<br>
 
-## *Dependent Files*
+## *Key Files*
 ### *ExcelOutput.csv*
 - Defines the selection, order, formatting and notes for each exported field.<br>
 - Target 1 is for the VM hosts report.<br>
@@ -73,7 +73,17 @@ Migrate a list of VMs from one cluster to another (including cross vCenter) pres
 It goes without saying that vMotion needs to be routable between the source and destination hosts.  If not, a temporary vMotion kernel can be created using an alternative routable VLAN.  This process is detailed in Jim Shen's excellent article in confluence.
 - `https://confluence.disney.com/display/INTLEISS/switchless+2-Node+VxRail+vMotion`
 
-Our hosts do not currently use proper authoritative certificates so the following command may be required to use PowerCli.
-- `Set-PowerCliConfiguration -InvalidCertificateAction Ignore`
+### *Notes*
 
-The installation of the latest version of PowerCLI is required.
+- Our hosts do not currently use proper authoritative certificates so the following command may be required to use PowerCli.
+`Set-PowerCliConfiguration -InvalidCertificateAction Ignore`
+
+- The installation of the latest version of PowerCLI is required.
+
+- It is recommeneded to run these scripts, especially the migration script on a hardwired jumpbox.  Given the length of time a migration can take, if connectivity or lost or the script terminated during migration, the vMotion may complete but the post migration tasks (e.g. reinstating Tags/Attributes) may not, meaning they would need to be manually reapplied.
+
+- If a machine has multiple NICs on different VLANs, post migration manual intervention will be required to fix.
+
+- If a resource pool or folder does not exist on the target, it will be created at the top level of the cluster.
+
+
